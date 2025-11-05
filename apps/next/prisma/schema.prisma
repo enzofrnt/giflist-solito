@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  giftLists GiftList[]
+
+  @@index([email])
+  @@index([createdAt])
+}
+
+model GiftList {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  image       String?
+  isPublic    Boolean  @default(true)
+  secret      Boolean  @default(false)
+  shareCode   String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId Int
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gifts  Gift[]
+
+  @@index([userId])
+  @@index([shareCode])
+  @@index([createdAt])
+  @@index([secret])
+}
+
+model Gift {
+  id               Int       @id @default(autoincrement())
+  title            String
+  url              String?
+  image            String?
+  price            Float?
+  description      String?
+  status           String    @default("available")
+  reservedBy       String?
+  reservedByName   String?
+  reservedByEmail  String?
+  reservedAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  giftListId Int
+  giftList   GiftList @relation(fields: [giftListId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([giftListId])
+}
