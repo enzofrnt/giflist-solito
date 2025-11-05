@@ -1,0 +1,8 @@
+{
+  "buildCommand": "cd apps/next && chmod +x build.sh && ./build.sh",
+  "installCommand": "cd apps/next && pnpm install",
+  "framework": "nextjs",
+  "regions": [
+    "cdg1"
+  ]
+}
