@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'solito/navigation'
-import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Image } from 'react-native'
+import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Image, Dimensions } from 'react-native'
 import { Svg, Path } from 'react-native-svg'
 import { FlickeringGrid } from 'app/components/FlickeringGrid'
 
@@ -20,9 +20,14 @@ export function HomeScreen() {
     router.push('/login')
   }
 
+  // Récupérer la hauteur de l'écran pour le FlickeringGrid
+  const screenHeight = Platform.OS === 'web' && typeof window !== 'undefined' 
+    ? window.innerHeight 
+    : Dimensions.get('window').height
+
   return (
     <View style={styles.container}>
-      {/* Arrière-plan FlickeringGrid */}
+      {/* Arrière-plan FlickeringGrid - prend toute la hauteur de l'écran visible */}
       <FlickeringGrid
         squareSize={3}
         gridGap={8}
@@ -30,6 +35,8 @@ export function HomeScreen() {
         maxOpacity={0.15}
         flickerChance={0.05}
         style={styles.flickeringGrid}
+        height={screenHeight}
+        width={Platform.OS === 'web' && typeof window !== 'undefined' ? window.innerWidth : Dimensions.get('window').width}
       />
       
       <ScrollView 
@@ -166,9 +173,14 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    bottom: 0,
+    width: '100%',
     zIndex: 0,
-  },
+    // Fixe le FlickeringGrid pour qu'il ne scroll pas avec le contenu sur web
+    ...(Platform.OS === 'web' ? { 
+      position: 'fixed' as any,
+      height: '100vh' as any,
+    } : {}),
+  } as any,
   scrollView: {
     flex: 1,
     zIndex: 1,

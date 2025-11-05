@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔨 Building Next.js app..."
+cd apps/next
+pnpm build || {
+  echo "❌ Build failed! Please fix errors before committing."
+  exit 1
+}
+echo "✅ Build successful!"

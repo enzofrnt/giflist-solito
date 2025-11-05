@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FlickeringGrid } from '@/components/ui/flickering-grid';
+import { FlickeringGrid } from 'app/components/FlickeringGrid';
 import AlertModal from '@/components/AlertModal';
 import ScrapingTest from '@/components/ScrapingTest';
 import AmazonDebug from '@/components/AmazonDebug';
