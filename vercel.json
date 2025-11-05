@@ -1,7 +1,6 @@
 {
   "buildCommand": "chmod +x build.sh && ./build.sh",
   "installCommand": "pnpm install",
-  "outputDirectory": "apps/next/.next",
   "framework": "nextjs",
   "regions": [
     "cdg1"
