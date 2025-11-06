@@ -59,7 +59,7 @@ export function HomeScreen() {
         </View>
         <Text style={styles.title}>Liste de cadeaux 🎁</Text>
         <Text style={styles.subtitle}>
-          Créez et partagez vos listes de cadeaux facilement.{'\n'}
+          Créez et partagez vos listes de cadeaux facilement.
           Invitez vos proches à réserver des cadeaux via QR Code ou lien direct.
         </Text>
         <Pressable 
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 120,
-    height: 120,
+    height: 82,
     borderWidth: 4,
     borderColor: '#C7D2FE',
     borderRadius: 12,
