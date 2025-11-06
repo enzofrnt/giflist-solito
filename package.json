@@ -4,6 +4,7 @@
   "devDependencies": {
     "@types/react": "^19",
     "eslint": "^8.21.0",
+    "husky": "^9.1.7",
     "turbo": "^2.4.4",
     "typescript": "^5.2.2"
   },
@@ -12,7 +13,8 @@
     "web:dev": "cd apps/next && pnpm next",
     "web:build": "cd apps/next && pnpm build",
     "android": "expo run:android",
-    "ios": "expo run:ios"
+    "ios": "expo run:ios",
+    "prepare": "husky"
   },
   "eslintConfig": {
     "extends": "next",
