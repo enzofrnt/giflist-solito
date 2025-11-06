@@ -6,12 +6,12 @@ import QRCodeDisplay from '@/components/QRCodeDisplay';
 import ReserveDialog, { type ReservePayload } from '@/components/ReserveDialog';
 import SecretModeToggle from '@/components/SecretModeToggle';
 import { useAlert } from '@/hooks/useAlert';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from 'app/hooks/useAuth'
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
-import type { Gift, GiftList } from '@/types';
+import type { Gift, GiftList } from 'app/types'
 
 interface PublicListClientProps {
   shareCode: string;

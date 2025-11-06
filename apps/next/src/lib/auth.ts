@@ -1,4 +1,4 @@
-import type { AuthResult, User } from '@/types';
+import type { AuthResult, User } from 'app/types'
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from './prisma';

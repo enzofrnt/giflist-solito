@@ -1,4 +1,4 @@
-import Header from "@/components/Header";
+import { Header } from 'app/components/Header'
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";

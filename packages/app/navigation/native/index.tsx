@@ -12,20 +12,18 @@ const Stack = createNativeStackNavigator<{
 
 export function NativeNavigation() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false, // Désactiver le header par défaut de React Navigation
+      }}
+    >
       <Stack.Screen
         name="home"
         component={HomeScreen}
-        options={{
-          title: 'Home',
-        }}
       />
       <Stack.Screen
         name="user-detail"
         component={UserDetailScreen}
-        options={{
-          title: 'User',
-        }}
       />
     </Stack.Navigator>
   )

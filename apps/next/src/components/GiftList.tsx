@@ -4,7 +4,7 @@ import Image from 'next/image';
 import ReserveDialog, { type ReservePayload } from './ReserveDialog';
 import AlertModal from './AlertModal';
 import { useAlert } from '@/hooks/useAlert';
-import type { Gift } from '@/types';
+import type { Gift } from 'app/types'
 
 // Type pour les cadeaux dans ce composant (peut avoir price en string ou number)
 type GiftWithFlexiblePrice = Omit<Gift, 'price'> & {

@@ -4,8 +4,8 @@ import AlertModal from '@/components/AlertModal'
 import EditListModal from '@/components/EditListModal'
 import { useAlert } from '@/hooks/useAlert'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { getAuthToken } from '@/lib/authStorage'
-import type { GiftListWithCount } from '@/types'
+import { getAuthToken } from 'app/lib/authStorage'
+import type { GiftListWithCount } from 'app/types'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -56,7 +56,8 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
   // Charger les listes dès que le token est disponible, en parallèle avec l'auth
   useEffect(() => {
     if (!initialGiftLists.length && !hasLoadedRef.current) {
-      const token = getAuthToken()
+      const tokenResult = getAuthToken()
+      const token = tokenResult instanceof Promise ? null : tokenResult
       if (token) {
         hasLoadedRef.current = true
         // Charger les données en parallèle avec la vérification d'auth
