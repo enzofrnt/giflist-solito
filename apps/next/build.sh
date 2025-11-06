@@ -82,7 +82,7 @@ fi
 echo "🏗️ Build Next.js..."
 # Utiliser pnpm si disponible, sinon npm
 if command -v pnpm &> /dev/null; then
-  pnpm next build --turbopack
+  pnpm next build
 else
-  npm run build -- --turbopack || npx next build --turbopack
+  npm run build || npx next build
 fi

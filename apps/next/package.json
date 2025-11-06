@@ -6,7 +6,7 @@
     "dev": "NODE_OPTIONS='--inspect' next dev --turbopack",
     "dev:debug": "NODE_OPTIONS='--inspect' next dev --turbopack",
     "dev:no-debug": "next dev --turbopack",
-    "build": "cp prisma/schema.production.prisma prisma/schema.prisma && prisma generate && next build --turbopack",
+    "build": "cp prisma/schema.production.prisma prisma/schema.prisma && prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
