@@ -1,7 +1,7 @@
 'use client';
 
 import PasswordInput from '@/components/PasswordInput';
-import { validatePassword } from '@/lib/passwordValidation';
+import { validatePassword } from 'app/lib/passwordValidation'
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';

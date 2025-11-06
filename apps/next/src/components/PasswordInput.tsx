@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { getPasswordRules } from '@/lib/passwordValidation'
+import { getPasswordRules } from 'app/lib/passwordValidation'
 
 interface PasswordInputProps {
   id: string

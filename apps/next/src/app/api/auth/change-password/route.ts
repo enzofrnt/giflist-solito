@@ -1,4 +1,4 @@
-import { validatePassword } from '@/lib/passwordValidation';
+import { validatePassword } from 'app/lib/passwordValidation'
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
