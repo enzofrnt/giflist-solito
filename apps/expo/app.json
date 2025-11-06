@@ -6,7 +6,7 @@
     "scheme": "solito-blank",
     "platforms": ["ios", "android"],
     "ios": {
-      "bundleIdentifier": "com.solito.blank"
+      "bundleIdentifier": "com.enzofournet.giflist"
     },
     "newArchEnabled": true,
     "experiments": {

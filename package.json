@@ -10,7 +10,9 @@
   "scripts": {
     "native": "cd apps/expo && pnpm start",
     "web:dev": "cd apps/next && pnpm next",
-    "web:build": "cd apps/next && pnpm build"
+    "web:build": "cd apps/next && pnpm build",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "eslintConfig": {
     "extends": "next",
@@ -27,5 +29,11 @@
     "tabWidth": 2,
     "singleQuote": true
   },
-  "packageManager": "pnpm@10.12.4+sha512.5ea8b0deed94ed68691c9bad4c955492705c5eeb8a87ef86bc62c74a26b037b08ff9570f108b2e4dbd1dd1a9186fea925e527f141c648e85af45631074680184"
+  "packageManager": "pnpm@10.12.4+sha512.5ea8b0deed94ed68691c9bad4c955492705c5eeb8a87ef86bc62c74a26b037b08ff9570f108b2e4dbd1dd1a9186fea925e527f141c648e85af45631074680184",
+  "version": "1.0.0",
+  "dependencies": {
+    "expo": "~54.0.22",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
+  }
 }

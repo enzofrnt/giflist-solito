@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FlickeringGrid } from '@/components/ui/flickering-grid';
+import { FlickeringGrid } from 'app/components/FlickeringGrid';
 import AlertModal from '@/components/AlertModal';
 import ScrapingTest from '@/components/ScrapingTest';
 import AmazonDebug from '@/components/AmazonDebug';
@@ -229,7 +229,7 @@ export default function AdminPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 relative">
         <div className="fixed inset-0 z-0">
           <FlickeringGrid
-            className="w-full h-full"
+            style={{ width: '100%', height: '100%' }}
             squareSize={3}
             gridGap={8}
             color="#9CA3AF"
@@ -250,7 +250,7 @@ export default function AdminPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 relative">
         <div className="fixed inset-0 z-0">
           <FlickeringGrid
-            className="w-full h-full"
+            style={{ width: '100%', height: '100%' }}
             squareSize={3}
             gridGap={8}
             color="#9CA3AF"
@@ -324,7 +324,7 @@ export default function AdminPage() {
       {/* Arrière-plan FlickeringGrid */}
       <div className="fixed inset-0 z-0">
         <FlickeringGrid
-          className="w-full h-full"
+          style={{ width: '100%', height: '100%' }}
           squareSize={3}
           gridGap={8}
           color="#9CA3AF"
