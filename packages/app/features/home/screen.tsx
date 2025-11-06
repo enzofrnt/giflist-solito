@@ -1,9 +1,9 @@
 'use client'
-import { SolitoImage } from 'solito/image'
 import { useRouter } from 'solito/navigation'
 import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Image, Dimensions } from 'react-native'
 import { Svg, Path } from 'react-native-svg'
 import { FlickeringGrid } from 'app/components/FlickeringGrid'
+import { LogoImage } from 'app/components/LogoImage'
 
 export function HomeScreen() {
   const router = useRouter()
@@ -46,13 +46,15 @@ export function HomeScreen() {
         {/* Hero Section */}
       <View style={styles.heroSection}>
         <View style={styles.logoContainer}>
-          <SolitoImage
-            src="/logo.webp"
-            style={styles.logo}
-            width={120}
-            height={82}
-            alt="Logo Liste de cadeaux"
-          />
+          <View style={{ backgroundColor: 'transparent' }}>
+            <LogoImage
+              style={styles.logo}
+              width={120}
+              height={82}
+              alt="Logo Liste de cadeaux"
+              contentFit="contain"
+            />
+          </View>
         </View>
         <Text style={styles.title}>Liste de cadeaux 🎁</Text>
         <Text style={styles.subtitle}>
@@ -216,6 +218,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
+    backgroundColor: 'transparent',
   },
   title: {
     fontSize: Platform.OS === 'web' ? 36 : 24,

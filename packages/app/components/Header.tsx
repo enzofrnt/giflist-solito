@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { View, Text, Pressable, StyleSheet, Platform, ActivityIndicator } from 'react-native'
 import { useRouter, usePathname } from 'solito/navigation'
-import { SolitoImage } from 'solito/image'
 import { useAuth } from 'app/hooks/useAuth'
 import { useSafeArea } from 'app/provider/safe-area/use-safe-area'
+import { LogoImage } from 'app/components/LogoImage'
 
 export function Header() {
   const [showMobileMenu, setShowMobileMenu] = useState(false)
@@ -53,13 +53,15 @@ export function Header() {
         <View style={styles.container}>
           <View style={styles.headerContent}>
             <View style={styles.logoContainer}>
-              <SolitoImage
-                src="/logo.webp"
-                style={styles.logo}
-                width={40}
-                height={28}
-                alt="Logo Liste de cadeaux"
-              />
+              <View style={{ backgroundColor: 'transparent', overflow: 'hidden' }}>
+                <LogoImage
+                  style={styles.logo}
+                  width={40}
+                  height={28}
+                  alt="Logo Liste de cadeaux"
+                  contentFit="contain"
+                />
+              </View>
               <Text style={styles.title}>Liste de cadeaux</Text>
             </View>
             <ActivityIndicator size="small" color="#2563EB" />
@@ -81,13 +83,15 @@ export function Header() {
               pressed && styles.pressed
             ]}
           >
-            <SolitoImage
-              src="/logo.webp"
-              style={styles.logo}
-              width={40}
-              height={28}
-              alt="Logo"
-            />
+            <View style={{ backgroundColor: 'transparent' }}>
+              <LogoImage
+                style={styles.logo}
+                width={40}
+                height={28}
+                alt="Logo"
+                contentFit="contain"
+              />
+            </View>
             <Text style={styles.title}>Liste de cadeaux</Text>
           </Pressable>
 
@@ -134,13 +138,15 @@ export function Header() {
                       pressed && styles.profileLinkPressed
                     ]}
                   >
-                    <SolitoImage
-                      src="/logo.webp"
-                      style={styles.avatar}
-                      width={32}
-                      height={22}
-                      alt="Logo Liste de cadeaux"
-                    />
+                    <View style={{ backgroundColor: 'transparent' }}>
+                      <LogoImage
+                        style={styles.avatar}
+                        width={32}
+                        height={22}
+                        alt="Logo Liste de cadeaux"
+                        contentFit="contain"
+                      />
+                    </View>
                     <Text style={[
                       styles.profileName,
                       isActive('/profile') && styles.profileNameActive
@@ -244,13 +250,15 @@ export function Header() {
                         pressed && styles.mobileProfileLinkPressed
                       ]}
                     >
-                      <SolitoImage
-                        src="/logo.webp"
-                        style={styles.mobileAvatar}
-                        width={32}
-                        height={32}
-                        alt="Logo Liste de cadeaux"
-                      />
+                      <View style={{ backgroundColor: 'transparent' }}>
+                        <LogoImage
+                          style={styles.mobileAvatar}
+                          width={32}
+                          height={32}
+                          alt="Logo Liste de cadeaux"
+                          contentFit="contain"
+                        />
+                      </View>
                       <Text style={[
                         styles.mobileProfileName,
                         isActive('/profile') && styles.mobileProfileNameActive
@@ -343,6 +351,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
     borderColor: '#C7D2FE',
+    backgroundColor: 'transparent',
   },
   title: {
     fontSize: 20,
@@ -400,6 +409,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#C7D2FE',
+    backgroundColor: 'transparent',
   },
   profileName: {
     fontSize: 14,
@@ -549,6 +559,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#C7D2FE',
+    backgroundColor: 'transparent',
   },
   mobileProfileName: {
     fontSize: 14,
