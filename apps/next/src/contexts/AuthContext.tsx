@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import type { User } from 'app/types'
-import { getAuthToken, removeAuthToken } from '@/lib/authStorage'
+import { getAuthToken, removeAuthToken } from 'app/lib/authStorage'
 
 interface AuthContextType {
   user: User | null
@@ -60,7 +60,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return
       }
 
-      const token = getAuthToken()
+      const tokenResult = getAuthToken()
+      const token = tokenResult instanceof Promise ? await tokenResult : tokenResult
       if (!token) {
         setUser(null)
         cachedUser = null
@@ -85,7 +86,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           cacheExpiry = now + CACHE_DURATION
           setUser(cachedResult)
         } else {
-          removeAuthToken()
+          const removeResult = removeAuthToken()
+          if (removeResult instanceof Promise) await removeResult
           cachedUser = null
           cacheExpiry = 0
           setUser(null)
@@ -104,7 +106,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         cacheExpiry = now + CACHE_DURATION
         setUser(result)
       } else {
-        removeAuthToken()
+        const removeResult = removeAuthToken()
+        if (removeResult instanceof Promise) await removeResult
         cachedUser = null
         cacheExpiry = 0
         setUser(null)
@@ -120,8 +123,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [])
 
-  const logout = useCallback(() => {
-    removeAuthToken()
+  const logout = useCallback(async () => {
+    const removeResult = removeAuthToken()
+    if (removeResult instanceof Promise) await removeResult
     cachedUser = null
     cacheExpiry = 0
     setUser(null)

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import type { User } from 'app/types'
-import { getAuthToken, removeAuthToken } from '@/lib/authStorage'
+import { getAuthToken, removeAuthToken } from 'app/lib/authStorage'
 
 interface UseAuthOptions {
   /**
@@ -72,7 +72,8 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthResult {
         return
       }
 
-      const token = getAuthToken()
+      const tokenResult = getAuthToken()
+      const token = tokenResult instanceof Promise ? await tokenResult : tokenResult
       if (!token) {
         setUser(null)
         setLoading(false)
@@ -97,7 +98,8 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthResult {
           await onAuthenticatedRef.current(token, data.user)
         }
       } else {
-        removeAuthToken()
+        const removeResult = removeAuthToken()
+        if (removeResult instanceof Promise) await removeResult
         setUser(null)
         if (redirectToLogin && !noRedirect && mounted) {
           router.push(redirectUrl)
@@ -115,8 +117,9 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthResult {
     }
   }, [redirectToLogin, redirectUrl, noRedirect, router, mounted])
 
-  const logout = useCallback(() => {
-    removeAuthToken()
+  const logout = useCallback(async () => {
+    const removeResult = removeAuthToken()
+    if (removeResult instanceof Promise) await removeResult
     setUser(null)
     if (!noRedirect) {
       router.push('/')

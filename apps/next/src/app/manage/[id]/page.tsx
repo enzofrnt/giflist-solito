@@ -8,7 +8,7 @@ import QRCodeDisplay from '@/components/QRCodeDisplay';
 import SecretModeToggle from '@/components/SecretModeToggle';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useAlert } from '@/hooks/useAlert';
-import { getAuthToken } from '@/lib/authStorage';
+import { getAuthToken } from 'app/lib/authStorage'
 import type { Gift, GiftList } from 'app/types'
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -64,9 +64,10 @@ export default function ManageListPage({ params }: { params: Promise<{ id: strin
   // Charger la liste dès que le token est disponible, en parallèle avec l'auth
   useEffect(() => {
     if (!hasLoadedRef.current) {
-      const token = getAuthToken();
+      const tokenResult = getAuthToken()
+      const token = tokenResult instanceof Promise ? null : tokenResult
       if (token) {
-        hasLoadedRef.current = true;
+        hasLoadedRef.current = true
         // Charger les données en parallèle avec la vérification d'auth
         loadGiftList(token);
       }

@@ -38,10 +38,11 @@ export default function LoginPage() {
 
       if (data.ok) {
         // Sauvegarder le token
-        const { setAuthToken } = await import('@/lib/authStorage')
-        setAuthToken(data.token)
+        const { setAuthToken } = await import('app/lib/authStorage')
+        const result = setAuthToken(data.token)
+        if (result instanceof Promise) await result
         // Rediriger vers la page d'accueil
-        router.push('/dashboard');
+        router.push('/dashboard')
       } else {
         setError(data.error || 'Une erreur est survenue');
       }
