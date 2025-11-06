@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { View, Text, Pressable, StyleSheet, Platform, ActivityIndicator } from 'react-native'
+import { useState, useEffect } from 'react'
+import { View, Text, Pressable, StyleSheet, Platform, ActivityIndicator, Dimensions } from 'react-native'
 import { useRouter, usePathname } from 'solito/navigation'
 import { useAuth } from 'app/hooks/useAuth'
 import { useSafeArea } from 'app/provider/safe-area/use-safe-area'
@@ -9,9 +9,52 @@ import { LogoImage } from 'app/components/LogoImage'
 
 export function Header() {
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const [headerHeight, setHeaderHeight] = useState(0)
+  // Initialiser isMobile correctement selon la plateforme
+  const [isMobile, setIsMobile] = useState(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      return window.innerWidth < 768
+    }
+    if (Platform.OS !== 'web') {
+      const { width } = Dimensions.get('window')
+      return width < 768
+    }
+    return false
+  })
   const router = useRouter()
   const pathname = usePathname()
   const insets = useSafeArea()
+
+  // Détecter si on est sur mobile (web ou native)
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const checkMobile = () => {
+        const mobile = window.innerWidth < 768 // Breakpoint md (768px)
+        setIsMobile(mobile)
+        // Fermer le menu si on passe en mode desktop
+        if (!mobile && showMobileMenu) {
+          setShowMobileMenu(false)
+        }
+      }
+      // Vérifier immédiatement au montage
+      checkMobile()
+      window.addEventListener('resize', checkMobile)
+      return () => window.removeEventListener('resize', checkMobile)
+    } else {
+      // Sur React Native, utiliser la largeur de l'écran
+      const subscription = Dimensions.addEventListener('change', ({ window: { width } }) => {
+        const mobile = width < 768
+        setIsMobile(mobile)
+        // Fermer le menu si on passe en mode desktop
+        if (!mobile && showMobileMenu) {
+          setShowMobileMenu(false)
+        }
+      })
+      const { width } = Dimensions.get('window')
+      setIsMobile(width < 768)
+      return () => subscription?.remove()
+    }
+  }, [showMobileMenu])
   
   // Pour React Native, définir l'URL de l'API via une variable d'environnement
   // ou utiliser la valeur par défaut pour le développement local
@@ -34,6 +77,10 @@ export function Header() {
   })
 
   function isActive(path: string) {
+    // Sur iOS, le pathname peut être vide ou undefined quand on est sur l'accueil
+    if (path === '/') {
+      return pathname === '/' || pathname === '' || !pathname
+    }
     return pathname === path
   }
 
@@ -53,7 +100,7 @@ export function Header() {
         <View style={styles.container}>
           <View style={styles.headerContent}>
             <View style={styles.logoContainer}>
-              <View style={{ backgroundColor: 'transparent', overflow: 'hidden' }}>
+              <View style={{ backgroundColor: 'transparent' } as any}>
                 <LogoImage
                   style={styles.logo}
                   width={40}
@@ -72,7 +119,15 @@ export function Header() {
   }
 
   return (
-    <View style={[styles.header, { paddingTop: Platform.OS === 'web' ? 0 : insets.top }]}>
+    <View 
+      style={[styles.header, { paddingTop: Platform.OS === 'web' ? 0 : insets.top }]}
+      onLayout={(event) => {
+        const { height } = event.nativeEvent.layout
+        if (height !== headerHeight) {
+          setHeaderHeight(height)
+        }
+      }}
+    >
       <View style={styles.container}>
         <View style={styles.headerContent}>
           {/* Logo et titre */}
@@ -95,8 +150,9 @@ export function Header() {
             <Text style={styles.title}>Liste de cadeaux</Text>
           </Pressable>
 
-          {/* Navigation desktop */}
-          <View style={styles.desktopNav}>
+          {/* Navigation desktop - masqué sur mobile */}
+          {!isMobile && (
+            <View style={styles.desktopNav}>
             <Pressable
               onPress={() => handleNavigate('/')}
               style={({ pressed }) => [
@@ -187,10 +243,12 @@ export function Header() {
                 </Pressable>
               </View>
             )}
-          </View>
+            </View>
+          )}
 
-          {/* Bouton menu mobile */}
-          <Pressable
+          {/* Bouton menu mobile - affiché sur mobile */}
+          {isMobile && (
+            <Pressable
             onPress={() => setShowMobileMenu(!showMobileMenu)}
             style={({ pressed }) => [
               styles.mobileMenuButton,
@@ -203,11 +261,22 @@ export function Header() {
               <View style={styles.hamburgerLine} />
             </View>
           </Pressable>
+          )}
         </View>
+      </View>
 
-        {/* Menu mobile */}
-        {showMobileMenu && (
-          <View style={styles.mobileMenu}>
+      {/* Menu mobile */}
+      {showMobileMenu && isMobile && (
+            <View 
+              style={[
+                styles.mobileMenu,
+                Platform.OS === 'web' ? {
+                  maxHeight: headerHeight > 0 ? `calc(100vh - ${headerHeight}px)` as any : 'calc(100vh - 70px)' as any,
+                } : headerHeight > 0 ? {
+                  top: headerHeight,
+                } : {},
+              ]}
+            >
             <View style={styles.mobileNav}>
               <Pressable
                 onPress={() => handleNavigate('/')}
@@ -300,9 +369,8 @@ export function Header() {
                 </View>
               )}
             </View>
-          </View>
+            </View>
         )}
-      </View>
     </View>
   )
 }
@@ -316,6 +384,8 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
+    position: 'relative' as any,
+    zIndex: 1000,
   },
   container: {
     maxWidth: 1152, // max-w-6xl
@@ -362,9 +432,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 24,
-    ...(Platform.OS === 'web' ? {} : {
-      display: 'none',
-    }),
   },
   navLink: {
     paddingHorizontal: 12,
@@ -479,9 +546,6 @@ const styles = StyleSheet.create({
     minWidth: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    ...(Platform.OS === 'web' ? {
-      display: 'none',
-    } : {}),
   },
   mobileMenuButtonPressed: {
     backgroundColor: '#F3F4F6',
@@ -497,17 +561,36 @@ const styles = StyleSheet.create({
     backgroundColor: '#374151',
     borderRadius: 1,
   },
+  overlay: {
+    position: 'absolute' as any,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 1000,
+    ...(Platform.OS === 'web' ? {
+      position: 'fixed' as any,
+      left: 0,
+      width: '100vw' as any,
+    } : {}),
+  } as any,
   mobileMenu: {
-    marginTop: 16,
+    position: 'absolute' as any,
+    top: '100%' as any,
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
     paddingTop: 16,
+    paddingBottom: 16,
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',
+    zIndex: 1001,
     ...(Platform.OS === 'web' ? {
-      display: 'none',
-    } : {
-      display: 'flex',
-    }),
-  },
+      width: '100%' as any,
+      overflowY: 'auto' as any,
+      boxShadow: 'none' as any,
+    } : {}),
+  } as any,
   mobileNav: {
     gap: 8,
   },
