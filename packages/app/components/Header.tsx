@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { View, Text, Pressable, Image, StyleSheet, Platform, ActivityIndicator } from 'react-native'
+import { View, Text, Pressable, StyleSheet, Platform, ActivityIndicator } from 'react-native'
 import { useRouter, usePathname } from 'solito/navigation'
+import { SolitoImage } from 'solito/image'
 import { useAuth } from 'app/hooks/useAuth'
 import { useSafeArea } from 'app/provider/safe-area/use-safe-area'
 
@@ -52,14 +53,11 @@ export function Header() {
         <View style={styles.container}>
           <View style={styles.headerContent}>
             <View style={styles.logoContainer}>
-              <Image
-                source={Platform.OS === 'web' 
-                  ? { uri: '/logo.png' } 
-                  : require('app/assets/logo.png')
-                }
+              <SolitoImage
+                src="/logo.webp"
                 style={styles.logo}
-                resizeMode="cover"
-                accessibilityLabel="Logo Liste de cadeaux"
+                width={40}
+                height={28}
                 alt="Logo Liste de cadeaux"
               />
               <Text style={styles.title}>Liste de cadeaux</Text>
@@ -83,14 +81,11 @@ export function Header() {
               pressed && styles.pressed
             ]}
           >
-            <Image
-              source={Platform.OS === 'web' 
-                ? { uri: '/logo.png' } 
-                : require('app/assets/logo.png')
-              }
+            <SolitoImage
+              src="/logo.webp"
               style={styles.logo}
-              resizeMode="cover"
-              accessibilityLabel="Logo"
+              width={40}
+              height={28}
               alt="Logo"
             />
             <Text style={styles.title}>Liste de cadeaux</Text>
@@ -139,14 +134,11 @@ export function Header() {
                       pressed && styles.profileLinkPressed
                     ]}
                   >
-                    <Image
-                      source={Platform.OS === 'web' 
-                        ? { uri: '/logo.png' } 
-                        : require('app/assets/logo.png')
-                      }
+                    <SolitoImage
+                      src="/logo.webp"
                       style={styles.avatar}
-                      resizeMode="cover"
-                      accessibilityLabel="Logo Liste de cadeaux"
+                      width={32}
+                      height={22}
                       alt="Logo Liste de cadeaux"
                     />
                     <Text style={[
@@ -252,14 +244,11 @@ export function Header() {
                         pressed && styles.mobileProfileLinkPressed
                       ]}
                     >
-                      <Image
-                        source={Platform.OS === 'web' 
-                          ? { uri: '/logo.png' } 
-                          : require('app/assets/logo.png')
-                        }
+                      <SolitoImage
+                        src="/logo.webp"
                         style={styles.mobileAvatar}
-                        resizeMode="cover"
-                        accessibilityLabel="Logo Liste de cadeaux"
+                        width={32}
+                        height={32}
                         alt="Logo Liste de cadeaux"
                       />
                       <Text style={[
@@ -350,7 +339,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 40,
-    height: 40,
+    height: 28,
     borderRadius: 20,
     borderWidth: 2,
     borderColor: '#C7D2FE',
@@ -407,7 +396,7 @@ const styles = StyleSheet.create({
   },
   avatar: {
     width: 32,
-    height: 32,
+    height: 22,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#C7D2FE',

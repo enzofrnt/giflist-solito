@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import PasswordInput from '@/components/PasswordInput';
@@ -13,8 +12,6 @@ export default function LoginPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,8 +38,9 @@ export default function LoginPage() {
         const { setAuthToken } = await import('app/lib/authStorage')
         const result = setAuthToken(data.token)
         if (result instanceof Promise) await result
-        // Rediriger vers la page d'accueil
-        router.push('/dashboard')
+        // Rediriger vers la page des listes avec rechargement complet
+        // pour que le AuthContext détecte le token
+        window.location.href = '/dashboard'
       } else {
         setError(data.error || 'Une erreur est survenue');
       }
