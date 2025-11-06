@@ -106,7 +106,7 @@ export default function RegisterPage() {
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <Image
-              src="/logo.png"
+              src="/logo.webp"
               alt="Logo Liste de cadeaux"
               width={64}
               height={64}

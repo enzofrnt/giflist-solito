@@ -166,7 +166,7 @@ export default function ProfileClient() {
                 <h2 className="text-lg font-semibold text-gray-900">Informations personnelles</h2>
                 <div className="flex items-center gap-2">
                   <Image
-                    src="/logo.png"
+                    src="/logo.webp"
                     alt="Logo Liste de cadeaux"
                     width={40}
                     height={40}

@@ -1,5 +1,5 @@
 'use client'
-
+import { SolitoImage } from 'solito/image'
 import { useRouter } from 'solito/navigation'
 import { View, Text, Pressable, StyleSheet, ScrollView, Platform, Image, Dimensions } from 'react-native'
 import { Svg, Path } from 'react-native-svg'
@@ -46,14 +46,11 @@ export function HomeScreen() {
         {/* Hero Section */}
       <View style={styles.heroSection}>
         <View style={styles.logoContainer}>
-          <Image
-            source={Platform.OS === 'web' 
-              ? { uri: '/logo.png' } 
-              : require('app/assets/logo.png')
-            }
+          <SolitoImage
+            src="/logo.webp"
             style={styles.logo}
-            resizeMode="contain"
-            accessibilityLabel="Logo Liste de cadeaux"
+            width={120}
+            height={82}
             alt="Logo Liste de cadeaux"
           />
         </View>

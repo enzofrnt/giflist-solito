@@ -20,16 +20,16 @@ export const metadata: Metadata = {
   title: "Liste de cadeaux 🎁",
   description: "Application de gestion de liste de cadeaux",
   icons: {
-    icon: '/logo.png',
-    shortcut: '/logo.png',
-    apple: '/logo.png',
+    icon: '/logo.webp',
+    shortcut: '/logo.webp',
+    apple: '/logo.webp',
   },
   openGraph: {
     title: "Liste de cadeaux 🎁",
     description: "Application de gestion de liste de cadeaux",
     images: [
       {
-        url: '/logo.png',
+        url: '/logo.webp',
         width: 1200,
         height: 1400,
         alt: 'Photo de profil - Liste de cadeaux',
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: "Liste de cadeaux 🎁",
     description: "Application de gestion de liste de cadeaux",
-    images: ['/logo.png'],
+    images: ['/logo.webp'],
   },
 };
 
