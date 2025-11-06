@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { ReservePayload } from '@/types';
+import type { ReservePayload } from 'app/types'
 
 // Réexporter pour compatibilité
 export type { ReservePayload };

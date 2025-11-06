@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import type { User } from '@/types'
+import type { User } from 'app/types'
 import { getAuthToken, removeAuthToken } from '@/lib/authStorage'
 
 interface UseAuthOptions {

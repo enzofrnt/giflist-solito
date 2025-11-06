@@ -9,7 +9,7 @@ import SecretModeToggle from '@/components/SecretModeToggle';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useAlert } from '@/hooks/useAlert';
 import { getAuthToken } from '@/lib/authStorage';
-import type { Gift, GiftList } from '@/types';
+import type { Gift, GiftList } from 'app/types'
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from 'react';
