@@ -34,7 +34,7 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
         }
         
         // Sinon, utiliser le logo par défaut
-        return '/logo.png';
+        return '/logo.webp';
       };
       
       // Créer le QR code avec des modules arrondis (SVG pour affichage)

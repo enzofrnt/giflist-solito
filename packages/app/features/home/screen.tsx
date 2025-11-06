@@ -48,8 +48,8 @@ export function HomeScreen() {
         <View style={styles.logoContainer}>
           <Image
             source={Platform.OS === 'web' 
-              ? { uri: '/logo.png' } 
-              : require('app/assets/logo.png')
+              ? { uri: '/logo.webp' } 
+              : require('app/assets/logo.webp')
             }
             style={styles.logo}
             resizeMode="contain"

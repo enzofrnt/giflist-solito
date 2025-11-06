@@ -22,7 +22,7 @@ export default function Header() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Image
-                src="/logo.png"
+                src="/logo.webp"
                 alt="Logo Liste de cadeaux"
                 width={40}
                 height={40}
@@ -44,7 +44,7 @@ export default function Header() {
           {/* Logo et titre */}
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <Image
-              src="/logo.png"
+              src="/logo.webp"
               alt="Logo"
               width={40}
               height={40}
@@ -84,7 +84,7 @@ export default function Header() {
                     className="flex items-center gap-2 hover:bg-gray-50 rounded-lg p-2 transition-colors group"
                   >
                     <Image
-                      src="/logo.png"
+                      src="/logo.webp"
                       alt="Logo Liste de cadeaux"
                       width={32}
                       height={32}
@@ -176,7 +176,7 @@ export default function Header() {
                       style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
                     >
                       <Image
-                        src="/logo.png"
+                        src="/logo.webp"
                         alt="Logo Liste de cadeaux"
                         width={32}
                         height={32}
