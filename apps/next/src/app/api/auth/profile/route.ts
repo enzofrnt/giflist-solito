@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import jwt from 'jsonwebtoken';
+import { getCurrentUser } from '@/lib/auth';
 
 export async function PUT(request: NextRequest) {
   try {
@@ -10,9 +10,8 @@ export async function PUT(request: NextRequest) {
     }
 
     const token = authHeader.substring(7);
-    // Utiliser le même mécanisme que src/lib/auth.ts pour avoir un fallback
-    const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+    const currentUser = await getCurrentUser(token);
+    if (!currentUser) return NextResponse.json({ error: 'Token invalide' }, { status: 401 });
     
     const { name } = await request.json();
 
@@ -25,7 +24,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: decoded.userId },
+      where: { id: currentUser.id },
       data: {
         name: name.trim()
       },
@@ -44,10 +43,6 @@ export async function PUT(request: NextRequest) {
 
   } catch (error) {
     console.error('Erreur mise à jour profil:', error);
-    
-    if (error instanceof jwt.JsonWebTokenError) {
-      return NextResponse.json({ error: 'Token invalide' }, { status: 401 });
-    }
     
     return NextResponse.json({ 
       error: 'Erreur lors de la mise à jour du profil' 

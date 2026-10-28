@@ -13,6 +13,7 @@ interface PasswordInputProps {
   showGuide?: boolean
   required?: boolean
   className?: string
+  autoComplete?: string
 }
 
 interface PasswordStrength {
@@ -59,7 +60,8 @@ export default function PasswordInput({
   showStrength = false,
   showGuide = false,
   required = false,
-  className = ''
+  className = '',
+  autoComplete
 }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false)
   const strength = useMemo(() => calculatePasswordStrength(value), [value])
@@ -98,6 +100,7 @@ export default function PasswordInput({
         <input
           id={id}
           name={name}
+          autoComplete={autoComplete}
           type={showPassword ? 'text' : 'password'}
           value={value}
           onChange={onChange}
@@ -109,8 +112,8 @@ export default function PasswordInput({
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
+          aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
           className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-          tabIndex={-1}
         >
           {showPassword ? (
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

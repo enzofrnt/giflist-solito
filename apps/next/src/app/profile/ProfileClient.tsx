@@ -4,7 +4,7 @@ import AlertModal from '@/components/AlertModal'
 import PasswordInput from '@/components/PasswordInput'
 import { useAlert } from '@/hooks/useAlert'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { getAuthToken } from 'app/lib/authStorage'
+import { getAuthToken, setAuthToken } from 'app/lib/authStorage'
 import { validatePassword } from 'app/lib/passwordValidation'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -117,6 +117,8 @@ export default function ProfileClient() {
       })
 
       if (response.ok) {
+        const data = await response.json()
+        await setAuthToken(data.token)
         showSuccess('Succès', 'Mot de passe modifié avec succès !')
         setPasswordData({
           currentPassword: '',
