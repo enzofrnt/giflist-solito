@@ -1,0 +1,16 @@
+// Giftlist design system — entry point.
+// Tailwind remains in src/app/globals.css; this layer is Sass-native and
+// namespaced with `.ds-`, so it does not restyle existing pages in Phase 1.
+//
+// Rule: use `@use`, never `@import` (deprecated in Dart Sass). Never import
+// Tailwind here — Tailwind v4 does not support preprocessors.
+
+@use 'tokens';
+@use 'mixins';
+@use 'typography';
+@use 'buttons';
+@use 'forms';
+@use 'feedback';
+@use 'cards';
+@use 'strength';
+@use 'showcase';

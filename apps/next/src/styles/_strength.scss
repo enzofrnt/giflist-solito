@@ -1,0 +1,116 @@
+@use 'tokens' as *;
+@use 'mixins' as *;
+
+@layer components {
+  .ds-strength {
+    --ds-strength-color: var(--ds-color-text-subtle);
+
+    display: grid;
+    gap: var(--ds-space-2);
+    min-width: 0;
+  }
+
+  .ds-strength[data-level='0'] {
+    --ds-strength-color: var(--ds-color-strength-weak);
+  }
+
+  .ds-strength[data-level='1'] {
+    --ds-strength-color: var(--ds-color-strength-fair);
+  }
+
+  .ds-strength[data-level='2'] {
+    --ds-strength-color: var(--ds-color-strength-medium);
+  }
+
+  .ds-strength[data-level='3'] {
+    --ds-strength-color: var(--ds-color-strength-strong);
+  }
+
+  .ds-strength[data-level='4'] {
+    --ds-strength-color: var(--ds-color-strength-excellent);
+  }
+
+  .ds-strength__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ds-space-3);
+  }
+
+  .ds-strength__label {
+    color: var(--ds-strength-color);
+    font-size: var(--ds-text-xs);
+    font-weight: var(--ds-weight-semibold);
+    line-height: var(--ds-leading-snug);
+  }
+
+  .ds-strength__hint {
+    color: var(--ds-color-text-subtle);
+    font-size: var(--ds-text-xs);
+    line-height: var(--ds-leading-snug);
+  }
+
+  .ds-strength__track {
+    position: relative;
+    height: 0.5rem;
+    border-radius: var(--ds-radius-full);
+    background: var(--ds-color-surface-muted);
+    overflow: hidden;
+  }
+
+  .ds-strength__fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--ds-strength-color);
+    @include ds-transition(width, background-color);
+  }
+
+  .ds-strength__rules {
+    display: grid;
+    gap: var(--ds-space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ds-strength__rule {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-2);
+    color: var(--ds-color-text-subtle);
+    font-size: var(--ds-text-xs);
+    line-height: var(--ds-leading-normal);
+
+    &::before {
+      content: '\2022';
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      background: var(--ds-color-surface-muted);
+      color: var(--ds-color-text-subtle);
+      font-size: 0.75rem;
+      flex: 0 0 auto;
+    }
+
+    &[data-met='true'] {
+      color: var(--ds-color-success-700);
+
+      &::before {
+        content: '\2713';
+        background: var(--ds-color-success-soft);
+        color: var(--ds-color-success);
+      }
+    }
+  }
+
+  .ds-strength--compact {
+    gap: var(--ds-space-1);
+
+    .ds-strength__rules {
+      display: none;
+    }
+  }
+}

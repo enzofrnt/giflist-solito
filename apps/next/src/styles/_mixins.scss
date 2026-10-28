@@ -1,0 +1,83 @@
+// Shared design-system mixins. Use with `@use 'mixins' as *;`.
+@use 'sass:map';
+@use 'tokens' as *;
+
+@mixin ds-focus-ring {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+
+@mixin ds-focus-reset {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+@mixin ds-media-up($name) {
+  $value: map.get($breakpoints, $name);
+
+  @if $value == null {
+    @error 'Unknown breakpoint: #{$name}';
+  }
+
+  @media (min-width: $value) {
+    @content;
+  }
+}
+
+@mixin ds-media-down($name) {
+  $value: map.get($breakpoints, $name);
+
+  @if $value == null {
+    @error 'Unknown breakpoint: #{$name}';
+  }
+
+  @media (max-width: ($value - 0.02px)) {
+    @content;
+  }
+}
+
+@mixin ds-elevation($level) {
+  box-shadow: var(--ds-shadow-#{$level});
+}
+
+@mixin ds-truncate {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@mixin ds-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@mixin ds-reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+@mixin ds-transition($properties...) {
+  $transition-properties: all;
+
+  @if length($properties) > 0 {
+    $transition-properties: $properties;
+  }
+
+  transition-property: $transition-properties;
+  transition-duration: var(--ds-duration-fast);
+  transition-timing-function: var(--ds-ease-standard);
+
+  @include ds-reduced-motion {
+    transition-duration: 0.01ms;
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+}

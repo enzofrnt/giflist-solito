@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { getPasswordRules } from 'app/lib/passwordValidation'
+import { calculatePasswordStrength } from 'app/lib/passwordStrength'
 
 interface PasswordInputProps {
   id: string
@@ -16,40 +17,22 @@ interface PasswordInputProps {
   autoComplete?: string
 }
 
-interface PasswordStrength {
-  score: number // 0-4
-  label: string
-  color: string
-}
+// Level 0-4, aligned with the shared `calculatePasswordStrength` output.
+const STRENGTH_BAR_CLASSES = [
+  'bg-red-500',
+  'bg-orange-500',
+  'bg-yellow-500',
+  'bg-green-500',
+  'bg-emerald-600',
+] as const
 
-function calculatePasswordStrength(password: string): PasswordStrength {
-  if (!password) {
-    return { score: 0, label: '', color: 'gray' }
-  }
-
-  const rules = getPasswordRules(password)
-  let score = 0
-
-  // Calcul du score basé sur les règles
-  if (rules.minLength) score++
-  if (rules.hasLowercase) score++
-  if (rules.hasUppercase) score++
-  if (rules.hasNumber) score++
-  if (rules.hasSpecial) score++
-
-  // Normaliser le score sur 0-4
-  const normalizedScore = Math.min(4, Math.floor(score * 0.8))
-
-  const strengths: Record<number, PasswordStrength> = {
-    0: { score: 0, label: 'Très faible', color: 'red' },
-    1: { score: 1, label: 'Faible', color: 'orange' },
-    2: { score: 2, label: 'Moyen', color: 'yellow' },
-    3: { score: 3, label: 'Fort', color: 'green' },
-    4: { score: 4, label: 'Très fort', color: 'emerald' }
-  }
-
-  return strengths[normalizedScore] || strengths[0]
-}
+const STRENGTH_TEXT_CLASSES = [
+  'text-red-600',
+  'text-orange-600',
+  'text-yellow-600',
+  'text-green-600',
+  'text-emerald-600',
+] as const
 
 export default function PasswordInput({
   id,
@@ -76,24 +59,6 @@ export default function PasswordInput({
     { check: rules.hasSpecial, label: 'Un caractère spécial' }
   ]
 
-  const strengthColors = {
-    red: 'bg-red-500',
-    orange: 'bg-orange-500',
-    yellow: 'bg-yellow-500',
-    green: 'bg-green-500',
-    emerald: 'bg-emerald-600',
-    gray: 'bg-gray-300'
-  }
-
-  const strengthTextColors = {
-    red: 'text-red-600',
-    orange: 'text-orange-600',
-    yellow: 'text-yellow-600',
-    green: 'text-green-600',
-    emerald: 'text-emerald-600',
-    gray: 'text-gray-500'
-  }
-
   return (
     <div>
       <div className="relative">
@@ -107,7 +72,10 @@ export default function PasswordInput({
           required={required}
           placeholder={placeholder}
           className={`mt-1 block w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 ${className}`}
-          minLength={showGuide ? 8 : 6}
+          // Login (showGuide=false) keeps no browser minimum so legacy accounts
+          // are not blocked client-side; the shared 8-char rule is enforced by
+          // the API and shown wherever the guide is enabled.
+          minLength={showGuide ? 8 : undefined}
         />
         <button
           type="button"
@@ -131,14 +99,25 @@ export default function PasswordInput({
       {showStrength && value && (
         <div className="mt-2">
           <div className="flex items-center justify-between mb-1">
-            <span className={`text-xs font-medium ${strengthTextColors[strength.color as keyof typeof strengthTextColors]}`}>
+            <span
+              aria-live="polite"
+              className={`text-xs font-medium ${STRENGTH_TEXT_CLASSES[strength.level]}`}
+            >
               Robustesse : {strength.label}
             </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div
+            role="meter"
+            aria-valuemin={0}
+            aria-valuemax={4}
+            aria-valuenow={strength.level}
+            aria-valuetext={strength.label}
+            aria-label="Robustesse du mot de passe"
+            className="w-full bg-gray-200 rounded-full h-2"
+          >
             <div
-              className={`h-2 rounded-full transition-all duration-300 ${strengthColors[strength.color as keyof typeof strengthColors]}`}
-              style={{ width: `${(strength.score / 4) * 100}%` }}
+              className={`h-2 rounded-full transition-all duration-300 ${STRENGTH_BAR_CLASSES[strength.level]}`}
+              style={{ width: `${strength.percent}%` }}
             />
           </div>
         </div>
@@ -168,4 +147,3 @@ export default function PasswordInput({
     </div>
   )
 }
-

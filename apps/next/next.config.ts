@@ -1,7 +1,11 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   transpilePackages: ['app', 'expo-image'],
+  sassOptions: {
+    includePaths: [path.join(process.cwd(), "src/styles")],
+  },
   webpack: (config) => {
     // Alias react-native vers react-native-web pour le web (client et serveur)
     config.resolve.alias = {
