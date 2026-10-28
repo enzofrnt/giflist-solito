@@ -35,6 +35,7 @@ before(async () => {
   process.env.RESEND_API_KEY = 'test-only-key'
   process.env.EMAIL_FROM = 'Giftlist <noreply@giftlist.fr>'
   process.env.APP_URL = 'https://giftlist.fr'
+  process.env.VERCEL_ENV = 'development'
   ;({ prisma } = await import('../src/lib/prisma'))
   recovery = await import('../src/lib/password-reset')
   auth = await import('../src/lib/auth')

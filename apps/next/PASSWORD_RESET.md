@@ -17,7 +17,11 @@ JWT_SECRET="<secret aléatoire, au moins 32 octets>"
 La clé Resend est provisionnée par l’intégration Vercel. Les autres valeurs ont
 été ajoutées dans l’environnement Production. Ne pas préfixer ces variables par
 `NEXT_PUBLIC_`, ni les copier dans Git. Utiliser une base et une clé séparées pour
-les previews et le développement. Le serveur refuse de signer des sessions en
+les previews et le développement. En Preview, `RESEND_API_KEY`, `EMAIL_FROM` et
+`JWT_SECRET` sont communs à tout l’environnement Vercel, sans restriction de
+branche. `APP_URL` n’est pas nécessaire : les liens utilisent automatiquement
+`VERCEL_BRANCH_URL`, ou `VERCEL_URL` à défaut. Ils ne pointent jamais sur la
+production, même si une valeur `APP_URL` de production est présente. Le serveur refuse de signer des sessions en
 production si `JWT_SECRET` manque.
 
 L’offre Resend Free a été sélectionnée. Le domaine `giftlist.fr` a été créé en

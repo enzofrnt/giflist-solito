@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test:password-reset": "bun run db:generate && bun test tests/password-reset.test.ts",
+    "test:password-reset": "bun run db:generate && bun test tests/*.test.ts",
     "dev": "bun run --bun next dev --webpack",
     "dev:debug": "bun --inspect run --bun next dev --webpack",
     "dev:no-debug": "bun run dev",
