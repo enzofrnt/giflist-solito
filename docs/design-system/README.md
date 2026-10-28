@@ -5,7 +5,7 @@
 - **Review page**: `/design-system` (local and Vercel preview; `404` on production, `noindex`)
 - **Feature artifacts**: [`specs/002-ui-design-system/`](../../specs/002-ui-design-system/spec.md)
 - **UI audit (evidence base)**: [ui-audit.md](ui-audit.md)
-- **Screenshots**: [Phase 1](screenshots/) · [Phase 2 pages](screenshots/phase-2/) · [Phase 3 UX](screenshots/phase-3/) · [Phase 4 share/perf](screenshots/phase-4/)
+- **Screenshots**: [Phase 1](screenshots/) · [Phase 2 pages](screenshots/phase-2/) · [Phase 3 UX](screenshots/phase-3/) · [Phase 4 share/perf](screenshots/phase-4/) · [Phase 5 SEO/list UX](screenshots/phase-5/)
 - **Guardrails**: [`scripts/design-system-guard.sh`](../../scripts/design-system-guard.sh)
 
 ## Aperçu
@@ -109,6 +109,15 @@ See [Phase 3 screenshots](screenshots/phase-3/).
 - **API**: public list fetched in one query with no owner email / reservation email exposure; manage list no longer joins the unused user.
 
 See [Phase 4 screenshots](screenshots/phase-4/).
+
+## Phase 5 — Brand icons, SEO/OpenGraph & list UX
+
+- **Favicon/icons**: cobalt gift/list mark at 16/32/48 (`.ico`), 180 (Apple), 192/512 (PWA); no more full logo as favicon.
+- **SEO**: title template + canonical, description, OG/Twitter 1200×630, WebSite/Organization JSON-LD; private routes noindex; robots/sitemap/manifest.
+- **Public list**: title before price/status, compact tinted image/placeholder, 3-line description, reserve remains primary.
+- **Public lists stay noindex** (share-by-link privacy) but get a list-specific OG preview.
+
+See [Phase 5 screenshots](screenshots/phase-5/).
 
 ## UX skill
 

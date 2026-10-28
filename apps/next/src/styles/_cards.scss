@@ -49,6 +49,7 @@
 
   .ds-card__body {
     display: grid;
+    align-content: start;
     gap: var(--ds-space-3);
     padding: var(--ds-space-5);
   }

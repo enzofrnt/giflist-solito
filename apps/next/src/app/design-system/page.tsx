@@ -16,21 +16,21 @@ import { TypographySection } from './sections/TypographySection'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Design system — Giftlist',
+  title: 'Design system',
   description: 'Revue de la proposition de design system Giftlist (Phase 1).',
   robots: {
     index: false,
     follow: false,
   },
   openGraph: {
-    title: 'Design system — Giftlist',
+    title: 'Design system',
     description: 'Revue de la proposition de design system Giftlist (Phase 1).',
     locale: 'fr_FR',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: 'Design system — Giftlist',
+    title: 'Design system',
     description: 'Revue de la proposition de design system Giftlist (Phase 1).',
   },
 }
