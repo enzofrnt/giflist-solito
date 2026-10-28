@@ -10,6 +10,7 @@ export interface DropdownItem {
   onSelect?: () => void
   danger?: boolean
   disabled?: boolean
+  mobileOnly?: boolean
   icon?: ReactNode
 }
 
@@ -127,7 +128,7 @@ export function DropdownMenu({
           onKeyDown={handleMenuKeyDown}
         >
           {items.map((item, index) => {
-            const itemClass = `ds-dropdown__item${item.danger ? ' ds-dropdown__item--danger' : ''}`
+            const itemClass = `ds-dropdown__item${item.danger ? ' ds-dropdown__item--danger' : ''}${item.mobileOnly ? ' ds-dropdown__item--mobile-only' : ''}`
             const content = (
               <>
                 {item.icon ? <span className="ds-dropdown__icon" aria-hidden="true">{item.icon}</span> : null}

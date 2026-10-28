@@ -146,6 +146,9 @@ Approved by the owner on 2026-10-28; the showcase in `docs/design-system/` is th
 - Start from the user job and success moment; ONE primary action per view.
 - Primary navigation is grouped with the logo on the left; never centred in the viewport.
 - Account actions collapse into a compact menu opened from the avatar; logout lives inside it, not as a separate header button.
+- Do not add a burger menu that duplicates the account menu or primary navigation. Short menus are anchored popovers — no app-wide dim overlay, scroll lock or page shift.
+- Keep the account menu minimal (profile + logout; lists only when the primary nav is hidden).
+- Every app page has a global footer with brand/promise, product links, project/GitHub and bug-report links, and copyright; no invented legal pages or dead links.
 - Secondary/destructive actions live in an overflow menu, not as equal large buttons on every card.
 - Public lists are about the list and its gifts, not about the Giftlist brand; no brand-dominant hero there.
 - Empty, loading, error, disabled and success states are designed, not left to chance.
@@ -165,4 +168,4 @@ Approved by the owner on 2026-10-28; the showcase in `docs/design-system/` is th
 - Amendments are proposed via PR with rationale, a semver version bump, an update to **Last Amended**, and corresponding updates to agent instructions and templates.
 - Version history and ratification date are recorded below. Compliance is checked by `/speckit-analyze` and in code review.
 
-**Version**: 1.1.0 | **Ratified**: 2026-10-28 | **Last Amended**: 2026-10-28
+**Version**: 1.1.2 | **Ratified**: 2026-10-28 | **Last Amended**: 2026-10-28

@@ -182,7 +182,7 @@ bun run web:build     # also enforced by Husky pre-commit
 - The approved **Design Charter** is in `.specify/memory/constitution.md` and the visual system in `docs/design-system/`. They are mandatory.
 - Load the **`ui-ux-design` skill** for any UI/UX work (new screen, header/navigation, menu/dialog, form, empty/loading/error state, redesign). In DSH use the `skill` tool; Claude has `/ui-ux-design`; Codex reads the same skill from `.agents/skills`.
 - Write a short UX brief + screen/action audit in the feature spec/plan before coding. Applying tokens without fixing hierarchy/friction is not a redesign.
-- Header rules: real logo on the left, nav grouped left (not centred), account menu from the avatar with logout inside, compact mobile drawer (≤20rem), no separate logout button.
+- Header rules: real logo on the left, nav grouped left (not centred), account menu from the avatar with logout inside, no separate logout button. Do not add a burger that duplicates the account menu/primary nav; short menus are anchored popovers, never app-wide dim overlays/scroll locks. Keep the account menu minimal (profile + logout; lists only when nav is hidden).
 - Actions: one primary per view; secondary/destructive actions in overflow menus; public list is list-first, never brand-first.
 - Verify with 1440/768/390 screenshots, keyboard/focus, dialogs/menus and the canonical gates.
 

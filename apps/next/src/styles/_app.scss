@@ -204,20 +204,14 @@
     gap: var(--ds-space-2);
   }
 
-  .ds-header__menu-button {
+  .ds-header__auth-action {
     display: inline-flex;
-
-    @include ds-media-up('md') {
-      display: none;
-    }
   }
 
-  .ds-header__auth-action,
-  .ds-header__logout {
-    display: none;
-
-    @include ds-media-up('md') {
-      display: inline-flex;
+  @include ds-media-down('sm') {
+    .ds-header__auth-action {
+      padding-inline: var(--ds-space-2);
+      font-size: var(--ds-text-xs);
     }
   }
 
@@ -237,79 +231,157 @@
     font-size: var(--ds-text-xs);
   }
 
-  .ds-mobile-menu {
-    position: fixed;
-    top: 4.5rem;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: var(--ds-z-overlay);
-    display: flex;
-    align-items: stretch;
-    justify-content: flex-end;
-    background: var(--ds-color-overlay);
+
+  // --- Global footer --------------------------------------------------------
+  .ds-footer {
+    margin-top: clamp(var(--ds-space-10), 8vw, var(--ds-space-16));
+    border-top: var(--ds-border-hairline) solid var(--ds-color-border);
+    background: var(--ds-color-surface);
   }
 
-  .ds-mobile-menu__panel {
-    position: relative;
+  .ds-footer__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr));
+    gap: clamp(var(--ds-space-6), 6vw, var(--ds-space-12));
+    width: min(calc(100% - 2rem), 72rem);
+    margin-inline: auto;
+    padding-block: clamp(var(--ds-space-8), 6vw, var(--ds-space-12));
+  }
+
+  .ds-footer__brand {
     display: grid;
     align-content: start;
-    gap: var(--ds-space-1);
-    width: min(18rem, 82vw);
-    height: 100%;
-    padding: var(--ds-space-4) var(--ds-space-4) var(--ds-space-6);
-    border-left: var(--ds-border-hairline) solid var(--ds-color-border);
-    background: var(--ds-color-surface);
-    box-shadow: var(--ds-shadow-xl);
-    overflow-y: auto;
+    gap: var(--ds-space-3);
+    max-width: 34ch;
   }
 
-  .ds-mobile-menu__account {
-    display: flex;
-    align-items: center;
-    gap: var(--ds-space-3);
-    margin-bottom: var(--ds-space-2);
-    padding-bottom: var(--ds-space-3);
-    border-bottom: var(--ds-border-hairline) solid var(--ds-color-border);
-  }
-
-  .ds-mobile-menu__link {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--ds-space-3);
-    padding: var(--ds-space-3);
+  .ds-footer__brand-link {
+    display: inline-flex;
+    width: fit-content;
     border-radius: var(--ds-radius-sm);
-    color: var(--ds-color-text);
-    font-size: var(--ds-text-base);
-    font-weight: var(--ds-weight-medium);
+
+    &:focus-visible {
+      @include ds-focus-ring;
+    }
+  }
+
+  .ds-footer__logo {
+    display: block;
+    width: auto;
+    height: 2.25rem;
+  }
+
+  .ds-footer__tagline {
+    margin: 0;
+    color: var(--ds-color-text-muted);
+    font-size: var(--ds-text-sm);
+    line-height: var(--ds-leading-relaxed);
+  }
+
+  .ds-footer__note {
+    margin: 0;
+    color: var(--ds-color-text-subtle);
+    font-size: var(--ds-text-xs);
+    line-height: var(--ds-leading-normal);
+  }
+
+  .ds-footer__nav {
+    display: grid;
+    align-content: start;
+    gap: var(--ds-space-2);
+  }
+
+  .ds-footer__title {
+    margin: 0 0 var(--ds-space-1);
+    color: var(--ds-color-text-subtle);
+    font-size: var(--ds-text-xs);
+    font-weight: var(--ds-weight-semibold);
+    letter-spacing: var(--ds-tracking-wider);
+    text-transform: uppercase;
+  }
+
+  .ds-footer__list {
+    display: grid;
+    gap: var(--ds-space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ds-footer__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-2);
+    width: fit-content;
+    min-height: 2rem;
+    color: var(--ds-color-text-muted);
+    font-size: var(--ds-text-sm);
     text-decoration: none;
 
     &:hover {
-      background: var(--ds-color-surface-muted);
+      color: var(--ds-color-text);
+      text-decoration: underline;
+      text-underline-offset: 0.2em;
     }
 
     &:focus-visible {
       @include ds-focus-ring;
     }
+  }
 
-    &[aria-current='page'] {
-      background: var(--ds-color-primary-soft);
-      color: var(--ds-color-primary-hover);
+  .ds-footer__link-icon {
+    display: inline-flex;
+    width: 1rem;
+    height: 1rem;
+    color: var(--ds-color-text-subtle);
+
+    svg {
+      width: 100%;
+      height: 100%;
     }
   }
 
-  .ds-mobile-menu__footer {
-    display: grid;
-    gap: var(--ds-space-2);
-    margin-top: var(--ds-space-3);
-    padding-top: var(--ds-space-3);
+  .ds-footer__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-3);
+    width: min(calc(100% - 2rem), 72rem);
+    margin-inline: auto;
+    padding-block: var(--ds-space-4);
+    padding-bottom: max(var(--ds-space-4), env(safe-area-inset-bottom));
     border-top: var(--ds-border-hairline) solid var(--ds-color-border);
+    color: var(--ds-color-text-subtle);
+    font-size: var(--ds-text-xs);
+
+    p {
+      margin: 0;
+    }
   }
 
+  @include ds-media-down('md') {
+    .ds-footer__inner {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 
-  .ds-card__footer.ds-card__footer--split {
-    justify-content: space-between;
+    .ds-footer__brand {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @include ds-media-down('sm') {
+    .ds-footer__inner {
+      grid-template-columns: 1fr;
+    }
+
+    .ds-footer__brand {
+      grid-column: auto;
+    }
+
+    .ds-footer__bottom {
+      align-items: flex-start;
+      flex-direction: column;
+    }
   }
 
   // --- Dropdown menus -------------------------------------------------------
@@ -374,6 +446,12 @@
     }
   }
 
+  .ds-dropdown__item--mobile-only {
+    @include ds-media-up('md') {
+      display: none;
+    }
+  }
+
   .ds-dropdown__item--danger {
     color: var(--ds-color-danger);
 
@@ -410,11 +488,7 @@
   }
 
   .ds-header__account-wrap {
-    display: none;
-
-    @include ds-media-up('md') {
-      display: flex;
-    }
+    display: flex;
   }
 
   .ds-header__account {
@@ -442,10 +516,15 @@
   }
 
   .ds-header__account-name {
+    display: none;
     max-width: 12rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+
+    @include ds-media-up('md') {
+      display: inline;
+    }
   }
 
   .ds-header__account-chevron {

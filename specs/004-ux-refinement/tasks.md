@@ -34,6 +34,13 @@
 - [x] T016 1440/768/390 screenshots of header, home, dashboard, manage, public list, profile, mobile drawer.
 - [x] T017 Route smoke + production showcase guard; confirm no API/data changes.
 - [x] T018 Update docs/specs, commit, push, open PR with before/after evidence.
+- [x] T019 Remove the burger and mobile drawer; consolidate signed-in mobile actions into the avatar menu (lists/profile/logout).
+- [x] T020 Desktop account menu = profile + logout only; keep Mes listes in nav; remove Accueil duplication (logo is home).
+- [x] T021 Keep short menus as anchored popovers: no overlay dim, no body scroll lock, no page shift.
+- [x] T022 Verify no-duplication/no-shift, keyboard, mobile signed-in/out, and update screenshots/spec evidence.
+- [x] T023 Add the global footer (brand/promise, product links, GitHub source, bug report, documentation, copyright) and mount it in AppChrome.
+- [x] T024 Make the body/footer light-canvas safe (remove dark body background; Geist font) so no black strip appears above the footer.
+- [x] T025 Verify footer at 1440/390, GitHub external link, no overflow; update screenshots/docs.
 
 ## Dependencies
 

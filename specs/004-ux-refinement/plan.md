@@ -42,12 +42,13 @@ See [research.md](research.md).
 
 ## Phase 1 Design
 
-- Header: real logo, left-grouped nav, account dropdown, compact mobile drawer.
+- Header: real logo, left-grouped nav, context-aware account dropdown; no burger/duplicate nav and no dim/scroll-lock overlay.
 - Home: hero + 3 steps; no black band.
 - Dashboard: primary Gérer + overflow edit/delete.
 - Manage: primary share/add; overflow edit/delete list.
 - Profile: remove logout; fix home link.
 - Public list: list-first hero; compact no-image placeholder.
+- Global footer: brand/promise, product/project links, GitHub/bug report, copyright; light canvas body.
 - Governance: `ui-ux-design` skill + Design Charter.
 
 ## Verification Plan

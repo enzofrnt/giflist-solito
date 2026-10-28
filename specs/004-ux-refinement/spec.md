@@ -30,9 +30,10 @@ A visitor or signed-in user always recognises Giftlist, knows where they are, an
 **Acceptance Scenarios**:
 
 1. **Given** any page, **When** the header renders, **Then** the real Giftlist logo is at the left and the primary nav is grouped with it, not centred.
-2. **Given** a signed-in user, **When** they click the avatar/name, **Then** a compact account menu opens with profile, lists and logout; there is no separate logout button in the header.
+2. **Given** a signed-in desktop user, **When** they click the avatar/name, **Then** a compact account menu opens with **Mon profil** and **Se déconnecter** only; “Mes listes” stays in the primary nav. There is no separate logout button.
 3. **Given** the account menu, **When** the user tabs/clicks outside/presses Escape, **Then** it closes and focus returns to the trigger.
-4. **Given** a mobile viewport, **When** the menu opens, **Then** it is a compact drawer (≤20rem) below the visible header, not a full-width page, and it closes on overlay/Escape/route change.
+4. **Given** a mobile signed-in viewport, **When** the user opens the avatar menu, **Then** it contains Mes listes (nav is hidden), Mon profil and Se déconnecter; there is **no burger** and no duplicated menu.
+5. **Given** any short menu, **When** it opens, **Then** it is an anchored popover with no app-wide dim overlay, no body scroll lock and no page shift.
 
 ### User Story 2 - A home page that explains and converts (Priority: P1)
 
@@ -85,7 +86,20 @@ A user manages identity, security and sessions from a coherent account area.
 2. **Given** the account menu, **When** the user picks logout, **Then** they are signed out and returned to the home page.
 3. **Given** a password/passkey action, **When** it succeeds/fails, **Then** feedback appears next to that section.
 
-### User Story 6 - UX process is reusable (Priority: P1)
+### User Story 6 - A complete, trustworthy footer (Priority: P2)
+
+A visitor finds the project links, the GitHub repository and the legal/copyright basics without hunting.
+
+**Independent Test**: Footer at 1440/390 on home, auth and app pages.
+
+**Acceptance Scenarios**:
+
+1. **Given** any app page, **When** the footer renders, **Then** it shows the brand/promise, product links and project links including GitHub.
+2. **Given** the GitHub link, **When** clicked, **Then** it opens the repository in a new tab with `rel="noreferrer"`.
+3. **Given** mobile, **When** the footer is read, **Then** it stacks cleanly with no horizontal overflow.
+4. **Given** the footer, **Then** it contains no invented legal pages or dead links.
+
+### User Story 7 - UX process is reusable (Priority: P1)
 
 The team can repeat this quality bar without re-learning it.
 
@@ -113,9 +127,12 @@ The team can repeat this quality bar without re-learning it.
 
 - **FR-001**: The header MUST display the real Giftlist logo (asset) on the left; no monogram/letter substitute.
 - **FR-002**: Primary navigation MUST be grouped with the brand on the left on desktop; the nav MUST NOT be centred across the viewport.
-- **FR-003**: Signed-in account actions MUST open a compact menu from the avatar/name, containing profile, lists and logout; logout MUST NOT be a separate header button.
+- **FR-003**: Signed-in account actions MUST open a compact menu from the avatar/name. Desktop: Mon profil + Se déconnecter only (Mes listes stays in nav). Mobile: Mes listes + Mon profil + Se déconnecter because the nav is hidden. Logout MUST NOT be a separate header button.
 - **FR-004**: Account and overflow menus MUST support keyboard navigation, Escape, outside-click close, focus restore, and accessible roles.
-- **FR-005**: Mobile navigation MUST be a compact drawer/sheet (max-width 20rem) below the header, with overlay/Escape/route-close and scroll lock.
+- **FR-005**: The app MUST NOT render a burger that duplicates the account menu/primary navigation. Signed-in mobile navigation is the avatar menu; signed-out mobile shows Connexion + Créer un compte in the header. Short menus MUST NOT use an app-wide dim overlay, body scroll lock or cause a page shift.
+- **FR-017**: The logo is the home link when signed in; an “Accueil” nav item MUST NOT duplicate it inside the app.
+- **FR-018**: Every app page (except the standalone design-system showcase) MUST render a global footer with brand/promise, product links, GitHub source, bug-report link and copyright.
+- **FR-019**: Footer external links MUST be clearly labelled, open in a new tab with `rel="noreferrer"`, and no dead/invented legal pages may be added.
 - **FR-006**: The home page MUST remove the black CTA band and add a 3-step “create / share / reserve” section with one primary action.
 - **FR-007**: Dashboard list cards MUST show one primary action and move edit/delete into an overflow menu; delete MUST be confirmed and styled as danger.
 - **FR-008**: Manage list-level secondary actions MUST move into an overflow menu; add/share remain primary/secondary as appropriate.
@@ -143,9 +160,10 @@ The team can repeat this quality bar without re-learning it.
 - **SC-003**: Home has no black CTA band and includes the 3-step section; one primary action.
 - **SC-004**: Dashboard/manage cards expose one primary action and an overflow menu; no card shows three equal large buttons.
 - **SC-005**: Public list hero is list-first at 1440/390; no dominant brand illustration.
-- **SC-006**: Mobile drawer ≤20rem and does not hide the header; no horizontal overflow.
+- **SC-006**: No burger/duplicate menu; account menu is desktop-minimal (profile/logout) and mobile-complete (lists/profile/logout); no overlay dim, body scroll lock or page shift; no horizontal overflow at 390/360.
 - **SC-007**: `ui-ux-design` skill is discoverable by DSH/Codex/Claude and the Design Charter is in the constitution.
 - **SC-008**: Full gates pass; existing flows/routes unchanged.
+- **SC-009**: Footer present on every app page, GitHub link present/valid, stacks at 390 without overflow, no dead links.
 
 ## Assumptions
 

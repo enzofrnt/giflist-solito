@@ -32,8 +32,9 @@ Use this skill for **any UI/UX change** — not only visual styling. Applying th
 ### Header and navigation
 - Brand: **the real Giftlist logo** on the left. Do not replace it with a monogram or a letter.
 - Desktop: logo + primary navigation grouped on the left; account actions on the right. **Do not centre the nav** in the viewport.
-- Account: avatar/name opens a **compact dropdown** containing profile, lists and logout. Logout is never a separate top-level button.
-- Mobile: compact right-side drawer (≤ 20 rem) or a short sheet; not a full-width white page that hides the product. Header stays visible; X/Escape/overlay close.
+- Account: avatar/name opens a **compact dropdown** with profile and logout; lists can be included only when the primary nav is hidden (mobile). Logout is never a separate top-level button.
+- Mobile: if there is standalone navigation, use a compact right-side drawer (≤ 20 rem) or a short sheet. If the account menu + logo already cover the actions, **do not add a burger** — duplication is worse than a missing menu.
+- Never duplicate the same actions in the avatar menu and a burger. No overlay/dim/body-scroll-lock for a short account/menu popover: it causes page shift and looks heavier than the task.
 - Current page is marked (`aria-current="page"`); focus is visible.
 
 ### Pages and actions
@@ -68,8 +69,15 @@ Use this skill for **any UI/UX change** — not only visual styling. Applying th
 - Three steps (“Créez / Partagez / Réservez”) are more useful than three generic feature cards.
 - Repeat the primary CTA at most twice, with a clear hierarchy.
 
+### Footer
+- Every app page (except a deliberately standalone showcase) has one **global footer**: brand + one-line promise, product links, project/GitHub link, bug-report link, copyright.
+- Do not invent legal pages that do not exist; no dead links. External links open in a new tab with `rel="noreferrer"`.
+- Footer is calm and secondary: 3 columns desktop → stacked mobile, visible focus, no CTA competition, no second full sitemap.
+- GitHub is a product/project link, not a social icon afterthought; label it clearly (“Code source”, “Signaler un bug”).
+
 ### Profile and account
 - Group by user goal: identity, security, passkeys, sessions.
+- Keep the account menu minimal: profile + logout (plus lists only when no nav). Do not repeat every nav destination there.
 - Destructive actions (logout) belong in the account menu or a clearly separated session section, not as a red primary button in a sidebar card.
 - Show success/error next to the affected section.
 
@@ -103,7 +111,8 @@ Use `.ds-page`, `.ds-page-header`, `.ds-card`, `.ds-btn` (one primary), `.ds-bad
 - Monogram/letter instead of the approved logo.
 - Centred primary navigation.
 - Logout as a separate header button next to the avatar.
-- Full-width mobile menu covering the product.
+- A burger that duplicates the account menu (few actions).
+- Full-width/dimming overlay for a short menu, causing page shift.
 - Three equal large buttons on every card.
 - Big black CTA band with no structural role.
 - Giant brand logo as the hero of a public list.

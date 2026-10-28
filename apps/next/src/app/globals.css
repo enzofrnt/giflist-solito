@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --background: var(--ds-color-canvas);
+  --foreground: var(--ds-color-text);
 }
 
 @theme inline {
@@ -32,24 +33,17 @@
   --color-info: var(--ds-color-info);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 html {
   /* Assurer que le html prend toute la hauteur */
   height: 100%;
   /* Couleur de fond pour éviter les zones noires */
-  background-color: #f9fafb;
+  background-color: var(--ds-color-canvas);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--ds-font-sans);
   /* Support pour les safe areas sur iPhone */
   min-height: 100vh;
   min-height: 100dvh; /* Dynamic viewport height pour mobile */

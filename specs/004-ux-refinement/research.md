@@ -27,7 +27,7 @@
 Create `DropdownMenu` (account + overflow menus) with keyboard navigation, Escape/outside close, focus restore, `role="menu"`, danger/disabled items. Use it for the account menu and card/list overflow actions.
 
 ### D2 — Header
-Real logo left; logo+nav grouped; account trigger (avatar/name + chevron) on the right; account menu contains profile/lists/logout. No separate logout. Mobile: compact right drawer `min(20rem, 88vw)` below the header, hidden account trigger, drawer account summary.
+Real logo left; logo+nav grouped; account trigger (avatar/name + chevron) on the right. Desktop account menu = profile + logout only; `Mes listes` stays in nav. Mobile: no burger (it duplicated the account menu); the avatar menu carries lists/profile/logout, the logo returns home, and signed-out users get Connexion/Créer in the header. No separate logout.
 
 ### D3 — Home
 Remove the black CTA band. Replace feature cards + band with a 3-step “Créez / Partagez / Réservez” section; keep one primary CTA in the hero.
@@ -40,6 +40,12 @@ Remove the red logout button and fix the dead `/home` link to `/`; logout is ava
 
 ### D6 — Public list
 Remove the logo fallback; if the list has an image, show it as a restrained hero, otherwise single-column list-first hero. Compact no-image gift placeholder with a tinted panel.
+
+### D8 — Menu/overlay consolidation
+Remove the burger and the mobile drawer entirely. Short menus are anchored popovers (no app-wide dim, no scroll lock, no layout shift). Account menu is context-aware: desktop minimal, mobile complete. This removes the Enzo/burger duplication and the unpleasant grey page shift.
+
+### D9 — Global footer
+Add a single `Footer` in AppChrome (not on the standalone showcase): brand + promise, Produit links (context-aware auth), Projet links (GitHub source, issue report, docs), copyright. Three columns desktop → stacked mobile. External links `target=_blank rel=noreferrer`. No legal pages invented. Fix the global body to the light canvas so dark-mode users no longer see a black strip above the footer.
 
 ### D7 — UX process
 Commit `ui-ux-design` skill in `.agents/skills`; sync a Claude symlink; add the Design Charter to the constitution; reference it from AGENTS/CLAUDE/design docs.

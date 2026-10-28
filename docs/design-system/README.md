@@ -91,11 +91,12 @@ See [Phase 2 screenshots](screenshots/phase-2/) for every page at desktop and mo
 The design system was not enough; Phase 3 fixes the experience:
 
 - **Header**: real Giftlist logo on the left, nav grouped left, account action in a compact menu (profile/lists/logout), no separate logout button.
-- **Mobile**: compact right drawer (max 18rem) below the header; account summary, nav and session actions; overlay/Escape/route close.
+- **Mobile**: no burger duplication — the account menu carries `Mes listes` (nav is hidden), profile and logout; the logo returns home. No app-wide dim/scroll lock.
 - **Home**: no black CTA band; a 3-step “Créez / Partagez / Réservez” section and one primary CTA.
 - **Action hierarchy**: dashboard list cards use one primary action + overflow menu; manage list edit/delete moved to overflow; delete remains confirmed/danger.
 - **Public list**: list-first hero (no logo fallback), compact no-image placeholder.
 - **Profile**: logout removed from the sidebar; available from the account menu; dead `/home` link fixed.
+- **Footer**: global brand/promise, product links, GitHub source, bug report and copyright; stacks on mobile.
 - **Process**: `ui-ux-design` skill + Design Charter in the constitution.
 
 See [Phase 3 screenshots](screenshots/phase-3/).
