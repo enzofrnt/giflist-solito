@@ -59,5 +59,8 @@
     "puppeteer",
     "sharp",
     "unrs-resolver"
-  ]
+  ],
+  "overrides": {
+    "sharp": "0.35.5"
+  }
 }
