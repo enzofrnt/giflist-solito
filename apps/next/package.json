@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test:password-reset": "prisma generate && tsx --test tests/password-reset.test.ts",
+    "test:password-reset": "prisma generate && tsx --test tests/*.test.ts",
     "dev": "NODE_OPTIONS='--inspect' next dev --turbopack",
     "dev:debug": "NODE_OPTIONS='--inspect' next dev --turbopack",
     "dev:no-debug": "next dev --turbopack",
