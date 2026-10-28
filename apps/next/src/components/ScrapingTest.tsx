@@ -1,124 +1,141 @@
-'use client';
+'use client'
 
-import Image from 'next/image';
-import { useState } from 'react';
+import Image from 'next/image'
+import { useState } from 'react'
 
 interface ScrapeResult {
-  title?: string;
-  price?: number;
-  image?: string;
-  description?: string;
-  error?: string;
+  title?: string
+  price?: number
+  image?: string
+  description?: string
+  error?: string
 }
 
 export default function ScrapingTest() {
-  const [url, setUrl] = useState('');
-  const [result, setResult] = useState<ScrapeResult | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [url, setUrl] = useState('')
+  const [result, setResult] = useState<ScrapeResult | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  const testScraping = async () => {
-    if (!url.trim()) return;
-
-    setLoading(true);
+  async function testScraping() {
+    if (!url.trim()) return
+    setLoading(true)
     try {
       const response = await fetch('/api/scrape-product', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url })
-      });
-
-      const data = await response.json();
-      setResult(data);
+        body: JSON.stringify({ url }),
+      })
+      setResult(await response.json())
     } catch {
-      setResult({ error: 'Erreur de connexion' });
+      setResult({ error: 'Erreur de connexion' })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="p-6 bg-gray-100 rounded-lg">
-      <h3 className="text-lg font-semibold mb-4">Test de Scraping</h3>
-      
-      <div className="space-y-4">
+    <div className="ds-card">
+      <div className="ds-card__header">
         <div>
-          <label className="block text-sm font-medium mb-2">URL du produit</label>
+          <h3 className="ds-card__title">Test de scraping</h3>
+          <p className="ds-card__subtitle">Vérifiez ce que l’API extrait d’une URL produit.</p>
+        </div>
+      </div>
+      <div className="ds-card__body ds-stack ds-stack--gap-4">
+        <div className="ds-field">
+          <label className="ds-label" htmlFor="scraping-test-url">URL du produit</label>
           <input
+            id="scraping-test-url"
             type="url"
             value={url}
-            onChange={(e) => setUrl(e.target.value)}
+            onChange={(event) => setUrl(event.target.value)}
             placeholder="https://www.amazon.fr/dp/..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            className="ds-input"
           />
         </div>
-        
         <button
+          type="button"
           onClick={testScraping}
           disabled={!url.trim() || loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          className="ds-btn ds-btn--primary ds-btn--sm self-start"
+          aria-busy={loading || undefined}
         >
-          {loading ? 'Test en cours...' : 'Tester le scraping'}
+          {loading ? <span className="ds-spinner" aria-hidden="true" /> : null}
+          {loading ? 'Test en cours…' : 'Tester le scraping'}
         </button>
-        
-        {result && (
-          <div className="mt-4 space-y-4">
-            <div className="p-4 bg-white rounded-lg border">
-              <h4 className="font-semibold mb-2">Résultat :</h4>
-              <pre className="text-sm overflow-auto">
-                {JSON.stringify(result, null, 2)}
-              </pre>
+
+        {result ? (
+          <div className="ds-stack ds-stack--gap-3">
+            <div className="ds-card ds-card--flat">
+              <div className="ds-card__body">
+                <p className="ds-label">Résultat complet</p>
+                <pre className="ds-code" style={{ overflow: 'auto' }}>{JSON.stringify(result, null, 2)}</pre>
+              </div>
             </div>
-            
-            {result.title && (
-              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                <h5 className="font-semibold text-green-800 mb-2">✅ Titre extrait :</h5>
-                <p className="text-green-700">{result.title}</p>
-              </div>
-            )}
-            
-            {result.price && (
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <h5 className="font-semibold text-blue-800 mb-2">💰 Prix extrait :</h5>
-                <p className="text-blue-700 text-lg font-bold">{result.price} €</p>
-              </div>
-            )}
-            
-            {result.image && (
-              <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                <h5 className="font-semibold text-purple-800 mb-2">🖼️ Image extraite :</h5>
-                <div className="flex items-center gap-4">
-                  <Image 
-                    src={result.image} 
-                    alt="Image du produit" 
-                    width={80}
-                    height={80}
-                    className="w-20 h-20 object-cover rounded-lg border"
-                    unoptimized
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                  <p className="text-purple-700 text-sm break-all">{result.image}</p>
+
+            {result.title ? (
+              <div className="ds-alert ds-alert--success" role="status">
+                <span className="ds-alert__icon" aria-hidden="true">✓</span>
+                <div className="ds-alert__content">
+                  <p className="ds-alert__title">Titre extrait</p>
+                  <p className="ds-alert__message">{result.title}</p>
                 </div>
               </div>
-            )}
-            
-            {result.description && (
-              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <h5 className="font-semibold text-yellow-800 mb-2">📝 Description extraite :</h5>
-                <p className="text-yellow-700 text-sm">{result.description}</p>
+            ) : null}
+
+            {result.price ? (
+              <div className="ds-alert ds-alert--info" role="status">
+                <span className="ds-alert__icon" aria-hidden="true">€</span>
+                <div className="ds-alert__content">
+                  <p className="ds-alert__title">Prix extrait</p>
+                  <p className="ds-alert__message">{result.price} €</p>
+                </div>
               </div>
-            )}
-            
-            {!result.title && !result.price && !result.image && !result.description && (
-              <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                <h5 className="font-semibold text-red-800 mb-2">❌ Aucune donnée extraite</h5>
-                <p className="text-red-700">Le site pourrait bloquer le scraping ou utiliser des techniques anti-bot.</p>
+            ) : null}
+
+            {result.image ? (
+              <div className="ds-alert ds-alert--info">
+                <span className="ds-alert__icon" aria-hidden="true">▣</span>
+                <div className="ds-alert__content">
+                  <p className="ds-alert__title">Image extraite</p>
+                  <div className="ds-cluster">
+                    <Image
+                      src={result.image}
+                      alt="Image du produit"
+                      width={80}
+                      height={80}
+                      className="h-20 w-20 rounded object-cover"
+                      unoptimized
+                      onError={(event) => { event.currentTarget.style.display = 'none' }}
+                    />
+                    <p className="ds-alert__message break-all">{result.image}</p>
+                  </div>
+                </div>
               </div>
-            )}
+            ) : null}
+
+            {result.description ? (
+              <div className="ds-alert ds-alert--warning">
+                <span className="ds-alert__icon" aria-hidden="true">≡</span>
+                <div className="ds-alert__content">
+                  <p className="ds-alert__title">Description extraite</p>
+                  <p className="ds-alert__message">{result.description}</p>
+                </div>
+              </div>
+            ) : null}
+
+            {!result.title && !result.price && !result.image && !result.description ? (
+              <div className="ds-alert ds-alert--danger" role="alert">
+                <span className="ds-alert__icon" aria-hidden="true">!</span>
+                <div className="ds-alert__content">
+                  <p className="ds-alert__title">Aucune donnée extraite</p>
+                  <p className="ds-alert__message">Le site peut bloquer le scraping ou utiliser des techniques anti-bot.</p>
+                </div>
+              </div>
+            ) : null}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
-  );
+  )
 }

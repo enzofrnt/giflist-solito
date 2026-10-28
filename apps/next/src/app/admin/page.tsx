@@ -1,8 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FlickeringGrid } from 'app/components/FlickeringGrid';
+import Link from 'next/link';
 import AlertModal from '@/components/AlertModal';
 import ScrapingTest from '@/components/ScrapingTest';
 import AmazonDebug from '@/components/AmazonDebug';
@@ -24,6 +23,54 @@ type Gift = {
   reservedByName?: string | null;
 };
 
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+    </svg>
+  );
+}
+
+function GiftIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+    </svg>
+  );
+}
+
+function PencilIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg>
+  );
+}
+
+function UndoIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3a4 4 0 118 0v4m-4 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 12a2 2 0 11-4 0 2 2 0 014 0zm0 0c0 1.306.835 2.417 2 2.83" />
+    </svg>
+  );
+}
+
+function ExternalIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+    </svg>
+  );
+}
+
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +87,7 @@ export default function AdminPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
   const [isUnreserving, setIsUnreserving] = useState<number | null>(null);
-  const router = useRouter();
+  const [loginError, setLoginError] = useState('');
   const { alert, showSuccess, showError, showConfirm, hideAlert } = useAlert();
 
   const fetchGifts = async () => {
@@ -72,10 +119,11 @@ export default function AdminPage() {
 
     if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
       localStorage.setItem('admin_authenticated', 'true');
+      setLoginError('');
       setIsAuthenticated(true);
       fetchGifts();
     } else {
-      showError('Erreur', 'Identifiants incorrects');
+      setLoginError('Identifiants incorrects. Vérifiez votre nom d’utilisateur et votre mot de passe.');
     }
   };
 
@@ -218,7 +266,7 @@ export default function AdminPage() {
       }
     } catch (error) {
       console.error('Erreur lors de l\'enregistrement:', error);
-      showError('Erreur', 'Erreur lors de l&apos;enregistrement du cadeau');
+      showError('Erreur', 'Erreur lors de l’enregistrement du cadeau');
     } finally {
       setIsSubmitting(false);
     }
@@ -226,93 +274,87 @@ export default function AdminPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 relative">
-        <div className="fixed inset-0 z-0">
-          <FlickeringGrid
-            style={{ width: '100%', height: '100%' }}
-            squareSize={3}
-            gridGap={8}
-            color="#9CA3AF"
-            maxOpacity={0.15}
-            flickerChance={0.05}
-          />
-        </div>
-        <div className="text-center relative z-10">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <div className="text-gray-600">Chargement...</div>
-        </div>
+      <div className="ds-page">
+        <main className="ds-page__main">
+          <div className="ds-empty" role="status" aria-live="polite">
+            <span className="ds-empty__icon">
+              <span className="ds-spinner" aria-hidden="true" />
+            </span>
+            <p className="ds-empty__title">Chargement de l’administration…</p>
+            <p className="ds-empty__message">Vérification de votre accès en cours.</p>
+          </div>
+        </main>
       </div>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 relative">
-        <div className="fixed inset-0 z-0">
-          <FlickeringGrid
-            style={{ width: '100%', height: '100%' }}
-            squareSize={3}
-            gridGap={8}
-            color="#9CA3AF"
-            maxOpacity={0.15}
-            flickerChance={0.05}
-          />
-        </div>
-        <div className="max-w-md w-full mx-4 relative z-10">
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900">Connexion Admin</h1>
-              <p className="text-gray-600 mt-2">Accédez à l&apos;administration des cadeaux</p>
+      <div className="ds-auth">
+        <div className="ds-auth__card">
+          <div className="ds-auth__header">
+            <span className="ds-avatar ds-avatar--lg" aria-hidden="true">
+              <LockIcon />
+            </span>
+            <h1 className="ds-auth__title">Connexion administrateur</h1>
+            <p className="ds-auth__lead">Accédez à l’administration des cadeaux.</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="ds-auth__form">
+            <div className="ds-field">
+              <label htmlFor="username" className="ds-label">
+                Nom d’utilisateur <span className="ds-label__required">*</span>
+              </label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                required
+                autoComplete="username"
+                className="ds-input"
+                placeholder="Votre nom d’utilisateur"
+              />
             </div>
-            
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                  Nom d&apos;utilisateur
-                </label>
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900 bg-white placeholder-gray-500"
-                  placeholder="Entrez votre nom d'utilisateur"
-                />
+
+            <div className="ds-field">
+              <label htmlFor="password" className="ds-label">
+                Mot de passe <span className="ds-label__required">*</span>
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                required
+                autoComplete="current-password"
+                className="ds-input"
+                placeholder="Votre mot de passe"
+              />
+            </div>
+
+            {loginError ? (
+              <div className="ds-alert ds-alert--danger" role="alert">
+                <span className="ds-alert__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <circle cx="12" cy="12" r="9" />
+                    <path strokeLinecap="round" d="M12 8v4m0 3.5h.01" />
+                  </svg>
+                </span>
+                <div className="ds-alert__content">
+                  <p className="ds-alert__title">Identifiants incorrects</p>
+                  <p className="ds-alert__message">{loginError}</p>
+                </div>
               </div>
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Mot de passe
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900 bg-white placeholder-gray-500"
-                  placeholder="Entrez votre mot de passe"
-                />
-              </div>
-              <div className="space-y-3">
-                <button
-                  type="submit"
-                  className="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                >
-                  Se connecter
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push('/')}
-                  className="w-full py-3 px-4 text-gray-700 bg-gray-100 font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
-                >
-                  ← Retour à la liste publique
-                </button>
-              </div>
-            </form>
+            ) : null}
+
+            <button type="submit" className="ds-btn ds-btn--primary ds-btn--lg ds-btn--block">
+              Se connecter
+            </button>
+          </form>
+
+          <div className="ds-auth__footer">
+            <Link href="/" className="ds-btn ds-btn--secondary ds-btn--block">
+              Retour à la liste publique
+            </Link>
           </div>
         </div>
       </div>
@@ -320,345 +362,358 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 relative">
-      {/* Arrière-plan FlickeringGrid */}
-      <div className="fixed inset-0 z-0">
-        <FlickeringGrid
-          style={{ width: '100%', height: '100%' }}
-          squareSize={3}
-          gridGap={8}
-          color="#9CA3AF"
-          maxOpacity={0.15}
-          flickerChance={0.05}
-        />
-      </div>
-      
-      {/* Header */}
-      <div className="bg-white/90 backdrop-blur-sm shadow-sm border-b border-gray-200 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-            <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Administration des cadeaux</h1>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              <button
-                onClick={() => router.push('/')}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Voir la liste publique
-              </button>
-              <button
-                onClick={() => setShowForm(true)}
-                className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                + Nouveau cadeau
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-              >
-                Déconnexion
-              </button>
-            </div>
+    <div className="ds-page">
+      <main className="ds-page__main ds-stack ds-stack--gap-6">
+        <header className="ds-page-header">
+          <div className="ds-page-header__copy">
+            <p className="ds-page-kicker">Espace administrateur</p>
+            <h1 className="ds-page-title">Administration des cadeaux</h1>
+            <p className="ds-page-subtitle">
+              Ajoutez, modifiez et retirez les cadeaux de votre liste. Les changements sont visibles
+              immédiatement sur la liste publique.
+            </p>
           </div>
-        </div>
-      </div>
+          <div className="ds-page-actions">
+            <Link href="/" className="ds-btn ds-btn--secondary">
+              Voir la liste publique
+            </Link>
+            <button type="button" onClick={handleLogout} className="ds-btn ds-btn--ghost">
+              Déconnexion
+            </button>
+          </div>
+        </header>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
-        {/* Test de Scraping */}
-        <div className="mb-8">
-          <ScrapingTest />
-        </div>
-        
-        {/* Debug Amazon */}
-        <div className="mb-8">
-          <AmazonDebug />
-        </div>
+        {/* Outils de développement, repliés par défaut. */}
+        <details className="ds-card" style={{ marginBottom: 'var(--ds-space-6)' }}>
+          <summary className="ds-card__header" style={{ cursor: 'pointer' }}>
+            <span className="ds-card__title">Outils de développement</span>
+          </summary>
+          <div className="ds-card__body">
+            <ScrapingTest />
+            <AmazonDebug />
+          </div>
+        </details>
+
         {showForm ? (
           /* Formulaire */
-          <div className="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-4 sm:p-8">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6 sm:mb-8">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-                {editingGift ? 'Modifier le cadeau' : 'Ajouter un nouveau cadeau'}
-              </h2>
-              <button
-                onClick={resetForm}
-                className="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors w-full sm:w-auto"
-              >
-                Annuler
-              </button>
+          <section className="ds-card" aria-labelledby="admin-form-title">
+            <div className="ds-card__header">
+              <div>
+                <h2 className="ds-card__title" id="admin-form-title">
+                  {editingGift ? 'Modifier le cadeau' : 'Ajouter un nouveau cadeau'}
+                </h2>
+                <p className="ds-card__subtitle">
+                  {editingGift
+                    ? 'Mettez à jour les informations du cadeau sélectionné.'
+                    : 'Renseignez les informations du cadeau à ajouter à votre liste.'}
+                </p>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                <div>
-                  <label htmlFor="title" className="block text-sm font-bold text-gray-800 mb-3">
-                    Titre du cadeau *
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    required
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 placeholder-gray-500"
-                    placeholder="Ex: PlayStation 5"
-                  />
+            <form onSubmit={handleSubmit}>
+              <div className="ds-card__body">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="ds-field">
+                    <label htmlFor="title" className="ds-label">
+                      Titre du cadeau <span className="ds-label__required">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="title"
+                      name="title"
+                      required
+                      value={formData.title}
+                      onChange={handleInputChange}
+                      className="ds-input"
+                      placeholder="Ex : PlayStation 5"
+                    />
+                  </div>
+
+                  <div className="ds-field">
+                    <label htmlFor="price" className="ds-label">
+                      Prix (€)
+                    </label>
+                    <input
+                      type="number"
+                      id="price"
+                      name="price"
+                      step="0.01"
+                      inputMode="decimal"
+                      value={formData.price}
+                      onChange={handleInputChange}
+                      aria-describedby="price-hint"
+                      className="ds-input"
+                      placeholder="299.99"
+                    />
+                    <p className="ds-hint" id="price-hint">
+                      Facultatif, en euros.
+                    </p>
+                  </div>
                 </div>
 
-                <div>
-                  <label htmlFor="price" className="block text-sm font-bold text-gray-800 mb-3">
-                    Prix (€)
+                <div className="ds-field">
+                  <label htmlFor="url" className="ds-label">
+                    URL du produit
                   </label>
                   <input
-                    type="number"
-                    id="price"
-                    name="price"
-                    step="0.01"
-                    value={formData.price}
+                    type="url"
+                    id="url"
+                    name="url"
+                    value={formData.url}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 placeholder-gray-500"
-                    placeholder="299.99"
+                    aria-describedby="url-hint"
+                    className="ds-input"
+                    placeholder="https://example.com/produit"
+                  />
+                  <p className="ds-hint" id="url-hint">
+                    Lien vers la fiche produit, utilisé par le bouton « Voir le produit ».
+                  </p>
+                </div>
+
+                <div className="ds-field">
+                  <label htmlFor="image" className="ds-label">
+                    URL de l’image
+                  </label>
+                  <input
+                    type="url"
+                    id="image"
+                    name="image"
+                    value={formData.image}
+                    onChange={handleInputChange}
+                    aria-describedby="image-hint"
+                    className="ds-input"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  <p className="ds-hint" id="image-hint">
+                    Lien direct vers une image (facultatif).
+                  </p>
+                </div>
+
+                <div className="ds-field">
+                  <label htmlFor="description" className="ds-label">
+                    Description
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    rows={4}
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    className="ds-textarea"
+                    placeholder="Informations supplémentaires…"
                   />
                 </div>
               </div>
 
-              <div>
-                <label htmlFor="url" className="block text-sm font-bold text-gray-800 mb-3">
-                  URL du produit
-                </label>
-                <input
-                  type="url"
-                  id="url"
-                  name="url"
-                  value={formData.url}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 placeholder-gray-500"
-                  placeholder="https://example.com/produit"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="image" className="block text-sm font-bold text-gray-800 mb-3">
-                  URL de l&apos;image
-                </label>
-                <input
-                  type="url"
-                  id="image"
-                  name="image"
-                  value={formData.image}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 placeholder-gray-500"
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="description" className="block text-sm font-bold text-gray-800 mb-3">
-                  Description
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  rows={4}
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 placeholder-gray-500 resize-vertical"
-                  placeholder="Informations supplémentaires..."
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-4 pt-4 border-t border-gray-200">
+              <div className="ds-card__footer">
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors w-full sm:w-auto"
+                  className="ds-btn ds-btn--secondary"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-3 text-sm font-semibold text-white bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors w-full sm:w-auto"
+                  aria-busy={isSubmitting ? true : undefined}
+                  className={isSubmitting ? 'ds-btn ds-btn--primary ds-btn--loading' : 'ds-btn ds-btn--primary'}
                 >
-                  {isSubmitting ? 'Enregistrement...' : (editingGift ? 'Modifier' : 'Ajouter')}
+                  {isSubmitting ? (
+                    <>
+                      <span className="ds-btn__spinner" aria-hidden="true" />
+                      <span className="ds-btn__label">Enregistrement…</span>
+                    </>
+                  ) : (
+                    <span className="ds-btn__label">
+                      {editingGift ? 'Enregistrer les modifications' : 'Ajouter le cadeau'}
+                    </span>
+                  )}
                 </button>
               </div>
             </form>
-          </div>
+          </section>
         ) : (
           /* Liste des cadeaux */
-          <div>
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900">
-                Liste des cadeaux ({gifts.length})
-              </h2>
-            </div>
-            
-            {gifts.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun cadeau trouvé</h3>
-                <p className="text-gray-500 mb-6">Commencez par ajouter votre premier cadeau</p>
+          <section aria-labelledby="admin-list-title">
+            <div className="ds-toolbar">
+              <div className="ds-toolbar__group">
+                <h2 className="ds-h3" id="admin-list-title">
+                  Liste des cadeaux
+                </h2>
+                <span className="ds-badge ds-badge--neutral">{gifts.length}</span>
+              </div>
+              <div className="ds-toolbar__group">
                 <button
+                  type="button"
                   onClick={() => setShowForm(true)}
-                  className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="ds-btn ds-btn--primary"
                 >
-                  Ajouter le premier cadeau
+                  <span className="ds-btn__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m-7-7h14" />
+                    </svg>
+                  </span>
+                  <span className="ds-btn__label">Nouveau cadeau</span>
+                </button>
+              </div>
+            </div>
+
+            {gifts.length === 0 ? (
+              <div className="ds-empty">
+                <span className="ds-empty__icon">
+                  <GiftIcon />
+                </span>
+                <p className="ds-empty__title">Aucun cadeau pour le moment</p>
+                <p className="ds-empty__message">
+                  Commencez par ajouter votre premier cadeau à la liste.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowForm(true)}
+                  className="ds-btn ds-btn--primary"
+                >
+                  <span className="ds-btn__label">Ajouter le premier cadeau</span>
                 </button>
               </div>
             ) : (
-              <div className="grid gap-4 sm:gap-6">
-                {gifts.map(gift => (
-                  <div key={gift.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
-                    {/* Image et titre - Mobile first */}
-                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 p-4 sm:p-6">
-                      {/* Image centrée sur mobile */}
-                      <div className="flex-shrink-0 w-full sm:w-auto flex justify-center">
+              <div className="ds-table" role="table" aria-label="Cadeaux de la liste">
+                <div className="ds-table__row hidden md:grid" role="row">
+                  <span role="columnheader">Cadeau</span>
+                  <span role="columnheader">Prix et statut</span>
+                  <span role="columnheader">Actions</span>
+                </div>
+
+                {gifts.map((gift, index) => (
+                  <div
+                    key={gift.id}
+                    role="row"
+                    className={`ds-table__row grid-cols-1 gap-3 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_auto] md:items-center${
+                      index === 0 ? ' border-t-0 md:border-t' : ''
+                    }`}
+                  >
+                    <div role="cell" className="flex min-w-0 items-start gap-3">
+                      <span className="ds-avatar ds-avatar--lg">
                         {gift.image ? (
-                          <div className="w-32 h-24 sm:w-24 sm:h-20 rounded-xl border-2 border-gray-200 overflow-hidden shadow-sm">
-                            <Image 
-                              src={gift.image} 
-                              alt={gift.title} 
-                              width={128}
-                              height={96}
-                              className="w-full h-full object-contain bg-gray-50" 
-                            />
-                          </div>
+                          <Image
+                            src={gift.image}
+                            alt=""
+                            width={64}
+                            height={64}
+                            className="h-full w-full object-cover"
+                          />
                         ) : (
-                          <div className="w-32 h-24 sm:w-24 sm:h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl border-2 border-gray-200 flex items-center justify-center shadow-sm">
-                            <svg className="w-8 h-8 sm:w-6 sm:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                            </svg>
-                          </div>
+                          <GiftIcon className="h-6 w-6" />
                         )}
-                      </div>
-                      
-                      {/* Contenu principal */}
-                      <div className="flex-1 min-w-0 w-full text-center sm:text-left">
-                        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">{gift.title}</h3>
-                        
-                        {/* Prix et statut */}
-                        <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2 mb-3">
-                          {gift.price && (
-                            <span className="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200">
-                              {gift.price} €
-                            </span>
-                          )}
-                          <span className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium ${
-                            gift.status === 'available' 
-                              ? 'bg-green-50 text-green-700 border border-green-200' 
-                              : 'bg-orange-50 text-orange-700 border border-orange-200'
-                          }`}>
-                            {gift.status === 'available' ? (
-                              <>
-                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                Disponible
-                              </>
-                            ) : (
-                              <>
-                                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                                Réservé
-                              </>
-                            )}
-                          </span>
-                        </div>
-                        
-                        {/* Description */}
-                        {gift.description && (
-                          <p className="text-sm text-gray-600 mb-4 leading-relaxed">{gift.description}</p>
-                        )}
-                        
-                        {/* Lien produit */}
-                        {gift.url && (
-                          <a 
-                            href={gift.url} 
-                            target="_blank" 
+                      </span>
+
+                      <div className="min-w-0 break-words">
+                        <h3 className="ds-h4">{gift.title}</h3>
+                        {gift.description ? (
+                          <p className="ds-body-sm mt-1">{gift.description}</p>
+                        ) : null}
+                        {gift.url ? (
+                          <a
+                            href={gift.url}
+                            target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-sm hover:shadow-md w-full sm:w-auto"
+                            className="ds-link mt-2 inline-flex items-center gap-1"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
                             Voir le produit
+                            <ExternalIcon />
                           </a>
-                        )}
+                        ) : null}
                       </div>
                     </div>
-                    
-                    {/* Actions - Séparées par une bordure */}
-                    <div className="border-t border-gray-100 p-4 sm:p-6 pt-4">
-                      <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+
+                    <div role="cell" className="ds-cluster">
+                      {gift.price ? (
+                        <span className="ds-badge ds-badge--primary">{gift.price} €</span>
+                      ) : null}
+                      <span
+                        className={`ds-badge ds-badge--dot ${
+                          gift.status === 'available' ? 'ds-badge--success' : 'ds-badge--warning'
+                        }`}
+                      >
+                        {gift.status === 'available' ? 'Disponible' : 'Réservé'}
+                      </span>
+                    </div>
+
+                    <div role="cell" className="ds-cluster md:justify-end">
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(gift)}
+                        className="ds-btn ds-btn--secondary"
+                      >
+                        <span className="ds-btn__icon" aria-hidden="true">
+                          <PencilIcon />
+                        </span>
+                        <span className="ds-btn__label">Modifier</span>
+                      </button>
+
+                      {gift.status === 'reserved' ? (
                         <button
-                          onClick={() => handleEdit(gift)}
-                          className="inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors w-full sm:w-auto"
+                          type="button"
+                          onClick={() => handleUnreserve(gift.id)}
+                          disabled={isUnreserving === gift.id}
+                          aria-busy={isUnreserving === gift.id ? true : undefined}
+                          aria-label={`Retirer la réservation du cadeau « ${gift.title} »`}
+                          className={
+                            isUnreserving === gift.id
+                              ? 'ds-btn ds-btn--ghost ds-btn--loading'
+                              : 'ds-btn ds-btn--ghost'
+                          }
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                          Modifier
-                        </button>
-                        
-                        {gift.status === 'reserved' && (
-                          <button
-                            onClick={() => handleUnreserve(gift.id)}
-                            disabled={isUnreserving === gift.id}
-                            className="inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-orange-700 bg-orange-50 rounded-lg hover:bg-orange-100 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors w-full sm:w-auto"
-                          >
-                            {isUnreserving === gift.id ? (
-                              <>
-                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Retrait...
-                              </>
-                            ) : (
-                              <>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a4 4 0 118 0v4m-4 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 12a2 2 0 11-4 0 2 2 0 014 0zm0 0c0 1.306.835 2.417 2 2.83M9 12a2 2 0 11-4 0 2 2 0 014 0zm0 0c0-1.306.835-2.417 2-2.83M9 12a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                Retirer la réservation
-                              </>
-                            )}
-                          </button>
-                        )}
-                        
-                        <button
-                          onClick={() => handleDelete(gift.id)}
-                          disabled={isDeleting === gift.id}
-                          className="inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-red-700 bg-red-50 rounded-lg hover:bg-red-100 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors w-full sm:w-auto"
-                        >
-                          {isDeleting === gift.id ? (
+                          {isUnreserving === gift.id ? (
                             <>
-                              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
-                              Suppression...
+                              <span className="ds-btn__spinner" aria-hidden="true" />
+                              <span className="ds-btn__label">Retrait…</span>
                             </>
                           ) : (
                             <>
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                              Supprimer
+                              <span className="ds-btn__icon" aria-hidden="true">
+                                <UndoIcon />
+                              </span>
+                              <span className="ds-btn__label">Retirer</span>
                             </>
                           )}
                         </button>
-                      </div>
+                      ) : null}
+
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(gift.id)}
+                        disabled={isDeleting === gift.id}
+                        aria-busy={isDeleting === gift.id ? true : undefined}
+                        aria-label={`Supprimer le cadeau « ${gift.title} »`}
+                        className={
+                          isDeleting === gift.id
+                            ? 'ds-btn ds-btn--danger ds-btn--loading'
+                            : 'ds-btn ds-btn--danger'
+                        }
+                      >
+                        {isDeleting === gift.id ? (
+                          <>
+                            <span className="ds-btn__spinner" aria-hidden="true" />
+                            <span className="ds-btn__label">Suppression…</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="ds-btn__icon" aria-hidden="true">
+                              <TrashIcon />
+                            </span>
+                            <span className="ds-btn__label">Supprimer</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </section>
         )}
-      </div>
+      </main>
 
       {/* Alert Modal */}
       {alert && (

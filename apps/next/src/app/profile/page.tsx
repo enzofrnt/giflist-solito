@@ -17,10 +17,10 @@ export default function ProfilePage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement...</p>
+      <div className="ds-page">
+        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
+          <span className="ds-spinner" role="status" aria-label="Chargement du compte" />
+          <p className="ds-body-sm ds-text-muted">Chargement…</p>
         </div>
       </div>
     )

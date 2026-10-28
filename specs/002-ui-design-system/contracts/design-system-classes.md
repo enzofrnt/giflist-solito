@@ -99,6 +99,21 @@ Variants: `--info`, `--success`, `--warning`, `--danger`. Rules: use `role="aler
 
 Levels: `0` Très faible (danger), `1` Faible (warning), `2` Moyen (caution), `3` Fort (success), `4` Très fort (strong). Rules derive from `getPasswordRules`; labels and messages are stable.
 
+## Application shell (Phase 2)
+
+| Class | Purpose |
+|-------|---------|
+| `.ds-page`, `.ds-page__main` | Application page canvas + centered content frame |
+| `.ds-page-header`, `.ds-page-header__copy`, `.ds-page-title`, `.ds-page-subtitle`, `.ds-page-kicker`, `.ds-page-actions` | Page title block + actions |
+| `.ds-toolbar`, `.ds-toolbar__group` | Row of filters/actions above content |
+| `.ds-header`, `.ds-header__inner`, `.ds-header__brand`, `.ds-header__mark`, `.ds-header__wordmark`, `.ds-header__nav`, `.ds-header__link`, `.ds-header__actions` | Web navigation shell |
+| `.ds-mobile-menu`, `.ds-mobile-menu__panel`, `.ds-mobile-menu__link`, `.ds-mobile-menu__footer` | Mobile navigation panel |
+| `.ds-auth`, `.ds-auth__card`, `.ds-auth__header`, `.ds-auth__logo`, `.ds-auth__title`, `.ds-auth__lead`, `.ds-auth__form`, `.ds-auth__footer`, `.ds-auth__links` | Auth / recovery / passkey layout |
+| `.ds-modal`, `.ds-modal__overlay`, `.ds-modal__panel` (+ `--sm`/`--lg`), `.ds-modal__header`, `.ds-modal__title`, `.ds-modal__description`, `.ds-modal__body`, `.ds-modal__footer`, `.ds-modal__close` | Accessible dialogs via `Modal` |
+| `.ds-icon-btn`, `.ds-spinner` | Icon button and loading indicator |
+| `.ds-list`, `.ds-list-item`, `.ds-table`, `.ds-table__row` | Dense lists / admin table |
+| `.ds-home`, `.ds-home__hero`, `.ds-home__title`, `.ds-home__lead`, `.ds-home__actions`, `.ds-home__art`, `.ds-home__features`, `.ds-home__feature`, `.ds-home__strip` | Marketing/home and public-list hero |
+
 ## Layout helpers
 
 | Class | Purpose |

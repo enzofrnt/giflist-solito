@@ -1,7 +1,7 @@
 'use client';
 
 import QRCodeStyling from 'qr-code-styling';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 interface QRCodeDisplayProps {
   shareCode: string;
@@ -15,32 +15,45 @@ interface QRCodeRef extends QRCodeStyling {
   pngContainer?: HTMLDivElement;
 }
 
+/** Reads a design token so the QR encoder stays in sync with the palette (no raw hex here). */
+function readToken(name: string): string | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return value || undefined;
+}
+
 export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appareil mobile", className = "", listImage }: QRCodeDisplayProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
   const qrCodeRef = useRef<QRCodeRef | null>(null);
+  const helpId = useId();
   const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/list/${shareCode}` : '';
 
   useEffect(() => {
     if (shareCode && qrRef.current) {
       setIsGenerating(true);
-      
+
       // Utiliser l'image de la liste ou le logo par défaut
       const getCenterImage = () => {
         if (listImage && listImage.trim()) {
           return listImage; // Utiliser l'image de la liste si elle existe
         }
-        
+
         // Sinon, utiliser le logo par défaut
         return '/logo.webp';
       };
-      
+
+      // Couleurs issues des tokens du design system (aucune valeur brute ici)
+      const ink = readToken('--ds-color-text');
+      const primary = readToken('--ds-color-primary');
+      const surface = readToken('--ds-color-surface');
+
       // Créer le QR code avec des modules arrondis (SVG pour affichage)
       const qrCode = new QRCodeStyling({
-        width: 256,
-        height: 256,
+        width: 224,
+        height: 224,
         type: "svg",
         data: `${window.location.origin}/list/${shareCode}`,
         image: getCenterImage(),
@@ -51,18 +64,18 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
           errorCorrectionLevel: 'M'
         },
         dotsOptions: {
-          color: '#1f2937', // Gris foncé pour les modules
+          color: ink, // Modules
           type: 'extra-rounded' // Modules très arrondis !
         },
         backgroundOptions: {
-          color: '#ffffff',
+          color: surface,
         },
         cornersSquareOptions: {
-          color: '#3b82f6', // Bleu pour les carrés de position (angles)
+          color: primary, // Carrés de position (angles)
           type: 'extra-rounded' // Coins des carrés de position très arrondis
         },
         cornersDotOptions: {
-          color: '#3b82f6', // Bleu pour les points des carrés de position
+          color: primary, // Points des carrés de position
           type: 'extra-rounded' // Points des coins très arrondis
         },
         imageOptions: {
@@ -87,18 +100,18 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
           errorCorrectionLevel: 'M'
         },
         dotsOptions: {
-          color: '#1f2937',
+          color: ink,
           type: 'extra-rounded'
         },
         backgroundOptions: {
-          color: '#ffffff',
+          color: surface,
         },
         cornersSquareOptions: {
-          color: '#3b82f6',
+          color: primary,
           type: 'extra-rounded'
         },
         cornersDotOptions: {
-          color: '#3b82f6',
+          color: primary,
           type: 'extra-rounded'
         },
         imageOptions: {
@@ -115,7 +128,7 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
       tempContainer.style.width = `${pngSize}px`;
       tempContainer.style.height = `${pngSize}px`;
       document.body.appendChild(tempContainer);
-      
+
       // Rendre le canvas PNG dans le conteneur temporaire
       qrCodePNG.append(tempContainer);
 
@@ -127,11 +140,11 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
       // Afficher le nouveau QR code SVG
       qrCode.append(qrRef.current);
       qrCodeRef.current = qrCode as QRCodeRef;
-      
+
       // Stocker la version PNG et le conteneur temporaire
       qrCodeRef.current.pngVersion = qrCodePNG;
       qrCodeRef.current.pngContainer = tempContainer;
-      
+
       setIsGenerating(false);
     }
 
@@ -157,7 +170,7 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
       const qrRef = qrCodeRef.current as QRCodeRef | null;
       const pngVersion = qrRef?.pngVersion;
       const pngContainer = qrRef?.pngContainer;
-      
+
       if (!pngVersion || !pngContainer) {
         console.error('Version PNG non disponible');
         return;
@@ -215,84 +228,80 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
   }
 
   return (
-    <div className={`text-center ${className}`}>
-      <h4 className="text-sm font-medium text-gray-700 mb-4">{title}</h4>
-      
-      {isGenerating ? (
-        <div className="inline-block">
-          <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
-            <div className="w-64 h-64 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    <div className={className}>
+      <div className="ds-stack ds-stack--gap-3 items-center text-center">
+        <h4 className="ds-card__title">{title}</h4>
+
+        {isGenerating ? (
+          <div className="ds-card ds-card--flat w-full" role="status" aria-live="polite">
+            <div className="ds-card__body items-center justify-items-center">
+              <span className="ds-spinner" aria-hidden="true" />
+              <p className="ds-hint">Génération du QR code…</p>
             </div>
           </div>
-        </div>
-      ) : (
-        <div className="inline-block">
-          {/* Conteneur simple et épuré */}
-          <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
-            {/* QR Code avec modules arrondis natifs */}
-            <div className="relative w-64 h-64 rounded-lg overflow-hidden flex items-center justify-center">
-              <div ref={qrRef} className="w-full h-full" />
-            </div>
-          </div>
-          
-          {/* Instructions simples */}
-          <div className="mt-3 text-sm text-gray-500">
-            📱 Pointez votre appareil photo vers le code
-          </div>
+        ) : (
+          <div className="ds-card ds-card--flat w-full max-w-full">
+            <div className="ds-card__body items-center justify-items-center">
+              <div ref={qrRef} className="h-56 w-56 max-w-full" aria-label="QR code de partage de la liste" aria-describedby={helpId} role="img" />
+              <p className="ds-hint" id={helpId}>📱 Pointez votre appareil photo vers le code</p>
 
-          {/* Boutons de téléchargement et partage */}
-          <div className="mt-4 flex gap-2 justify-center">
-            <button
-              onClick={handleDownload}
-              disabled={isDownloading || isGenerating}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isDownloading ? (
-                <>
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Téléchargement...
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Télécharger
-                </>
-              )}
-            </button>
+              <div className="ds-cluster justify-center">
+                <button
+                  type="button"
+                  onClick={handleDownload}
+                  disabled={isDownloading || isGenerating}
+                  aria-busy={isDownloading || undefined}
+                  className="ds-btn ds-btn--secondary"
+                >
+                  {isDownloading ? (
+                    <>
+                      <span className="ds-spinner" aria-hidden="true" />
+                      Téléchargement…
+                    </>
+                  ) : (
+                    <>
+                      <span className="ds-btn__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                      </span>
+                      Télécharger
+                    </>
+                  )}
+                </button>
 
-            {canShare && (
-              <button
-                onClick={handleShare}
-                disabled={isSharing || isGenerating}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isSharing ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Partage...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                    Partager
-                  </>
+                {canShare && (
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    disabled={isSharing || isGenerating}
+                    aria-busy={isSharing || undefined}
+                    className="ds-btn ds-btn--primary"
+                  >
+                    {isSharing ? (
+                      <>
+                        <span className="ds-spinner" aria-hidden="true" />
+                        Partage…
+                      </>
+                    ) : (
+                      <>
+                        <span className="ds-btn__icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                          </svg>
+                        </span>
+                        Partager
+                      </>
+                    )}
+                  </button>
                 )}
-              </button>
-            )}
+              </div>
+
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
     </div>
   );
 }

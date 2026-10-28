@@ -1,9 +1,15 @@
+import type { ReactNode } from 'react'
+
 interface GiftStatusBadgeProps {
   status: 'available' | 'reserved'
   reservedByName?: string
   isSecret: boolean
   hasRevealed: boolean
   variant?: 'default' | 'public'
+}
+
+function Badge({ tone, children }: { tone: 'success' | 'warning' | 'neutral'; children: ReactNode }) {
+  return <span className={`ds-badge ds-badge--${tone} ds-badge--dot`}>{children}</span>
 }
 
 export default function GiftStatusBadge({
@@ -17,42 +23,23 @@ export default function GiftStatusBadge({
   if (isSecret && !hasRevealed) {
     if (variant === 'public') {
       // Sur la page publique, on affiche toujours "Disponible" quand masqué
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium bg-green-50 text-green-700 border border-green-200">
-          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full"></div>
-          Disponible
-        </span>
-      )
-    } else {
-      // Sur la page de modification, on affiche "Statut masqué"
-      return (
-        <span className="inline-flex items-center gap-1.5 text-xs px-2 py-1 sm:px-3 sm:py-1.5 rounded-full font-medium bg-gray-50 text-gray-600 border border-gray-200">
-          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full"></div>
-          Statut masqué
-        </span>
-      )
+      return <Badge tone="success">Disponible</Badge>
     }
+
+    // Sur la page de modification, on affiche "Statut masqué"
+    return <Badge tone="neutral">Statut masqué</Badge>
   }
 
   // Si la liste n'est pas secrète ou si les réservations sont révélées, afficher le vrai statut
   if (status === 'available') {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium bg-green-50 text-green-700 border border-green-200">
-        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full"></div>
-        Disponible
-      </span>
-    )
+    return <Badge tone="success">Disponible</Badge>
   }
 
-  // Statut réservé
+  const showName = hasRevealed && reservedByName && reservedByName !== 'Anonyme'
+
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium bg-orange-50 text-orange-700 border border-orange-200">
-      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-orange-500 rounded-full"></div>
-      Réservé
-      {hasRevealed && reservedByName && reservedByName !== 'Anonyme' && (
-        <span className="ml-1 text-xs">par {reservedByName}</span>
-      )}
-    </span>
+    <Badge tone="warning">
+      {showName ? `Réservé par ${reservedByName}` : 'Réservé'}
+    </Badge>
   )
 }
-

@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { Header } from 'app/components/Header'
+import { Header } from '@/components/Header'
 
 /**
  * Renders the product Header everywhere except on the design-system review

@@ -1,58 +1,46 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import PasswordInput from '@/components/PasswordInput';
-import { startAuthentication } from '@simplewebauthn/browser';
-import { setAuthToken } from 'app/lib/authStorage';
+import { useState } from 'react'
+import Link from 'next/link'
+import PasswordInput from '@/components/PasswordInput'
+import { AuthCard } from '@/components/AuthCard'
+import { startAuthentication } from '@simplewebauthn/browser'
+import { setAuthToken } from 'app/lib/authStorage'
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({ email: '', password: '' })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (loading) return;
-    
-    setLoading(true);
-    setError('');
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (loading) return
+
+    setLoading(true)
+    setError('')
 
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+      const data = await response.json()
 
       if (data.ok) {
-        // Sauvegarder le token
-        const { setAuthToken } = await import('app/lib/authStorage')
         const result = setAuthToken(data.token)
         if (result instanceof Promise) await result
-        // Rediriger vers la page des listes avec rechargement complet
-        // pour que le AuthContext détecte le token
         window.location.href = '/setup-passkey'
       } else {
-        setError(data.error || 'Une erreur est survenue');
+        setError(data.error || 'Une erreur est survenue')
       }
-    } catch (error) {
-      console.error('Erreur:', error);
-      setError('Une erreur est survenue');
+    } catch {
+      setError('Une erreur est survenue')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const loginWithPasskey = async () => {
     setLoading(true)
@@ -62,139 +50,101 @@ export default function LoginPage() {
       if (!optionsResponse.ok) throw new Error('options')
       const optionsJSON = await optionsResponse.json()
       const credential = await startAuthentication({ optionsJSON })
-      const response = await fetch('/api/auth/passkeys/login-verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(credential) })
+      const response = await fetch('/api/auth/passkeys/login-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credential),
+      })
       const data = await response.json()
       if (!response.ok || !data.ok) throw new Error('verification')
       await setAuthToken(data.token)
       window.location.href = '/dashboard'
     } catch {
       setError('Connexion par clé d’accès impossible ou annulée. Réessayez ou utilisez votre mot de passe.')
-    } finally { setLoading(false) }
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!loading) {
-      const form = e.currentTarget.closest('form') as HTMLFormElement;
-      if (form) {
-        form.requestSubmit();
-      }
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  };
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((previous) => ({ ...previous, [event.target.name]: event.target.value }))
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <div className="flex justify-center mb-4">
-            <Image
-              src="/logo.webp"
-              alt="Logo Liste de cadeaux"
-              width={64}
-              height={64}
-              className="rounded-full object-cover border-4 border-indigo-200 shadow-lg"
-            />
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900">
-            Connexion
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Connectez-vous à votre compte
-          </p>
+    <AuthCard
+      title="Connexion"
+      lead="Connectez-vous à votre compte pour retrouver vos listes."
+      footer={
+        <div className="ds-auth__links">
+          <Link href="/register" className="ds-link">Pas de compte ? Créez-en un</Link>
+          <Link href="/forgot-password" className="ds-link">Mot de passe oublié ?</Link>
+        </div>
+      }
+    >
+      <form onSubmit={handleSubmit} className="ds-stack ds-stack--gap-5">
+        <div className="ds-field">
+          <label htmlFor="email" className="ds-label">
+            Adresse e-mail <span className="ds-label__required">*</span>
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            value={formData.email}
+            onChange={handleInputChange}
+            className="ds-input"
+            placeholder="votre@email.com"
+            autoComplete="email"
+          />
         </div>
 
-        {/* Formulaire */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Adresse email <span className="text-red-500">*</span>
-                <span className="text-xs text-gray-500 ml-2 font-normal">(obligatoire)</span>
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleInputChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                placeholder="votre@email.com"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Mot de passe <span className="text-red-500">*</span>
-                <span className="text-xs text-gray-500 ml-2 font-normal">(obligatoire)</span>
-              </label>
-              <PasswordInput
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                placeholder="Votre mot de passe"
-                showStrength={false}
-                showGuide={false}
-                required={true}
-              />
-            </div>
-          </div>
-
-          <div className="text-right">
-            <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
-              Mot de passe oublié ?
-            </Link>
-          </div>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
-
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              onClick={handleButtonClick}
-              onTouchEnd={handleButtonClick}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] transition-colors cursor-pointer relative z-10"
-              style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
-            >
-              {loading ? 'Chargement...' : 'Se connecter'}
-            </button>
-          </div>
-
-          <button type="button" disabled={loading} onClick={loginWithPasskey}
-            className="w-full flex justify-center py-3 px-4 border border-blue-600 rounded-lg text-base font-medium text-blue-700 bg-white hover:bg-blue-50 disabled:opacity-50 min-h-[44px]">
-            Se connecter avec une clé d’accès
-          </button>
-
-          <div className="text-center">
-            <Link
-              href="/register"
-              className="text-sm text-blue-600 hover:text-blue-500"
-            >
-              Pas de compte ? Créez-en un
-            </Link>
-          </div>
-        </form>
-
-        {/* Footer */}
-        <div className="text-center text-xs text-gray-500">
-          <p>En continuant, vous acceptez nos conditions d&apos;utilisation</p>
+        <div className="ds-field">
+          <label htmlFor="password" className="ds-label">
+            Mot de passe <span className="ds-label__required">*</span>
+          </label>
+          <PasswordInput
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleInputChange}
+            placeholder="Votre mot de passe"
+            showStrength={false}
+            showGuide={false}
+            required
+            autoComplete="current-password"
+          />
         </div>
-      </div>
-    </div>
-  );
+
+        {error ? (
+          <div className="ds-alert ds-alert--danger" role="alert">
+            <span className="ds-alert__icon" aria-hidden="true">!</span>
+            <div className="ds-alert__content">
+              <p className="ds-alert__title">Connexion impossible</p>
+              <p className="ds-alert__message">{error}</p>
+            </div>
+          </div>
+        ) : null}
+
+        <button
+          type="submit"
+          className="ds-btn ds-btn--primary ds-btn--lg ds-btn--block"
+          disabled={loading}
+          aria-busy={loading || undefined}
+        >
+          {loading ? <span className="ds-spinner" aria-hidden="true" /> : null}
+          {loading ? 'Connexion…' : 'Se connecter'}
+        </button>
+
+        <button
+          type="button"
+          className="ds-btn ds-btn--secondary ds-btn--block"
+          disabled={loading}
+          onClick={loginWithPasskey}
+        >
+          Se connecter avec une clé d’accès
+        </button>
+      </form>
+    </AuthCard>
+  )
 }

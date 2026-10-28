@@ -82,7 +82,7 @@
 - [x] T044 Capture review screenshots at 1440px and 375px (Puppeteer + system Chrome) into `docs/design-system/screenshots/`; verify no console errors.
 - [x] T045 Review `git diff` for scope creep, secrets, and unintended edits to existing pages; confirm only root layout, `PasswordInput`, `globals.css` theme aliases, and new files changed.
 - [x] T046 Commit on `feat/ui-design-system`, push, open the Phase 1 PR with spec link, evidence, showcase URL, and the explicit "Phase 2 not started" statement.
-- [ ] T047 Record the owner's approval/rejection/change-request in `specs/002-ui-design-system/`; do not start Phase 2 before that.
+- [x] T047 Record the owner's approval/rejection/change-request in `specs/002-ui-design-system/`; do not start Phase 2 before that.
 
 ## Dependencies
 

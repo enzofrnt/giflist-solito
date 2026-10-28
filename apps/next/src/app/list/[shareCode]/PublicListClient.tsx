@@ -2,6 +2,7 @@
 
 import AlertModal from '@/components/AlertModal';
 import GiftStatusBadge from '@/components/GiftStatusBadge';
+import { Modal } from '@/components/Modal';
 import QRCodeDisplay from '@/components/QRCodeDisplay';
 import ReserveDialog, { type ReservePayload } from '@/components/ReserveDialog';
 import SecretModeToggle from '@/components/SecretModeToggle';
@@ -17,6 +18,22 @@ interface PublicListClientProps {
   shareCode: string;
 }
 
+function GiftIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+    </svg>
+  )
+}
+
+function ErrorIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 8v5M12 16.5h.01M10.3 3.9 2.6 17.2A1.8 1.8 0 0 0 4.2 20h15.6a1.8 1.8 0 0 0 1.6-2.8L13.7 3.9a1.9 1.9 0 0 0-3.4 0Z" />
+    </svg>
+  )
+}
+
 export default function PublicListClient({ shareCode }: PublicListClientProps) {
   const [giftList, setGiftList] = useState<GiftList | null>(null);
   const [gifts, setGifts] = useState<Gift[]>([]);
@@ -25,8 +42,9 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
   const [dialogFor, setDialogFor] = useState<Gift | null>(null);
   const [loadingId, setLoadingId] = useState<number | null>(null);
   const [cancellingId, setCancellingId] = useState<number | null>(null);
-  const [user, setUser] = useState<{ id: number; email: string } | null>(null);
+  const [user, setUser] = useState<{ id: number; email: string; name?: string } | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [shareFeedback, setShareFeedback] = useState<{ tone: 'success' | 'danger'; message: string } | null>(null);
   const [hasRevealed, setHasRevealed] = useState(false); // Par défaut, masquer les réservations sur liste secrète
   const router = useRouter();
   const { alert, showSuccess, showError, showConfirm, hideAlert } = useAlert();
@@ -67,23 +85,6 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
   // Pour les listes secrètes, les réservations sont toujours masquées par défaut
   // Le propriétaire peut les révéler en cliquant sur le bouton
   // Si la liste n'est pas secrète, hasRevealed n'a pas d'impact (on affiche toujours tout)
-
-  // Gestion de la touche Échap pour fermer la modal
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && showShareModal) {
-        setShowShareModal(false);
-      }
-    };
-
-    if (showShareModal) {
-      document.addEventListener('keydown', handleEscape);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [showShareModal]);
 
   async function submitReservation(giftId: number, payload: ReservePayload) {
     setLoadingId(giftId);
@@ -135,7 +136,7 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
           });
           const json = await res.json();
           if (!res.ok || !json.ok) {
-            showError('Erreur', json.error || 'Impossible d&apos;annuler la réservation');
+            showError('Erreur', json.error || 'Impossible d’annuler la réservation');
             return;
           }
           setGifts(g =>
@@ -144,7 +145,7 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
           showSuccess('Succès', 'Réservation annulée !');
         } catch (error) {
           console.error('Erreur annulation:', error);
-          showError('Erreur', 'Erreur lors de l&apos;annulation de la réservation');
+          showError('Erreur', 'Erreur lors de l’annulation de la réservation');
         } finally {
           setCancellingId(null);
         }
@@ -154,6 +155,7 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
 
   const handleShareClick = () => {
     if (giftList) {
+      setShareFeedback(null);
       setShowShareModal(true);
     }
   };
@@ -161,14 +163,14 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      showSuccess('Succès', 'Lien copié dans le presse-papiers !');
+      setShareFeedback({ tone: 'success', message: 'Lien copié dans le presse-papiers !' });
     } catch (error) {
       console.error('Erreur copie:', error);
-      showError('Erreur', 'Erreur lors de la copie');
+      setShareFeedback({ tone: 'danger', message: 'Copie impossible. Sélectionnez le lien puis copiez-le manuellement.' });
     }
   };
 
-  const isOwner = user && giftList && user.id === giftList.user.id;
+  const isOwner = Boolean(user && giftList && user.id === giftList.user.id);
 
   // Fonction pour déterminer où retourner selon le contexte
   const handleBackClick = () => {
@@ -195,13 +197,14 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
   };
 
   const backButtonText = getBackButtonText();
+  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/list/${shareCode}` : '';
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement...</p>
+      <div className="ds-page">
+        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
+          <span className="ds-spinner" role="status" aria-label="Chargement de la liste" />
+          <p className="ds-body-sm ds-text-muted">Chargement…</p>
         </div>
       </div>
     );
@@ -209,195 +212,172 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
+      <div className="ds-page">
+        <main className="ds-page__main">
+          <div className="ds-alert ds-alert--danger" role="alert">
+            <span className="ds-alert__icon"><ErrorIcon /></span>
+            <div className="ds-alert__content">
+              <p className="ds-alert__title">Liste inaccessible</p>
+              <p className="ds-alert__message">{error}</p>
+            </div>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Erreur</h3>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={() => router.push('/')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Retour à l&apos;accueil
-          </button>
-        </div>
+          <div className="ds-page-actions mt-6">
+            <button type="button" onClick={() => router.push('/')} className="ds-btn ds-btn--primary ds-btn--md">
+              Retour à l’accueil
+            </button>
+          </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-gradient-to-br from-blue-50 via-white to-purple-50 shadow-lg border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-          {/* Navigation */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <button
-              onClick={handleBackClick}
-              className="inline-flex items-center gap-2 px-3 py-2 text-sm sm:text-base text-gray-600 hover:text-gray-900 hover:bg-white/50 rounded-lg transition-all duration-200"
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span className="hidden sm:inline">{backButtonText.desktop}</span>
-              <span className="sm:hidden">{backButtonText.mobile}</span>
-            </button>
-            
-            {/* Boutons de gestion si propriétaire */}
-            {isOwner && (
-              <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                <button
-                  onClick={handleShareClick}
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 shadow-md hover:shadow-lg flex-1 sm:flex-none justify-center"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                  </svg>
-                  <span className="hidden sm:inline">Partager</span>
-                  <span className="sm:hidden">Partager</span>
-                </button>
-                <button
-                  onClick={() => router.push(`/manage/${giftList?.id}`)}
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg flex-1 sm:flex-none justify-center"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span className="hidden sm:inline">Gérer</span>
-                  <span className="sm:hidden">Gérer</span>
-                </button>
-                <button
-                  onClick={() => router.push('/dashboard')}
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg flex-1 sm:flex-none justify-center"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                  <span className="hidden sm:inline">Mes listes</span>
-                  <span className="sm:hidden">Listes</span>
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Contenu principal du header */}
-          <div className="text-center">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-              {giftList?.image ? (
-                <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-xl overflow-hidden shadow-lg border-2 border-white/70 flex-shrink-0">
-                  <Image 
-                    src={giftList.image} 
-                    alt={giftList.title} 
-                    fill
-                    className="object-cover"
-                    unoptimized
-                    priority
-                  />
-                </div>
-              ) : (
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+    <div className="ds-home">
+      <main className="ds-home__main">
+        <section className="ds-home__hero" aria-labelledby="list-title">
+          <div className="ds-home__copy">
+            <div className="ds-home__actions">
+              <button type="button" onClick={handleBackClick} className="ds-btn ds-btn--ghost ds-btn--md">
+                <svg className="ds-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
+                <span className="hidden sm:inline">{backButtonText.desktop}</span>
+                <span className="sm:hidden">{backButtonText.mobile}</span>
+              </button>
+            </div>
+
+            <span className="ds-overline">Liste de cadeaux</span>
+            <h1 className="ds-home__title break-words" id="list-title">{giftList?.title}</h1>
+            {giftList?.description ? (
+              <p className="ds-home__lead">{giftList.description}</p>
+            ) : null}
+
+            <div className="ds-home__meta">
+              <span>Par {giftList?.user.name?.trim() || 'un proche'}</span>
+              <span aria-hidden="true">·</span>
+              <span>{gifts.length} {gifts.length > 1 ? 'cadeaux' : 'cadeau'}</span>
+              <span aria-hidden="true">·</span>
+              <span>Partage sans compte</span>
+              {giftList?.secret ? (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span>Mode secret</span>
+                </>
+              ) : null}
+            </div>
+
+            {isOwner ? (
+              <div className="ds-home__actions">
+                <button type="button" onClick={handleShareClick} className="ds-btn ds-btn--primary ds-btn--md">
+                  <svg className="ds-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M8.6 13.4 15.4 9.2M8.6 10.6l6.8 4.2" />
+                    <circle cx="6" cy="12" r="2.5" />
+                    <circle cx="18" cy="7" r="2.5" />
+                    <circle cx="18" cy="17" r="2.5" />
+                  </svg>
+                  Partager
+                </button>
+                <button type="button" onClick={() => router.push(`/manage/${giftList?.id}`)} className="ds-btn ds-btn--secondary ds-btn--md">
+                  Gérer la liste
+                </button>
+                <button type="button" onClick={() => router.push('/dashboard')} className="ds-btn ds-btn--ghost ds-btn--md">
+                  Mes listes
+                </button>
               </div>
-              )}
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
-                {giftList?.title}
-              </h1>
-            </div>
-            
-            <div className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-white/70 backdrop-blur-sm rounded-full border border-gray-200 shadow-sm mb-4">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-xs sm:text-sm font-medium text-gray-700">
-                Liste créée par <span className="font-semibold text-gray-900">{giftList?.user.name || giftList?.user.email}</span>
-              </span>
-            </div>
-            
-            {giftList?.description && (
-              <p className="text-sm sm:text-base lg:text-lg text-gray-600 mb-4 sm:mb-6 max-w-2xl mx-auto leading-relaxed px-4">
-                {giftList.description}
-              </p>
+            ) : null}
+          </div>
+
+          <div className="ds-home__art">
+            {giftList?.image ? (
+              <Image
+                src={giftList.image}
+                alt={giftList.title}
+                width={640}
+                height={480}
+                className="h-auto w-full object-contain"
+                unoptimized
+                priority
+              />
+            ) : (
+              <Image
+                src="/logo.webp"
+                alt="Giftlist"
+                width={1536}
+                height={1024}
+                className="ds-home__logo"
+                priority
+              />
             )}
           </div>
-        </div>
-      </header>
+        </section>
 
-      {/* Contenu principal */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        {/* Bouton révéler pour liste secrète */}
-        {giftList?.secret && (
-          <SecretModeToggle
-            hasRevealed={hasRevealed}
-            onToggle={() => {
-              if (!hasRevealed) {
-                showConfirm(
-                  'Révéler les réservations',
-                  'Voulez-vous afficher l&apos;état des réservations ? Cela vous permettra de voir qui a réservé chaque cadeau.',
-                  () => {
-                    setHasRevealed(true);
-                  }
-                );
-              } else {
-                setHasRevealed(false);
-              }
-            }}
-            variant="public"
-          />
-        )}
+        {giftList?.secret ? (
+          <div className="mt-8">
+            <SecretModeToggle
+              hasRevealed={hasRevealed}
+              onToggle={() => {
+                if (!hasRevealed) {
+                  showConfirm(
+                    'Révéler les réservations',
+                    'Voulez-vous afficher l’état des réservations ? Cela vous permettra de voir qui a réservé chaque cadeau.',
+                    () => {
+                      setHasRevealed(true);
+                    }
+                  );
+                } else {
+                  setHasRevealed(false);
+                }
+              }}
+              variant="public"
+            />
+          </div>
+        ) : null}
 
         {gifts.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun cadeau pour le moment</h3>
-            <p className="text-gray-500">La liste de cadeaux sera bientôt disponible !</p>
+          <div className="ds-empty mt-8">
+            <span className="ds-empty__icon"><GiftIcon /></span>
+            <h2 className="ds-empty__title">Aucun cadeau pour le moment</h2>
+            <p className="ds-empty__message">La liste de cadeaux sera bientôt disponible !</p>
           </div>
         ) : (
-          <div className="space-y-4 sm:space-y-6">
-            {gifts.map(g => (
-              <div key={g.id} className="bg-white border-2 border-gray-200 rounded-xl p-4 sm:p-6 hover:border-blue-300 hover:shadow-lg transition-all duration-200">
-                <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
-                  {/* Image */}
-                  <div className="flex-shrink-0 order-first sm:order-none w-full sm:w-auto">
-                    {g.image ? (
-                      <div className="w-full sm:w-32 h-40 sm:h-24 rounded-xl border-2 border-gray-200 overflow-hidden shadow-sm bg-gray-50 flex items-center justify-center">
-                        <Image 
-                          src={g.image} 
-                          alt={g.title} 
-                          width={128}
-                          height={96}
-                          className="w-full h-full object-contain"
-                          unoptimized 
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-full sm:w-32 h-40 sm:h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl border-2 border-gray-200 flex items-center justify-center shadow-sm">
-                        <svg className="w-6 h-6 sm:w-8 sm:h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Contenu principal */}
-                  <div className="flex-1 min-w-0 w-full">
-                    <div className="flex flex-col sm:flex-row items-start justify-between mb-3 gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 leading-tight">{g.title}</h2>
-                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
-                          {g.price != null && (
-                            <span className="px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-semibold bg-blue-100 text-blue-800 border border-blue-200">
-                              {g.price} €
-                            </span>
-                          )}
+          <>
+            <div className="ds-toolbar mt-10">
+              <h2 className="ds-h3">Les cadeaux</h2>
+              <div className="ds-toolbar__group">
+                <span className="ds-chip">{gifts.length} {gifts.length > 1 ? 'cadeaux' : 'cadeau'}</span>
+              </div>
+            </div>
+
+            <ul className="ds-grid">
+              {gifts.map(g => {
+                const showReserve = g.status === 'available' || (giftList?.secret && !hasRevealed);
+                const showCancel = isOwner && !showReserve;
+
+                return (
+                  <li key={g.id}>
+                    <article className="ds-card h-full">
+                      <div className="ds-card__body flex-1">
+                        {g.image ? (
+                          <Image
+                            src={g.image}
+                            alt={g.title}
+                            width={480}
+                            height={320}
+                            className="h-44 w-full object-contain"
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="flex h-44 items-center justify-center" aria-hidden="true">
+                            <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
+                          </div>
+                        )}
+
+                        <div className="ds-cluster">
+                          {g.price != null ? (
+                            <span className="ds-badge ds-badge--neutral">{g.price} €</span>
+                          ) : null}
                           <GiftStatusBadge
                             status={g.status}
                             reservedByName={g.reservedByName}
@@ -406,108 +386,77 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
                             variant="public"
                           />
                         </div>
-                      </div>
-                    </div>
-                    
-                    {g.description && (
-                      <div className="mb-4">
-                        <p className="text-gray-700 text-xs sm:text-sm leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-200">
-                          {g.description}
-                        </p>
-                      </div>
-                    )}
-                    
-                    {g.url && (
-                      <div className="mb-4">
-                        <a 
-                          href={g.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg w-full sm:w-auto justify-center"
-                        >
-                          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                          Voir le produit
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Action */}
-                  <div className="flex-shrink-0 w-full sm:w-auto">
-                    {g.status === 'available' || (giftList?.secret && !hasRevealed) ? (
-                      <button
-                        onClick={() => setDialogFor(g)}
-                        disabled={loadingId === g.id || ((!giftList?.secret || hasRevealed) && g.status === 'reserved')}
-                        className="inline-flex items-center gap-2 px-4 py-3 sm:px-5 sm:px-6 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-green-600 to-green-700 rounded-xl hover:from-green-700 hover:to-green-800 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto justify-center"
-                      >
-                        {loadingId === g.id ? (
-                          <>
-                            <svg className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span className="hidden sm:inline">Réservation...</span>
-                            <span className="sm:hidden">En cours...</span>
-                          </>
-                        ) : (
-                          <>
-                            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span className="hidden sm:inline">Je m&apos;en occupe</span>
-                            <span className="sm:hidden">Réserver</span>
-                          </>
-                        )}
-                      </button>
-                    ) : (giftList?.secret && hasRevealed) || (!giftList?.secret && g.status === 'reserved') ? (
-                      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                        <div className="inline-flex items-center gap-2 px-3 py-3 sm:px-4 rounded-xl bg-gradient-to-r from-orange-100 to-orange-200 border-2 border-orange-300 justify-center">
-                          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                          </svg>
-                          <div className="text-xs sm:text-sm font-semibold text-orange-800">
-                            <div>Réservé</div>
-                            {hasRevealed && g.reservedByName && g.reservedByName !== 'Anonyme' && (
-                              <div className="text-xs text-orange-600">par {g.reservedByName}</div>
-                            )}
+
+                        <h3 className="ds-card__title">{g.title}</h3>
+
+                        {g.description ? (
+                          <p className="ds-body-sm">{g.description}</p>
+                        ) : null}
+
+                        {g.url ? (
+                          <div>
+                            <a
+                              href={g.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ds-btn ds-btn--secondary ds-btn--md"
+                            >
+                              <svg className="ds-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                              Voir le produit
+                            </a>
                           </div>
-                        </div>
-                        {/* Bouton d'annulation uniquement pour le propriétaire */}
-                        {isOwner && (
-                          <button
-                            onClick={() => cancelReservation(g.id)}
-                            disabled={cancellingId === g.id}
-                            className="inline-flex items-center gap-2 px-3 py-3 sm:px-4 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-red-700 rounded-xl hover:from-red-700 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl justify-center"
-                          >
-                            {cancellingId === g.id ? (
-                              <>
-                                <svg className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span className="hidden sm:inline">Annulation...</span>
-                                <span className="sm:hidden">En cours...</span>
-                              </>
-                            ) : (
-                              <>
-                                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                                <span className="hidden sm:inline">Annuler</span>
-                                <span className="sm:hidden">Annuler</span>
-                              </>
-                            )}
-                          </button>
-                        )}
+                        ) : null}
                       </div>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+
+                      {showReserve || showCancel ? (
+                        <div className="ds-card__footer">
+                          {showReserve ? (
+                            <button
+                              type="button"
+                              onClick={() => setDialogFor(g)}
+                              disabled={loadingId === g.id}
+                              aria-busy={loadingId === g.id || undefined}
+                              aria-label={`Réserver ${g.title}`}
+                              className="ds-btn ds-btn--primary ds-btn--md ds-btn--block"
+                            >
+                              {loadingId === g.id ? (
+                                <>
+                                  <span className="ds-spinner" aria-hidden="true" />
+                                  Réservation…
+                                </>
+                              ) : (
+                                'Réserver ce cadeau'
+                              )}
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => cancelReservation(g.id)}
+                              disabled={cancellingId === g.id}
+                              aria-busy={cancellingId === g.id || undefined}
+                              aria-label={`Annuler la réservation de ${g.title}`}
+                              className="ds-btn ds-btn--danger ds-btn--md"
+                            >
+                              {cancellingId === g.id ? (
+                                <>
+                                  <span className="ds-spinner" aria-hidden="true" />
+                                  Annulation…
+                                </>
+                              ) : (
+                                'Annuler la réservation'
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      ) : null}
+                    </article>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
         )}
       </main>
 
@@ -518,81 +467,80 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
         onConfirm={(payload) => dialogFor ? submitReservation(dialogFor.id, payload) : undefined}
       />
 
-      {/* Modal de partage */}
-      {showShareModal && giftList && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-screen items-center justify-center p-4">
-            <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setShowShareModal(false)}></div>
-            <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full">
-              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Partager la liste</h3>
-                  <button
-                    onClick={() => setShowShareModal(false)}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
+      {giftList ? (
+        <Modal
+          open={showShareModal}
+          onClose={() => {
+            setShowShareModal(false);
+            setShareFeedback(null);
+          }}
+          title="Partager la liste"
+          description="Envoyez ce lien ou faites scanner le QR code."
+          footer={
+            <button
+              type="button"
+              onClick={() => {
+                setShowShareModal(false);
+                setShareFeedback(null);
+              }}
+              className="ds-btn ds-btn--secondary ds-btn--md"
+            >
+              Fermer
+            </button>
+          }
+        >
+          <QRCodeDisplay shareCode={giftList.shareCode} listImage={giftList.image} />
 
-              <div className="p-6 space-y-6">
-                {/* QR Code */}
-                <QRCodeDisplay shareCode={giftList.shareCode} listImage={giftList.image} />
-
-                {/* Lien de partage */}
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Lien de partage</h4>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={`${typeof window !== 'undefined' ? window.location.origin : ''}/list/${giftList.shareCode}`}
-                      readOnly
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 text-sm"
-                    />
-                    <button
-                      onClick={() => copyToClipboard(`${typeof window !== 'undefined' ? window.location.origin : ''}/list/${giftList.shareCode}`)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                    >
-                      Copier
-                    </button>
-                  </div>
-                </div>
-
-                {/* Informations de la liste */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Informations de la liste</h4>
-                  <p className="text-sm text-gray-600">
-                    <strong>Titre :</strong> {giftList.title}
-                  </p>
-                  {giftList.description && (
-                    <p className="text-sm text-gray-600 mt-1">
-                      <strong>Description :</strong> {giftList.description}
-                    </p>
-                  )}
-                  <p className="text-sm text-gray-600 mt-1">
-                    <strong>Code de partage :</strong> {giftList.shareCode}
-                  </p>
-                </div>
-
-                <div className="flex gap-3 pt-4 border-t border-gray-200">
-                  <button
-                    onClick={() => setShowShareModal(false)}
-                    className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors w-full"
-                  >
-                    Fermer
-                  </button>
-                </div>
-              </div>
+          <div className="ds-field">
+            <label htmlFor="share-link" className="ds-label">Lien de partage</label>
+            <div className="flex flex-wrap gap-2">
+              <input
+                id="share-link"
+                type="text"
+                value={shareUrl}
+                readOnly
+                className="ds-input flex-1"
+              />
+              <button
+                type="button"
+                onClick={() => copyToClipboard(shareUrl)}
+                className="ds-btn ds-btn--primary ds-btn--md"
+              >
+                Copier
+              </button>
             </div>
           </div>
-        </div>
-      )}
+
+          {shareFeedback ? (
+            <div className={`ds-alert ds-alert--${shareFeedback.tone}`} role={shareFeedback.tone === 'danger' ? 'alert' : 'status'}>
+              <span className="ds-alert__icon">
+                {shareFeedback.tone === 'success' ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="m5 12 4.5 4.5L19 7" />
+                  </svg>
+                ) : (
+                  <ErrorIcon />
+                )}
+              </span>
+              <div className="ds-alert__content">
+                <p className="ds-alert__message">{shareFeedback.message}</p>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="ds-stack ds-stack--gap-1">
+            <h3 className="ds-card__title">Informations de la liste</h3>
+            <p className="ds-body-sm"><strong>Titre :</strong> {giftList.title}</p>
+            {giftList.description ? (
+              <p className="ds-body-sm"><strong>Description :</strong> {giftList.description}</p>
+            ) : null}
+            <p className="ds-body-sm"><strong>Code de partage :</strong> {giftList.shareCode}</p>
+          </div>
+        </Modal>
+      ) : null}
 
       {/* Alert Modal */}
-      {alert && (
+      {alert ? (
         <AlertModal
           isOpen={!!alert}
           onClose={hideAlert}
@@ -604,8 +552,7 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
           showCancel={alert.showCancel}
           cancelText={alert.cancelText}
         />
-      )}
+      ) : null}
     </div>
   );
 }
-

@@ -1,12 +1,5 @@
-'use client';
+import { HomePage } from '@/components/home/HomePage'
 
-import { HomeScreen } from 'app/features/home/screen';
-
-export default function HomePage() {
-  return (
-    <div className="min-h-screen bg-gray-50 relative">
-      {/* Contenu principal - utilise la version partagée qui inclut le FlickeringGrid */}
-      <HomeScreen />
-    </div>
-  );
+export default function HomePageRoute() {
+  return <HomePage />
 }
