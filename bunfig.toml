@@ -1,0 +1,3 @@
+# Keep a single hoisted dependency tree for Metro and the Solito workspace.
+[install]
+linker = "hoisted"

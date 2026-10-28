@@ -1,30 +1,36 @@
 'use client'
 
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState, useSyncExternalStore, type FormEvent } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { removeAuthToken } from 'app/lib/authStorage'
 import { validatePassword } from 'app/lib/passwordValidation'
 import PasswordInput from './PasswordInput'
 
+const subscribeToHydration = () => () => {}
+const clientSnapshot = () => true
+const serverSnapshot = () => false
+
 export default function PasswordRecoveryForm({ mode }: { mode: 'request' | 'reset' }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmation, setConfirmation] = useState('')
-  const [token, setToken] = useState('')
-  const [ready, setReady] = useState(mode === 'request')
+  const [token, setToken] = useState(() => {
+    if (mode !== 'reset' || typeof window === 'undefined') return ''
+    const secret = new URLSearchParams(window.location.hash.slice(1)).get('token')
+    return secret && /^[a-f0-9]{64}$/.test(secret) ? secret : ''
+  })
+  const hydrated = useSyncExternalStore(subscribeToHydration, clientSnapshot, serverSnapshot)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
   const resetting = mode === 'reset'
+  const ready = !resetting || hydrated
 
   useEffect(() => {
     if (!resetting) return
-    const secret = new URLSearchParams(window.location.hash.slice(1)).get('token')
-    if (secret && /^[a-f0-9]{64}$/.test(secret)) setToken(secret)
     // Keep the secret in memory only, including after successful submission.
     window.history.replaceState(null, '', window.location.pathname)
-    setReady(true)
   }, [resetting])
 
   async function submit(event: FormEvent<HTMLFormElement>) {

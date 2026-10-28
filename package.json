@@ -9,12 +9,19 @@
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "native": "cd apps/expo && pnpm start",
-    "web:dev": "cd apps/next && pnpm next",
-    "web:build": "cd apps/next && pnpm build",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "prepare": "husky"
+    "native": "bun run --cwd apps/expo start",
+    "web:dev": "bun run --cwd apps/next dev",
+    "web:build": "bun run --cwd apps/next build",
+    "web:build:vercel": "bun run --cwd apps/next build:vercel",
+    "web:start": "bun run --cwd apps/next start",
+    "web:typecheck": "bun run --cwd apps/next typecheck",
+    "test": "bun run --cwd apps/next test:password-reset",
+    "android": "bun run --cwd apps/expo android",
+    "ios": "bun run --cwd apps/expo ios",
+    "prepare": "husky",
+    "postinstall": "bun run --cwd apps/next db:generate",
+    "native:export": "bun run --cwd apps/expo export",
+    "web:lint": "bun run --cwd apps/next lint ."
   },
   "eslintConfig": {
     "extends": "next",
@@ -31,16 +38,30 @@
     "tabWidth": 2,
     "singleQuote": true
   },
-  "packageManager": "pnpm@10.12.4+sha512.5ea8b0deed94ed68691c9bad4c955492705c5eeb8a87ef86bc62c74a26b037b08ff9570f108b2e4dbd1dd1a9186fea925e527f141c648e85af45631074680184",
+  "packageManager": "bun@1.4.4",
   "version": "1.0.0",
   "dependencies": {
     "expo": "~54.0.22",
     "react": "19.1.0",
     "react-native": "0.81.5"
   },
-  "pnpm": {
-    "overrides": {
-      "sharp": "0.35.5"
-    }
+  "engines": {
+    "bun": ">=1.4.4 <1.5.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "trustedDependencies": [
+    "@prisma/client",
+    "@prisma/engines",
+    "esbuild",
+    "prisma",
+    "puppeteer",
+    "sharp",
+    "unrs-resolver"
+  ],
+  "overrides": {
+    "sharp": "0.35.5"
   }
 }

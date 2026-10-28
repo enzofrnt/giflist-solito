@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "app": "*",
+    "app": "workspace:*",
     "expo": "^54.0.16",
     "expo-image": "~3.0.10",
     "expo-linear-gradient": "~15.0.7",
@@ -25,12 +25,13 @@
     "typescript": "~5.9.2"
   },
   "scripts": {
-    "start": "expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios"
+    "start": "bun run --bun expo start",
+    "android": "bun run --bun expo run:android",
+    "ios": "bun run --bun expo run:ios",
+    "export": "CI=1 bun run --bun expo export --max-workers 1"
   },
   "main": "index.js",
-  "packageManager": "pnpm@10.12.4+sha512.5ea8b0deed94ed68691c9bad4c955492705c5eeb8a87ef86bc62c74a26b037b08ff9570f108b2e4dbd1dd1a9186fea925e527f141c648e85af45631074680184",
+  "packageManager": "bun@1.4.4",
   "version": "1.0.0",
   "private": true,
   "name": "expo-app",

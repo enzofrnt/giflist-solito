@@ -6,8 +6,7 @@ Application web pour gérer vos listes de cadeaux avec partage public.
 
 ### Prérequis
 
-- Node.js 20+
-- pnpm (gestionnaire de paquets)
+- Bun 1.4.4 (runtime et gestionnaire de paquets)
 - Docker et Docker Compose (pour la base de données locale)
 
 ### Installation
@@ -15,17 +14,19 @@ Application web pour gérer vos listes de cadeaux avec partage public.
 1. **Cloner le dépôt**
 ```bash
 git clone <repo-url>
-cd gift
+cd giflist-solito
+# Les étapes suivantes se lancent dans apps/next
+cd apps/next
 ```
 
 2. **Installer les dépendances**
 ```bash
-pnpm install
+bun install --frozen-lockfile
 ```
 
 3. **Démarrer PostgreSQL avec Docker**
 ```bash
-pnpm docker:up
+bun run docker:up
 ```
 
 4. **Configurer les variables d'environnement**
@@ -37,17 +38,17 @@ Modifiez `.env` avec votre configuration (les valeurs par défaut fonctionnent p
 
 5. **Appliquer les migrations**
 ```bash
-pnpm db:migrate:dev
+bun run db:migrate:dev
 ```
 
 6. **Générer le client Prisma**
 ```bash
-pnpm db:generate
+bun run db:generate
 ```
 
 7. **Démarrer l'application**
 ```bash
-pnpm dev
+bun run dev
 ```
 
 L'application sera accessible sur [http://localhost:3000](http://localhost:3000)
@@ -59,18 +60,18 @@ L'application sera accessible sur [http://localhost:3000](http://localhost:3000)
 Le projet utilise **PostgreSQL** en local via Docker pour correspondre à l'environnement de production.
 
 **Commandes Docker :**
-- `pnpm docker:up` - Démarrer PostgreSQL
-- `pnpm docker:down` - Arrêter PostgreSQL
-- `pnpm docker:logs` - Voir les logs
-- `pnpm docker:reset` - Réinitialiser la base de données (supprime les données)
+- `bun run docker:up` - Démarrer PostgreSQL
+- `bun run docker:down` - Arrêter PostgreSQL
+- `bun run docker:logs` - Voir les logs
+- `bun run docker:reset` - Réinitialiser la base de données (supprime les données)
 
 **Commandes Prisma :**
-- `pnpm db:generate` - Générer le client Prisma
-- `pnpm db:push` - Synchroniser le schéma (sans migration)
-- `pnpm db:migrate:dev` - Créer et appliquer une migration
-- `pnpm db:migrate:create` - Créer une migration sans l'appliquer
-- `pnpm db:migrate:reset` - Réinitialiser la base et appliquer les migrations
-- `pnpm db:studio` - Ouvrir Prisma Studio (interface graphique)
+- `bun run db:generate` - Générer le client Prisma
+- `bun run db:push` - Synchroniser le schéma (sans migration)
+- `bun run db:migrate:dev` - Créer et appliquer une migration
+- `bun run db:migrate:create` - Créer une migration sans l'appliquer
+- `bun run db:migrate:reset` - Réinitialiser la base et appliquer les migrations
+- `bun run db:studio` - Ouvrir Prisma Studio (interface graphique)
 
 ### Production
 
@@ -90,10 +91,10 @@ Voir `env.example` pour la liste complète des variables d'environnement nécess
 
 ## 🛠️ Scripts disponibles
 
-- `pnpm dev` - Démarrer en mode développement
-- `pnpm build` - Build de production
-- `pnpm start` - Démarrer en mode production
-- `pnpm lint` - Linter le code
+- `bun run dev` - Démarrer en mode développement
+- `bun run build` - Build de production
+- `bun run start` - Démarrer en mode production
+- `bun run lint` - Linter le code
 
 ## 📦 Déploiement
 
@@ -113,5 +114,6 @@ Le déploiement est automatique sur Vercel via GitHub. Voir `DEPLOYMENT.md` pour
 │   ├── lib/                       # Utilitaires (auth, prisma)
 │   └── generated/prisma/          # Client Prisma généré
 ├── docker-compose.yml             # Configuration Docker
-└── build.sh                       # Script de build Vercel
+├── scripts/build-vercel.mjs      # Build Vercel sous Bun
+└── vercel.json                     # Configuration du runtime Bun
 ```
