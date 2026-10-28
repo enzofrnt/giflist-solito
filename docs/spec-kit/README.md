@@ -4,7 +4,7 @@ This directory documents the Spec Kit installation for `giflist-solito`. The too
 
 | Client | Command surface | Instruction file |
 |--------|-----------------|------------------|
-| **Claude Code** | `.claude/skills/speckit-*/SKILL.md` → `/speckit-*` slash commands | `CLAUDE.md` → imports `AGENTS.md` |
+| **Claude Code** | `.claude/skills/speckit-*` (symlinks → `.agents/skills/speckit-*`) → `/speckit-*` slash commands | `CLAUDE.md` → imports `AGENTS.md` |
 | **Codex CLI** | `.agents/skills/speckit-*/SKILL.md` → reference `speckit-*` skills | `AGENTS.md` |
 | **DeepSeek Harness (DSH)** | `.agents/skills/speckit-*/SKILL.md` → `skill` tool with `speckit-*` | `AGENTS.md` + `CLAUDE.md` |
 
@@ -22,8 +22,8 @@ The scripts are bash (`.specify/scripts/bash/*.sh`, `--script sh`). All three cl
 ├── init-options.json           # sequential feature numbering, sh scripts
 └── workflows/                  # Spec Kit workflow definitions
 
-.claude/skills/speckit-*/       # Claude Code skills (managed)
-.agents/skills/speckit-*/       # Codex + DSH skills (managed)
+.claude/skills/speckit-*        # Claude Code adapters — symlinks to .agents/skills (single source)
+.agents/skills/speckit-*        # CANONICAL skill instructions (Codex + DSH; Claude reads through links)
 
 AGENTS.md                       # canonical agent guide (Codex/DSH; imported by Claude)
 CLAUDE.md                       # Claude entry point
@@ -32,6 +32,22 @@ specs/                          # feature artifacts, committed with code
 ```
 
 `specs/001-giftlist-baseline/` captures the app as it exists today (canonical `origin/main` @ `acde7cc`, 2026-10-28). New features start at `specs/002-…`.
+
+## Single source of truth for skills
+
+Spec Kit installs two full copies of the ten `speckit-*` skills: `.claude/skills` (Claude format) and `.agents/skills` (Codex/DSH format). Giftlist avoids that duplication:
+
+- **Canonical**: `.agents/skills/speckit-*/SKILL.md` — full instructions, used directly by Codex and DSH.
+- **Claude adapters**: `.claude/skills/speckit-*` are **relative symlinks** to `../../.agents/skills/speckit-*`. Claude Code officially supports symlinked skill folders and reads `SKILL.md` from the target ([docs](https://code.claude.com/docs/en/skills), “Symlinked folders”).
+- **Regenerate after an upgrade** (which replaces links with real copies):
+
+```sh
+./.specify/scripts/bash/sync-claude-skill-links.sh
+```
+
+The script removes/recreates the links and verifies each one resolves to a readable `SKILL.md`. Never edit files under `.claude/skills` or `.agents/skills` by hand: update the canonical `.agents` copy (or upgrade Spec Kit) and re-link.
+
+> Trade-off: `specify integration status` reports the 10 Claude skills as “modified” because the symlinked target carries the canonical Codex/DSH format instead of Spec Kit's Claude copy. That is expected (see Troubleshooting). Before running `specify integration upgrade --force`, remove the links first (or run the upgrade and then the sync script) so the upgrade cannot write through a link into the canonical copy.
 
 ## The working agreement
 
@@ -62,7 +78,7 @@ Use `speckit-clarify` whenever scope, data, permissions, or UX are ambiguous. Us
 /speckit-implement
 ```
 
-Claude loads `CLAUDE.md`, which imports `AGENTS.md` and the constitution. It discovers skills in `.claude/skills/`.
+Claude loads `CLAUDE.md`, which imports `AGENTS.md` and the constitution. It discovers skills in `.claude/skills/` — those entries are symlinks to the canonical `.agents/skills/` copies.
 
 ### Codex CLI
 
@@ -89,14 +105,17 @@ DSH exposes the ten `speckit-*` skills automatically once `.agents/skills/` is p
 ## Maintenance
 
 ```sh
-specify integration status        # confirm claude + codex are installed and files unmodified
+specify integration status        # expect 12 intentional "modified" entries: 10 Claude links + 2 customized templates
 specify integration list          # list available integrations and installed state
 specify check                     # tool availability for every integration
 ```
 
-- Do **not** hand-edit `.claude/skills/**` or `.agents/skills/**`. Reinstall/upgrade with `specify integration upgrade --force` (or `specify integration install <key> --force`), then re-apply the local customizations in `.specify/templates/plan-template.md` and `tasks-template.md` — upgrades overwrite shared templates.
+- Do **not** hand-edit `.claude/skills/**` or `.agents/skills/**`. Reinstall/upgrade with `specify integration upgrade --force` (or `specify integration install <key> --force`), then:
+  1. re-apply the local customizations in `.specify/templates/plan-template.md` and `tasks-template.md` (upgrades overwrite shared templates);
+  2. run `./.specify/scripts/bash/sync-claude-skill-links.sh` to restore the single-source links.
+- When upgrading Claude specifically, remove the symlinks first (`find .claude/skills -type l -name 'speckit-*' -delete`) so the upgrade cannot write through a link into the canonical `.agents` copy. Then run the sync script.
 - The constitution is authored content: upgrade scripts will not change it.
-- Add a new client? `specify integration install <key>`, then document its invocation here and in `AGENTS.md`.
+- Add a new client? `specify integration install <key>`, then document its invocation here and in `AGENTS.md`. If it supports symlinked skills, add it to the sync script.
 - If `specify` is missing: `uv tool install specify-cli --from git+https://github.com/github/spec-kit.git` (this machine has it at `~/.local/bin/specify`).
 
 ## Drift policy
@@ -112,8 +131,8 @@ This repository has multiple worktrees, and local checkouts can lag `origin/main
 
 | Symptom | Fix |
 |---------|-----|
-| `specify integration status` reports `WARNING` with **2 modified managed files** | Expected: `plan-template.md` and `tasks-template.md` are intentionally customized for Giftlist (cross-platform impact, migration plan, verification gates). Everything else must stay `0`. Do not run `integration upgrade --force` without re-applying those customizations. |
-| Agent does not see the skills | Confirm `.claude/skills/` (Claude) and `.agents/skills/` (Codex/DSH) exist; restart the client so it re-scans. |
+| `specify integration status` reports `WARNING` with **12 modified managed files** (10 Claude + 2 shared) | Expected and intentional: the 10 `.claude/skills/speckit-*` entries are symlinks to the canonical `.agents` copies, and `plan-template.md` / `tasks-template.md` are customized for Giftlist. `Missing managed files` and `Invalid manifest paths` must stay `0`. Do not run `integration upgrade --force` without re-applying the template customizations and re-running the skill-link sync. |
+| Agent does not see the skills | Confirm `.agents/skills/` exists and `.claude/skills/speckit-*` links resolve (`./.specify/scripts/bash/sync-claude-skill-links.sh`); restart the client so it re-scans. |
 | `Not a Spec Kit project` | Run from the repo root that contains `.specify/`. |
 | Scripts not executable | `chmod +x .specify/scripts/bash/*.sh` (should already be executable). |
 | Feature directory not found by plan/tasks | Re-run `speckit-specify` or check `.specify/feature.json`; scripts also accept a feature directory argument. |
