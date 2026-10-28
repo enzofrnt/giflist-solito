@@ -58,7 +58,7 @@ The full contract is [`specs/002-ui-design-system/contracts/design-system-classe
 | Area | Classes |
 |------|---------|
 | Buttons | `.ds-btn` + `--primary/--secondary/--ghost/--danger/--accent`, `--sm/--md/--lg`, `--block`, `--icon`, `--loading` |
-| Forms | `.ds-field`, `.ds-label`, `.ds-input`, `.ds-textarea`, `.ds-select`, `.ds-hint`, `.ds-error`, `.ds-check`, `.ds-switch` |
+| Forms | `.ds-field`, `.ds-label`, `.ds-input`, `.ds-textarea`, `.ds-select` (dans `.ds-select-wrap`) (+ wrapper `.ds-select-wrap`), `.ds-hint`, `.ds-error`, `.ds-check`, `.ds-switch` |
 | Feedback | `.ds-alert` + `--info/--success/--warning/--danger`, `.ds-empty`, `.ds-skeleton` |
 | Surfaces | `.ds-card` (+ header/body/footer, `--interactive`), `.ds-badge` (tones + dot), `.ds-chip`, `.ds-avatar`, `.ds-divider` |
 | Layout | `.ds-container`, `.ds-section`, `.ds-stack`, `.ds-cluster`, `.ds-grid` |

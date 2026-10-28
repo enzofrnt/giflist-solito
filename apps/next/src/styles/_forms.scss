@@ -91,8 +91,44 @@
   }
 
   .ds-select {
-    padding-right: var(--ds-space-8);
+    padding-right: var(--ds-space-10);
     cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: none;
+
+    option {
+      background: var(--ds-color-surface);
+      color: var(--ds-color-text);
+    }
+  }
+
+  .ds-select-wrap {
+    position: relative;
+    display: block;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: var(--ds-space-4);
+      width: 0.5rem;
+      height: 0.5rem;
+      border-right: 1.5px solid var(--ds-color-text-muted);
+      border-bottom: 1.5px solid var(--ds-color-text-muted);
+      transform: translateY(-70%) rotate(45deg);
+      pointer-events: none;
+    }
+
+    &:has(.ds-select:disabled)::after {
+      border-color: var(--ds-color-text-subtle);
+      opacity: 0.55;
+    }
+
+    &:has(.ds-select[aria-invalid='true'])::after {
+      border-color: var(--ds-color-danger);
+    }
   }
 
   .ds-input--sm {

@@ -33,12 +33,14 @@ export function FormsSection() {
 
           <div className="ds-field">
             <label className="ds-label" htmlFor="ds-demo-select">Occasion</label>
-            <select className="ds-select" id="ds-demo-select" defaultValue="anniversaire">
-              <option value="anniversaire">Anniversaire</option>
-              <option value="noel">Noël</option>
-              <option value="mariage">Mariage</option>
-              <option value="autre">Autre</option>
-            </select>
+            <div className="ds-select-wrap">
+              <select className="ds-select" id="ds-demo-select" defaultValue="anniversaire">
+                <option value="anniversaire">Anniversaire</option>
+                <option value="noel">Noël</option>
+                <option value="mariage">Mariage</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
           </div>
 
           <div className="ds-field">

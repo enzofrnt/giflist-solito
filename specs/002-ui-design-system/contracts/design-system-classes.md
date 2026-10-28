@@ -48,7 +48,7 @@ Rules: one primary action per view; danger requires confirmation; loading keeps 
 |-------|---------|
 | `.ds-field` | Vertical wrapper: label + control + hint/error |
 | `.ds-label`, `.ds-label__required` | Label and required marker |
-| `.ds-input`, `.ds-textarea`, `.ds-select` | Controls; `.ds-input--sm/lg`, `.ds-input--invalid` |
+| `.ds-input`, `.ds-textarea`, `.ds-select` (dans `.ds-select-wrap`) (+ wrapper `.ds-select-wrap`) | Controls; `.ds-input--sm/lg`, `.ds-input--invalid` |
 | `.ds-hint`, `.ds-error` | Help and error text; error must be linked with `aria-describedby` and `aria-invalid` |
 | `.ds-checkbox`, `.ds-radio`, `.ds-switch` | Native-input based controls; switch uses `role="switch"` + `aria-checked` |
 | `.ds-field--inline` | Checkbox/radio row (control + label) |
