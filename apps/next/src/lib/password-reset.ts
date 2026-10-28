@@ -94,6 +94,8 @@ export async function resetPassword(token: string, password: string) {
       })
       if (updated.count !== 1) throw new InvalidResetToken()
       await tx.passwordResetToken.deleteMany({ where: { userId: pending.userId } })
+      // Recovery also removes passkeys, so a lost or compromised device cannot bypass it.
+      await tx.passkey.deleteMany({ where: { userId: pending.userId } })
     })
   } catch (error) {
     if (error instanceof InvalidResetToken) return false
@@ -106,6 +108,6 @@ export async function notifyPasswordReset(email: string, tokenHash: string) {
   await sendEmail({
     to: email,
     subject: 'Votre mot de passe Giftlist a été modifié',
-    text: 'Bonjour,\n\nVotre mot de passe Giftlist vient d’être réinitialisé. Vos anciennes sessions ont été déconnectées.\n\nSi vous n’êtes pas à l’origine de ce changement, demandez immédiatement une nouvelle réinitialisation depuis Giftlist.\n\nL’équipe Giftlist',
+    text: 'Bonjour,\n\nVotre mot de passe Giftlist vient d’être réinitialisé. Vos anciennes sessions ont été déconnectées et vos clés d’accès supprimées.\n\nSi vous n’êtes pas à l’origine de ce changement, demandez immédiatement une nouvelle réinitialisation depuis Giftlist.\n\nL’équipe Giftlist',
   }, `password-reset-confirmation-${tokenHash}`)
 }

@@ -2,6 +2,7 @@
 
 import AlertModal from '@/components/AlertModal'
 import PasswordInput from '@/components/PasswordInput'
+import PasskeyManager from '@/components/PasskeyManager'
 import { useAlert } from '@/hooks/useAlert'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { getAuthToken, setAuthToken } from 'app/lib/authStorage'
@@ -233,6 +234,8 @@ export default function ProfileClient() {
                   {showPasswordForm ? 'Annuler' : 'Changer le mot de passe'}
                 </button>
               </div>
+
+              <PasskeyManager />
 
               {showPasswordForm && (
                 <form onSubmit={(e) => {

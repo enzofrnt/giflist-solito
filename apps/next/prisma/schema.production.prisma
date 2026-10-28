@@ -18,6 +18,7 @@ model User {
 
   authVersion Int @default(0)
   passwordResetToken PasswordResetToken?
+  passkeys Passkey[]
 
   giftLists GiftList[]
 
@@ -83,6 +84,35 @@ model PasswordResetToken {
 model AuthRateLimit {
   key       String   @id
   count     Int
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
+model Passkey {
+  id String @id
+  userId Int
+  rpId String
+  publicKey Bytes
+  counter BigInt @default(0)
+  transports String[]
+  deviceType String
+  backedUp Boolean
+  createdAt DateTime @default(now())
+  lastUsedAt DateTime?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PasskeyChallenge {
+  id String @id
+  challenge String
+  purpose String
+  origin String
+  rpId String
+  userId Int?
+  authVersion Int?
   expiresAt DateTime
 
   @@index([expiresAt])

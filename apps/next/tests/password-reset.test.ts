@@ -1,6 +1,7 @@
 import { after, before, beforeEach, test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile, readdir } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { PGlite } from '@electric-sql/pglite'
 import { PGLiteSocketServer } from '@electric-sql/pglite-socket'
@@ -39,13 +40,13 @@ before(async () => {
   ;({ prisma } = await import('../src/lib/prisma'))
   recovery = await import('../src/lib/password-reset')
   auth = await import('../src/lib/auth')
-  globalThis.fetch = async (input, init) => {
+  globalThis.fetch = (async (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
     assert.equal(input, 'https://api.resend.com/emails')
     assert.equal(new Headers(init?.headers).get('Authorization'), 'Bearer test-only-key')
     if (rejectEmail) return new Response('{}', { status: 503 })
     emails.push(JSON.parse(String(init?.body)))
     return Response.json({ id: 'test-email' })
-  }
+  }) as typeof fetch
 })
 
 beforeEach(async () => {
@@ -175,4 +176,106 @@ test('password hashes and recovery data are inaccessible to public Data API role
   const grants = await prisma.$queryRaw<{ allowed: boolean }[]>`SELECT has_table_privilege(role, tablename, 'SELECT') OR has_table_privilege(role, tablename, 'UPDATE') AS allowed FROM unnest(ARRAY['anon', 'authenticated']) role CROSS JOIN unnest(ARRAY['public."User"', 'public."PasswordResetToken"', 'public."AuthRateLimit"']) tablename`
   assert.equal(grants.length, 6)
   assert.ok(grants.every(grant => !grant.allowed))
+})
+
+test('passkey registration requires a valid session and challenges are single-use and origin-bound', async () => {
+  const account = await user('passkeys@example.com')
+  const token = auth.generateToken(account)
+  const { POST: options } = await import('../src/app/api/auth/passkeys/register-options/route')
+  const { consumeChallenge } = await import('../src/lib/passkeys')
+  const makeRequest = (bearer = token, origin = 'http://localhost:3000') => new NextRequest('http://localhost:3000/api/auth/passkeys/register-options', {
+    method: 'POST', headers: { origin, authorization: `Bearer ${bearer}` },
+  })
+  assert.equal((await options(makeRequest('invalid-token'))).status, 401)
+  assert.equal((await options(makeRequest(token, 'https://evil.example'))).status, 400)
+  const response = await options(makeRequest())
+  assert.equal(response.status, 200)
+  const cookie = response.headers.get('set-cookie')!.split(';')[0]
+  const request = () => new NextRequest('http://localhost:3000/api/auth/passkeys/register-verify', { method: 'POST', headers: { origin: 'http://localhost:3000', cookie } })
+  const attempts = await Promise.allSettled([consumeChallenge(request(), 'register'), consumeChallenge(request(), 'register')])
+  assert.equal(attempts.filter(result => result.status === 'fulfilled').length, 1)
+  assert.equal(attempts.filter(result => result.status === 'rejected').length, 1)
+})
+
+test('passkeys are private to the owning account and removed during password recovery', async () => {
+  const account = await user('passkey-owner@example.com')
+  const other = await user('passkey-other@example.com')
+  await prisma.passkey.create({ data: { id: 'test-credential', userId: account.id, rpId: 'localhost', publicKey: Buffer.from([1]), counter: 0, transports: [], deviceType: 'singleDevice', backedUp: false } })
+  const { POST: list, DELETE: remove } = await import('../src/app/api/auth/passkeys/manage/route')
+  const request = (method: string, who: typeof account, body?: object) => new NextRequest('http://localhost:3000/api/auth/passkeys/manage', { method, headers: { origin: 'http://localhost:3000', authorization: `Bearer ${auth.generateToken(who)}`, 'content-type': 'application/json' }, ...(body ? { body: JSON.stringify(body) } : {}) })
+  const otherKeys = await (await list(request('POST', other))).json()
+  assert.equal(otherKeys.keys.length, 0)
+  assert.equal(otherKeys.hasPasskeyForCurrentOrigin, false)
+  assert.equal((await remove(request('DELETE', other, { id: 'test-credential' }))).status, 404)
+  const ownerKeys = await (await list(request('POST', account))).json()
+  assert.equal(ownerKeys.keys.length, 1)
+  assert.equal(ownerKeys.hasPasskeyForCurrentOrigin, true)
+  await recovery.requestPasswordReset(account.email)
+  assert.ok(await recovery.resetPassword(lastToken(), 'NewPassword!1'))
+  assert.equal(await prisma.passkey.count({ where: { userId: account.id } }), 0)
+  for (const role of ['anon', 'authenticated']) {
+    const grants = await db.query<{ passkeys: boolean; challenges: boolean }>(`SELECT has_table_privilege('${role}', '"Passkey"', 'SELECT') AS passkeys, has_table_privilege('${role}', '"PasskeyChallenge"', 'SELECT') AS challenges`)
+    assert.equal(grants.rows[0].passkeys, false)
+    assert.equal(grants.rows[0].challenges, false)
+  }
+})
+
+const chromePath = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+// Set CHROME_PATH to run the browser integration test on another machine.
+test('a virtual authenticator can register, log in, and cannot replay its assertion', { timeout: 30000, skip: !existsSync(chromePath) }, async () => {
+  const puppeteer = await import('puppeteer')
+  const registerOptions = await import('../src/app/api/auth/passkeys/register-options/route')
+  const registerVerify = await import('../src/app/api/auth/passkeys/register-verify/route')
+  const loginOptions = await import('../src/app/api/auth/passkeys/login-options/route')
+  const loginVerify = await import('../src/app/api/auth/passkeys/login-verify/route')
+  const routes: Record<string, (request: NextRequest) => Promise<Response>> = {
+    '/api/auth/passkeys/register-options': registerOptions.POST,
+    '/api/auth/passkeys/register-verify': registerVerify.POST,
+    '/api/auth/passkeys/login-options': loginOptions.POST,
+    '/api/auth/passkeys/login-verify': loginVerify.POST,
+  }
+  const account = await user('virtual-key@example.com')
+  const token = auth.generateToken(account)
+  const server = Bun.serve({ hostname: 'localhost', port: 0, async fetch(req) {
+    const url = new URL(req.url)
+    const handler = routes[url.pathname]
+    if (!handler) return new Response('<!doctype html><title>Passkey test</title>', { headers: { 'Content-Type': 'text/html' } })
+    const nextReq = new NextRequest(req.url, { method: req.method, headers: req.headers, ...(req.method !== 'GET' ? { body: await req.text() } : {}) })
+    return handler(nextReq)
+  } })
+  const browser = await puppeteer.default.launch({ headless: true, executablePath: chromePath, args: ['--no-sandbox'] })
+  try {
+    const page = await browser.newPage()
+    const cdp = await page.createCDPSession()
+    await cdp.send('WebAuthn.enable')
+    await cdp.send('WebAuthn.addVirtualAuthenticator', { options: { protocol: 'ctap2', transport: 'internal', hasResidentKey: true, hasUserVerification: true, isUserVerified: true, automaticPresenceSimulation: true } })
+    await page.goto(`http://localhost:${server.port}/`)
+    const registration = await page.evaluate(async (authToken) => {
+      const headers = { authorization: `Bearer ${authToken}`, 'content-type': 'application/json' }
+      const opts = await (await fetch('/api/auth/passkeys/register-options', { method: 'POST', headers })).json()
+      const publicKey = PublicKeyCredential.parseCreationOptionsFromJSON(opts)
+      const credential = await navigator.credentials.create({ publicKey }) as PublicKeyCredential
+      const response = await fetch('/api/auth/passkeys/register-verify', { method: 'POST', headers, body: JSON.stringify(credential.toJSON()) })
+      return response.status
+    }, token)
+    assert.equal(registration, 200)
+    assert.equal(await prisma.passkey.count({ where: { userId: account.id } }), 1)
+    const login = await page.evaluate(async () => {
+      const options = await (await fetch('/api/auth/passkeys/login-options', { method: 'POST' })).json()
+      const publicKey = PublicKeyCredential.parseRequestOptionsFromJSON(options)
+      const credential = await navigator.credentials.get({ publicKey }) as PublicKeyCredential
+      const body = JSON.stringify(credential.toJSON())
+      const send = () => fetch('/api/auth/passkeys/login-verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body })
+      const first = await send()
+      const result = await first.json()
+      const replay = await send()
+      return { status: first.status, token: result.token, replay: replay.status }
+    })
+    assert.equal(login.status, 200)
+    assert.equal(login.replay, 401)
+    assert.equal((await auth.getCurrentUser(login.token))?.id, account.id)
+  } finally {
+    await browser.close()
+    server.stop(true)
+  }
 })
