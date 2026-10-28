@@ -79,3 +79,6 @@ build/**
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Spec Kit runtime state (generated per feature, never committed)
+.specify/feature.json
