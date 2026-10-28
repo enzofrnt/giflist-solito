@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import type { User } from 'app/types'
 import { getAuthToken, removeAuthToken } from 'app/lib/authStorage'
 
@@ -49,7 +49,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
-  const pathname = usePathname()
 
   const checkAuth = useCallback(async () => {
     try {
@@ -143,15 +142,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       checkAuth()
     }
   }, [mounted, checkAuth])
-
-  // Re-vérifier quand la route change
-  useEffect(() => {
-    if (mounted) {
-      // Invalider le cache et re-vérifier
-      cacheExpiry = 0
-      checkAuth()
-    }
-  }, [pathname, mounted, checkAuth])
 
   return (
     <AuthContext.Provider value={{ user, loading, error, checkAuth, logout }}>
