@@ -80,7 +80,7 @@ export default function PasswordRecoveryForm({ mode }: { mode: 'request' | 'rese
 
         {success ? (
           <div role="status" className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
-            {resetting ? 'Votre mot de passe a été modifié. Connectez-vous avec votre nouveau mot de passe.' : 'Si un compte correspond à cette adresse, un e-mail de réinitialisation a été envoyé. Vérifiez aussi vos courriers indésirables. Le lien est valable 30 minutes.'}
+            {resetting ? 'Votre mot de passe a été modifié. Vos clés d’accès ont été supprimées ; vous pourrez les ajouter à nouveau après connexion.' : 'Si un compte correspond à cette adresse, un e-mail de réinitialisation a été envoyé. Vérifiez aussi vos courriers indésirables. Le lien est valable 30 minutes.'}
           </div>
         ) : invalidLink ? (
           <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Ce lien est incomplet ou invalide. Demandez un nouveau lien de réinitialisation.</div>

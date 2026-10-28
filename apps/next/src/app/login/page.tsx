@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import PasswordInput from '@/components/PasswordInput';
+import { startAuthentication } from '@simplewebauthn/browser';
+import { setAuthToken } from 'app/lib/authStorage';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -51,6 +53,24 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  const loginWithPasskey = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const optionsResponse = await fetch('/api/auth/passkeys/login-options', { method: 'POST' })
+      if (!optionsResponse.ok) throw new Error('options')
+      const optionsJSON = await optionsResponse.json()
+      const credential = await startAuthentication({ optionsJSON })
+      const response = await fetch('/api/auth/passkeys/login-verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(credential) })
+      const data = await response.json()
+      if (!response.ok || !data.ok) throw new Error('verification')
+      await setAuthToken(data.token)
+      window.location.href = '/dashboard'
+    } catch {
+      setError('Connexion par clé d’accès impossible ou annulée. Réessayez ou utilisez votre mot de passe.')
+    } finally { setLoading(false) }
+  }
 
   const handleButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
@@ -154,6 +174,11 @@ export default function LoginPage() {
               {loading ? 'Chargement...' : 'Se connecter'}
             </button>
           </div>
+
+          <button type="button" disabled={loading} onClick={loginWithPasskey}
+            className="w-full flex justify-center py-3 px-4 border border-blue-600 rounded-lg text-base font-medium text-blue-700 bg-white hover:bg-blue-50 disabled:opacity-50 min-h-[44px]">
+            Se connecter avec une clé d’accès
+          </button>
 
           <div className="text-center">
             <Link
