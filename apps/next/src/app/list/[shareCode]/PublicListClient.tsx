@@ -234,7 +234,7 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
   return (
     <div className="ds-home">
       <main className="ds-home__main">
-        <section className="ds-home__hero" aria-labelledby="list-title">
+        <section className={`ds-home__hero${giftList?.image ? '' : ' ds-home__hero--single'}`} aria-labelledby="list-title">
           <div className="ds-home__copy">
             <div className="ds-home__actions">
               <button type="button" onClick={handleBackClick} className="ds-btn ds-btn--ghost ds-btn--md">
@@ -287,8 +287,8 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
             ) : null}
           </div>
 
-          <div className="ds-home__art">
-            {giftList?.image ? (
+          {giftList?.image ? (
+            <div className="ds-home__art">
               <Image
                 src={giftList.image}
                 alt={giftList.title}
@@ -298,17 +298,8 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
                 unoptimized
                 priority
               />
-            ) : (
-              <Image
-                src="/logo.webp"
-                alt="Giftlist"
-                width={1536}
-                height={1024}
-                className="ds-home__logo"
-                priority
-              />
-            )}
-          </div>
+            </div>
+          ) : null}
         </section>
 
         {giftList?.secret ? (
@@ -367,7 +358,7 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
                             unoptimized
                           />
                         ) : (
-                          <div className="flex h-44 items-center justify-center" aria-hidden="true">
+                          <div className="flex h-32 items-center justify-center rounded-md bg-[var(--ds-color-surface-muted)]" aria-hidden="true">
                             <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                             </svg>

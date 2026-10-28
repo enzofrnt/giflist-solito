@@ -5,7 +5,7 @@
 - **Review page**: `/design-system` (local and Vercel preview; `404` on production, `noindex`)
 - **Feature artifacts**: [`specs/002-ui-design-system/`](../../specs/002-ui-design-system/spec.md)
 - **UI audit (evidence base)**: [ui-audit.md](ui-audit.md)
-- **Screenshots**: [Phase 1](screenshots/) · [Phase 2 pages](screenshots/phase-2/)
+- **Screenshots**: [Phase 1](screenshots/) · [Phase 2 pages](screenshots/phase-2/) · [Phase 3 UX](screenshots/phase-3/)
 - **Guardrails**: [`scripts/design-system-guard.sh`](../../scripts/design-system-guard.sh)
 
 ## Aperçu
@@ -85,6 +85,24 @@ Phase 2 is implemented on `feat/ui-harmonization`: every web page now uses the s
 - **Native**: shared `packages/app` Header/home remain the native versions; no CSS is imported into shared/native code.
 
 See [Phase 2 screenshots](screenshots/phase-2/) for every page at desktop and mobile. Public before/after examples are in [before/](screenshots/phase-2/before/) versus the current page captures.
+
+## Phase 3 — UX refinement
+
+The design system was not enough; Phase 3 fixes the experience:
+
+- **Header**: real Giftlist logo on the left, nav grouped left, account action in a compact menu (profile/lists/logout), no separate logout button.
+- **Mobile**: compact right drawer (max 18rem) below the header; account summary, nav and session actions; overlay/Escape/route close.
+- **Home**: no black CTA band; a 3-step “Créez / Partagez / Réservez” section and one primary CTA.
+- **Action hierarchy**: dashboard list cards use one primary action + overflow menu; manage list edit/delete moved to overflow; delete remains confirmed/danger.
+- **Public list**: list-first hero (no logo fallback), compact no-image placeholder.
+- **Profile**: logout removed from the sidebar; available from the account menu; dead `/home` link fixed.
+- **Process**: `ui-ux-design` skill + Design Charter in the constitution.
+
+See [Phase 3 screenshots](screenshots/phase-3/).
+
+## UX skill
+
+The project ships a reusable `ui-ux-design` skill at [`.agents/skills/ui-ux-design/SKILL.md`](../../.agents/skills/ui-ux-design/SKILL.md) (Claude adapter: `.claude/skills/ui-ux-design`). It covers hierarchy, navigation, action priority, friction, states, accessibility, mobile and the Design Charter. Use it before any UI/UX change; the design system alone is not a UX process.
 
 ## Usage in Phase 2
 

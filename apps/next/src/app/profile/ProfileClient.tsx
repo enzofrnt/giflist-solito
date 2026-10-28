@@ -49,7 +49,7 @@ export default function ProfileClient() {
   })
 
   const router = useRouter()
-  const { alert, showConfirm, hideAlert } = useAlert()
+  const { alert, hideAlert } = useAlert()
   const { user } = useAuthContext()
 
   // Synchroniser avec l'utilisateur du contexte
@@ -158,17 +158,6 @@ export default function ProfileClient() {
     } finally {
       setChangingPassword(false)
     }
-  }
-
-  function logout() {
-    showConfirm(
-      'Déconnexion',
-      'Êtes-vous sûr de vouloir vous déconnecter ?',
-      () => {
-        localStorage.removeItem('auth-token')
-        router.push('/')
-      }
-    )
   }
 
   function closePasswordForm() {
@@ -424,17 +413,10 @@ export default function ProfileClient() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => router.push('/home')}
+                  onClick={() => router.push('/')}
                   className="ds-btn ds-btn--ghost ds-btn--block"
                 >
                   Page d’accueil
-                </button>
-                <button
-                  type="button"
-                  onClick={logout}
-                  className="ds-btn ds-btn--danger ds-btn--block"
-                >
-                  Se déconnecter
                 </button>
               </div>
             </section>

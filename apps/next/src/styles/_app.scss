@@ -244,19 +244,33 @@
     bottom: 0;
     left: 0;
     z-index: var(--ds-z-overlay);
-    display: grid;
-    align-items: start;
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-end;
     background: var(--ds-color-overlay);
   }
 
   .ds-mobile-menu__panel {
     position: relative;
     display: grid;
+    align-content: start;
     gap: var(--ds-space-1);
+    width: min(18rem, 82vw);
+    height: 100%;
     padding: var(--ds-space-4) var(--ds-space-4) var(--ds-space-6);
-    border-bottom: var(--ds-border-hairline) solid var(--ds-color-border);
+    border-left: var(--ds-border-hairline) solid var(--ds-color-border);
     background: var(--ds-color-surface);
-    box-shadow: var(--ds-shadow-lg);
+    box-shadow: var(--ds-shadow-xl);
+    overflow-y: auto;
+  }
+
+  .ds-mobile-menu__account {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-3);
+    margin-bottom: var(--ds-space-2);
+    padding-bottom: var(--ds-space-3);
+    border-bottom: var(--ds-border-hairline) solid var(--ds-color-border);
   }
 
   .ds-mobile-menu__link {
@@ -291,6 +305,154 @@
     margin-top: var(--ds-space-3);
     padding-top: var(--ds-space-3);
     border-top: var(--ds-border-hairline) solid var(--ds-color-border);
+  }
+
+
+  .ds-card__footer.ds-card__footer--split {
+    justify-content: space-between;
+  }
+
+  // --- Dropdown menus -------------------------------------------------------
+  .ds-dropdown {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .ds-dropdown__menu {
+    position: absolute;
+    top: calc(100% + var(--ds-space-2));
+    z-index: var(--ds-z-modal);
+    display: grid;
+    gap: var(--ds-space-1);
+    min-width: 13rem;
+    max-width: calc(100vw - 2rem);
+    padding: var(--ds-space-1);
+    border: var(--ds-border-hairline) solid var(--ds-color-border);
+    border-radius: var(--ds-radius-md);
+    background: var(--ds-color-surface);
+    box-shadow: var(--ds-shadow-lg);
+  }
+
+  .ds-dropdown__menu--end {
+    right: 0;
+  }
+
+  .ds-dropdown__menu--start {
+    left: 0;
+  }
+
+  .ds-dropdown__item {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-2);
+    width: 100%;
+    min-height: 2.5rem;
+    padding: var(--ds-space-2) var(--ds-space-3);
+    border: 0;
+    border-radius: var(--ds-radius-sm);
+    background: transparent;
+    color: var(--ds-color-text);
+    font-family: var(--ds-font-sans);
+    font-size: var(--ds-text-sm);
+    font-weight: var(--ds-weight-medium);
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover:not(:disabled),
+    &:focus-visible {
+      background: var(--ds-color-surface-muted);
+    }
+
+    &:focus-visible {
+      @include ds-focus-ring;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .ds-dropdown__item--danger {
+    color: var(--ds-color-danger);
+
+    &:hover:not(:disabled),
+    &:focus-visible {
+      background: var(--ds-color-danger-soft);
+    }
+  }
+
+  .ds-dropdown__icon {
+    display: inline-flex;
+    width: 1rem;
+    height: 1rem;
+    color: currentColor;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  // --- Header account -------------------------------------------------------
+  .ds-header__left {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-5);
+    min-width: 0;
+  }
+
+  .ds-header__logo {
+    display: block;
+    width: auto;
+    height: 2.75rem;
+  }
+
+  .ds-header__account-wrap {
+    display: none;
+
+    @include ds-media-up('md') {
+      display: flex;
+    }
+  }
+
+  .ds-header__account {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-2);
+    min-height: 2.75rem;
+    padding: var(--ds-space-1) var(--ds-space-2);
+    border: var(--ds-border-hairline) solid transparent;
+    border-radius: var(--ds-radius-full);
+    background: transparent;
+    color: var(--ds-color-text);
+    font-family: var(--ds-font-sans);
+    font-size: var(--ds-text-sm);
+    font-weight: var(--ds-weight-medium);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--ds-color-surface-muted);
+    }
+
+    &:focus-visible {
+      @include ds-focus-ring;
+    }
+  }
+
+  .ds-header__account-name {
+    max-width: 12rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ds-header__account-chevron {
+    display: inline-flex;
+    width: 0.875rem;
+    height: 0.875rem;
+    color: var(--ds-color-text-subtle);
   }
 
   // --- Auth shell -----------------------------------------------------------
@@ -597,6 +759,10 @@
     align-items: center;
   }
 
+  .ds-home__hero--single {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .ds-home__copy {
     display: grid;
     gap: var(--ds-space-5);
@@ -657,6 +823,67 @@
     width: min(22rem, 100%);
     height: auto;
     filter: drop-shadow(0 18px 30px rgba(27, 25, 23, 0.14));
+  }
+
+  .ds-home__steps {
+    display: grid;
+    gap: var(--ds-space-5);
+    margin-top: clamp(var(--ds-space-10), 8vw, var(--ds-space-16));
+  }
+
+  .ds-home__steps-head {
+    display: grid;
+    gap: var(--ds-space-2);
+    max-width: 60ch;
+  }
+
+  .ds-home__steps-title {
+    margin: 0;
+    font-size: var(--ds-text-2xl);
+    font-weight: var(--ds-weight-semibold);
+    line-height: var(--ds-leading-tight);
+    letter-spacing: var(--ds-tracking-snug);
+  }
+
+  .ds-home__steps-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ds-space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ds-home__step {
+    display: grid;
+    align-content: start;
+    gap: var(--ds-space-2);
+    padding: var(--ds-space-5);
+    border-top: 2px solid var(--ds-color-primary);
+    background: var(--ds-color-surface);
+    border-radius: 0 0 var(--ds-radius-md) var(--ds-radius-md);
+  }
+
+  .ds-home__step-number {
+    font-family: var(--ds-font-mono);
+    font-size: var(--ds-text-xs);
+    font-weight: var(--ds-weight-semibold);
+    letter-spacing: var(--ds-tracking-wider);
+    color: var(--ds-color-accent-700);
+  }
+
+  .ds-home__step-title {
+    margin: 0;
+    font-size: var(--ds-text-md);
+    font-weight: var(--ds-weight-semibold);
+    line-height: var(--ds-leading-snug);
+  }
+
+  .ds-home__step-text {
+    margin: 0;
+    color: var(--ds-color-text-muted);
+    font-size: var(--ds-text-sm);
+    line-height: var(--ds-leading-normal);
   }
 
   .ds-home__features {
@@ -726,6 +953,10 @@
   }
 
   @include ds-media-down('md') {
+    .ds-home__steps-list {
+      grid-template-columns: 1fr;
+    }
+
     .ds-home__hero {
       grid-template-columns: 1fr;
     }

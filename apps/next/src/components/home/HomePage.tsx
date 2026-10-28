@@ -4,36 +4,21 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useAuthContext } from '@/contexts/AuthContext'
 
-const FEATURES = [
+const STEPS = [
   {
-    title: 'Créez facilement',
-    text: 'Une liste pour chaque occasion, en quelques secondes.',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M12 5v14M5 12h14" />
-      </svg>
-    ),
+    step: '01',
+    title: 'Créez votre liste',
+    text: 'Ajoutez vos envies en quelques secondes, avec un lien produit ou manuellement.',
   },
   {
-    title: 'Partagez simplement',
-    text: 'Un lien unique ou un QR code, sans compte pour vos proches.',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M8.6 13.4 15.4 9.2M8.6 10.6l6.8 4.2" />
-        <circle cx="6" cy="12" r="2.5" />
-        <circle cx="18" cy="7" r="2.5" />
-        <circle cx="18" cy="17" r="2.5" />
-      </svg>
-    ),
+    step: '02',
+    title: 'Partagez le lien',
+    text: 'Un lien unique ou un QR code. Vos proches n’ont pas besoin de créer un compte.',
   },
   {
-    title: 'Suivez les réservations',
-    text: 'Voyez qui a réservé quoi, en temps réel, sans spoiler.',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="m5 12 4.5 4.5L19 7" />
-      </svg>
-    ),
+    step: '03',
+    title: 'Laissez réserver',
+    text: 'Vos proches réservent sans spoiler ; vous suivez les réservations en temps réel.',
   },
 ]
 
@@ -86,24 +71,21 @@ export function HomePage() {
           </div>
         </section>
 
-        <section className="ds-home__features" aria-label="Fonctionnalités">
-          {FEATURES.map((feature) => (
-            <article className="ds-home__feature" key={feature.title}>
-              <span className="ds-home__feature-icon">{feature.icon}</span>
-              <h2 className="ds-home__feature-title">{feature.title}</h2>
-              <p className="ds-home__feature-text">{feature.text}</p>
-            </article>
-          ))}
-        </section>
-
-        <section className="ds-home__strip" aria-label="Prêt à commencer">
-          <div>
-            <p className="ds-home__strip-title">Une liste, un lien, zéro friction.</p>
-            <p className="ds-home__strip-text">Vos proches réservent sans créer de compte.</p>
+        <section className="ds-home__steps" aria-labelledby="how-it-works-title">
+          <div className="ds-home__steps-head">
+            <span className="ds-overline">Comment ça marche</span>
+            <h2 className="ds-home__steps-title" id="how-it-works-title">Trois étapes, zéro friction.</h2>
+            <p className="ds-body-sm">Créez, partagez, laissez réserver. Le reste est automatique.</p>
           </div>
-          <Link href={primaryHref} className="ds-btn ds-btn--accent ds-btn--md">
-            {primaryLabel}
-          </Link>
+          <ol className="ds-home__steps-list">
+            {STEPS.map((step) => (
+              <li className="ds-home__step" key={step.step}>
+                <span className="ds-home__step-number" aria-hidden="true">{step.step}</span>
+                <h3 className="ds-home__step-title">{step.title}</h3>
+                <p className="ds-home__step-text">{step.text}</p>
+              </li>
+            ))}
+          </ol>
         </section>
       </main>
     </div>
