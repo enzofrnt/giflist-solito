@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useSyncExternalStore, type FormEvent } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { removeAuthToken } from 'app/lib/authStorage'
 import { validatePassword } from 'app/lib/passwordValidation'
+import { AuthCard } from './AuthCard'
 import PasswordInput from './PasswordInput'
 
 const subscribeToHydration = () => () => {}
@@ -69,45 +69,110 @@ export default function PasswordRecoveryForm({ mode }: { mode: 'request' | 'rese
   }
 
   const invalidLink = resetting && ready && !token && !success
-  return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6">
-      <div className="max-w-md w-full space-y-6">
-        <div className="text-center">
-          <Image src="/logo.webp" alt="Giftlist" width={64} height={64} className="mx-auto mb-4 rounded-full border-4 border-indigo-200" />
-          <h1 className="text-3xl font-bold text-gray-900">{resetting ? 'Nouveau mot de passe' : 'Mot de passe oublié ?'}</h1>
-          {!success && <p className="mt-3 text-sm text-gray-600">{resetting ? 'Choisissez un nouveau mot de passe pour votre compte Giftlist.' : 'Indiquez votre adresse e-mail pour recevoir un lien de réinitialisation.'}</p>}
-        </div>
 
-        {success ? (
-          <div role="status" className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
-            {resetting ? 'Votre mot de passe a été modifié. Vos clés d’accès ont été supprimées ; vous pourrez les ajouter à nouveau après connexion.' : 'Si un compte correspond à cette adresse, un e-mail de réinitialisation a été envoyé. Vérifiez aussi vos courriers indésirables. Le lien est valable 30 minutes.'}
+  return (
+    <AuthCard
+      title={resetting ? 'Nouveau mot de passe' : 'Mot de passe oublié ?'}
+      lead={
+        resetting
+          ? 'Choisissez un nouveau mot de passe pour votre compte Giftlist.'
+          : 'Indiquez votre adresse e-mail pour recevoir un lien de réinitialisation.'
+      }
+      footer={
+        <div className="ds-auth__links">
+          <Link href="/login" className="ds-link">Retour à la connexion</Link>
+          {invalidLink ? <Link href="/forgot-password" className="ds-link">Demander un nouveau lien</Link> : null}
+        </div>
+      }
+    >
+      {success ? (
+        <div className="ds-alert ds-alert--success" role="status">
+          <span className="ds-alert__icon" aria-hidden="true">✓</span>
+          <div className="ds-alert__content">
+            <p className="ds-alert__title">C’est fait</p>
+            <p className="ds-alert__message">
+              {resetting
+                ? 'Votre mot de passe a été modifié. Vos clés d’accès ont été supprimées ; vous pourrez les ajouter à nouveau après connexion.'
+                : 'Si un compte correspond à cette adresse, un e-mail de réinitialisation a été envoyé. Vérifiez aussi vos courriers indésirables. Le lien est valable 30 minutes.'}
+            </p>
           </div>
-        ) : invalidLink ? (
-          <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Ce lien est incomplet ou invalide. Demandez un nouveau lien de réinitialisation.</div>
-        ) : !ready ? <p role="status" className="text-center text-gray-600">Chargement…</p> : (
-          <form onSubmit={submit} className="space-y-5" aria-busy={loading}>
-            {resetting ? <>
-              <div>
-                <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">Nouveau mot de passe</label>
-                <PasswordInput id="new-password" name="password" autoComplete="new-password" value={password} onChange={event => setPassword(event.target.value)} required showGuide showStrength />
+        </div>
+      ) : invalidLink ? (
+        <div className="ds-alert ds-alert--warning" role="alert">
+          <span className="ds-alert__icon" aria-hidden="true">!</span>
+          <div className="ds-alert__content">
+            <p className="ds-alert__title">Lien invalide</p>
+            <p className="ds-alert__message">Ce lien est incomplet ou invalide. Demandez un nouveau lien de réinitialisation.</p>
+          </div>
+        </div>
+      ) : !ready ? (
+        <p className="ds-body-sm" role="status">Chargement…</p>
+      ) : (
+        <form onSubmit={submit} className="ds-stack ds-stack--gap-5" aria-busy={loading}>
+          {resetting ? (
+            <>
+              <div className="ds-field">
+                <label htmlFor="new-password" className="ds-label">Nouveau mot de passe</label>
+                <PasswordInput
+                  id="new-password"
+                  name="password"
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                  showGuide
+                  showStrength
+                />
               </div>
-              <div>
-                <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">Confirmer le mot de passe</label>
-                <PasswordInput id="confirm-password" name="confirmation" autoComplete="new-password" value={confirmation} onChange={event => setConfirmation(event.target.value)} required />
+              <div className="ds-field">
+                <label htmlFor="confirm-password" className="ds-label">Confirmer le mot de passe</label>
+                <PasswordInput
+                  id="confirm-password"
+                  name="confirmation"
+                  autoComplete="new-password"
+                  value={confirmation}
+                  onChange={(event) => setConfirmation(event.target.value)}
+                  required
+                />
               </div>
-            </> : <div>
-              <label htmlFor="recovery-email" className="block text-sm font-medium text-gray-700">Adresse e-mail</label>
-              <input id="recovery-email" type="email" autoComplete="email" maxLength={254} required value={email} onChange={event => setEmail(event.target.value)} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>}
-            {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-            <button type="submit" disabled={loading} className="w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50">
-              {loading ? 'En cours…' : resetting ? 'Enregistrer le nouveau mot de passe' : 'Recevoir le lien'}
-            </button>
-          </form>
-        )}
-        {(invalidLink || resetting && error) && <Link href="/forgot-password" className="block text-center text-sm text-blue-600 hover:underline">Demander un nouveau lien</Link>}
-        <Link href="/login" className="block text-center text-sm text-blue-600 hover:underline">Retour à la connexion</Link>
-      </div>
-    </main>
+            </>
+          ) : (
+            <div className="ds-field">
+              <label htmlFor="recovery-email" className="ds-label">Adresse e-mail</label>
+              <input
+                id="recovery-email"
+                type="email"
+                autoComplete="email"
+                maxLength={254}
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className="ds-input"
+              />
+            </div>
+          )}
+
+          {error ? (
+            <div className="ds-alert ds-alert--danger" role="alert">
+              <span className="ds-alert__icon" aria-hidden="true">!</span>
+              <div className="ds-alert__content">
+                <p className="ds-alert__title">Action impossible</p>
+                <p className="ds-alert__message">{error}</p>
+              </div>
+            </div>
+          ) : null}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="ds-btn ds-btn--primary ds-btn--lg ds-btn--block"
+            aria-busy={loading || undefined}
+          >
+            {loading ? <span className="ds-spinner" aria-hidden="true" /> : null}
+            {loading ? 'En cours…' : resetting ? 'Enregistrer le nouveau mot de passe' : 'Recevoir le lien'}
+          </button>
+        </form>
+      )}
+    </AuthCard>
   )
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { browserSupportsWebAuthn, startRegistration } from '@simplewebauthn/browser'
 import { getAuthToken } from 'app/lib/authStorage'
-import Image from 'next/image'
+import { AuthCard } from '@/components/AuthCard'
 
 export default function SetupPasskeyPage() {
   const [ready, setReady] = useState(false)
@@ -17,7 +17,10 @@ export default function SetupPasskeyPage() {
       if (!token) { window.location.replace('/login'); return }
       if (!browserSupportsWebAuthn()) { window.location.replace('/dashboard'); return }
       try {
-        const response = await fetch('/api/auth/passkeys/manage', { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
+        const response = await fetch('/api/auth/passkeys/manage', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        })
         if (!response.ok) throw new Error('unavailable')
         const data = await response.json()
         if (cancelled) return
@@ -43,7 +46,11 @@ export default function SetupPasskeyPage() {
       if (!response.ok) throw new Error('options')
       const optionsJSON = await response.json()
       const credential = await startRegistration({ optionsJSON })
-      const verified = await fetch('/api/auth/passkeys/register-verify', { method: 'POST', headers, body: JSON.stringify(credential) })
+      const verified = await fetch('/api/auth/passkeys/register-verify', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(credential),
+      })
       if (!verified.ok) throw new Error('verification')
       window.location.replace('/dashboard')
     } catch {
@@ -52,17 +59,51 @@ export default function SetupPasskeyPage() {
     }
   }
 
-  if (!ready) return <main className="min-h-screen flex items-center justify-center text-gray-600" role="status">Chargement…</main>
+  if (!ready) {
+    return (
+      <div className="ds-auth">
+        <p className="ds-cluster ds-body-sm" role="status">
+          <span className="ds-spinner" aria-hidden="true" />
+          Chargement…
+        </p>
+      </div>
+    )
+  }
 
-  return <main className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
-    <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-sm text-center space-y-5">
-      <Image src="/logo.webp" alt="Giftlist" width={64} height={64} className="mx-auto rounded-full border-4 border-indigo-200" />
-      <h1 className="text-2xl font-bold text-gray-900">Simplifiez vos prochaines connexions</h1>
-      <p className="text-gray-600">Ajoutez une clé d’accès pour vous connecter avec le code, l’empreinte ou la reconnaissance faciale de votre appareil.</p>
-      {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-      <button type="button" onClick={addPasskey} disabled={busy} className="w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white hover:bg-blue-700 disabled:opacity-50">{busy ? 'Création en cours…' : 'Ajouter une clé d’accès'}</button>
-      <button type="button" onClick={() => window.location.replace('/dashboard')} disabled={busy} className="w-full rounded-lg px-4 py-2 text-blue-700 hover:bg-blue-50 disabled:opacity-50">Plus tard</button>
-      <p className="text-xs text-gray-500">Vous pourrez aussi ajouter ou supprimer une clé depuis Mon compte.</p>
-    </div>
-  </main>
+  return (
+    <AuthCard
+      title="Simplifiez vos prochaines connexions"
+      lead="Ajoutez une clé d’accès pour vous connecter avec le code, l’empreinte ou la reconnaissance faciale de votre appareil."
+      footer={<p className="ds-caption">Vous pourrez aussi ajouter ou supprimer une clé depuis Mon compte.</p>}
+    >
+      {error ? (
+        <div className="ds-alert ds-alert--danger" role="alert">
+          <span className="ds-alert__icon" aria-hidden="true">!</span>
+          <div className="ds-alert__content">
+            <p className="ds-alert__title">Clé non ajoutée</p>
+            <p className="ds-alert__message">{error}</p>
+          </div>
+        </div>
+      ) : null}
+
+      <button
+        type="button"
+        onClick={addPasskey}
+        disabled={busy}
+        className="ds-btn ds-btn--primary ds-btn--lg ds-btn--block"
+        aria-busy={busy || undefined}
+      >
+        {busy ? <span className="ds-spinner" aria-hidden="true" /> : null}
+        {busy ? 'Création en cours…' : 'Ajouter une clé d’accès'}
+      </button>
+      <button
+        type="button"
+        onClick={() => window.location.replace('/dashboard')}
+        disabled={busy}
+        className="ds-btn ds-btn--ghost ds-btn--block"
+      >
+        Plus tard
+      </button>
+    </AuthCard>
+  )
 }

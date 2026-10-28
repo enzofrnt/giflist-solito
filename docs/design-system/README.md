@@ -5,7 +5,7 @@
 - **Review page**: `/design-system` (local and Vercel preview; `404` on production, `noindex`)
 - **Feature artifacts**: [`specs/002-ui-design-system/`](../../specs/002-ui-design-system/spec.md)
 - **UI audit (evidence base)**: [ui-audit.md](ui-audit.md)
-- **Screenshots**: [screenshots/](screenshots/)
+- **Screenshots**: [Phase 1](screenshots/) · [Phase 2 pages](screenshots/phase-2/)
 - **Guardrails**: [`scripts/design-system-guard.sh`](../../scripts/design-system-guard.sh)
 
 ## Aperçu
@@ -72,13 +72,28 @@ Rules:
 - All controls meet 44 px minimum touch targets; reduced motion disables non-essential animation.
 - No colour-only semantics: icon + text for alerts and badges.
 
+## Phase 2 — application-wide harmonization
+
+Phase 2 is implemented on `feat/ui-harmonization`: every web page now uses the shared shell and components.
+
+- **Shell**: web Header (`apps/next/src/components/Header.tsx`, monogram + nav + account + mobile menu), `.ds-page`, `.ds-page__main`, `.ds-page-header`, `.ds-auth`, `.ds-modal`, `.ds-list`, `.ds-table`, `.ds-home`.
+- **Auth**: `AuthCard` + shared fields/buttons/alerts; password strength reused from Phase 1.
+- **Dashboard / manage / public / profile / admin**: cards, badges, fields, selects, alerts, empty states and dialogs composed from `.ds-*`; the legacy ad-hoc button/input/modal recipes were removed in the refactored files.
+- **Select**: `.ds-select` is `appearance: none` with a token-based CSS chevron provided by `.ds-select-wrap`.
+- **Modals**: shared `Modal` (role=dialog, aria-modal, labelled title, Escape, focus trap/restore, scroll lock); AlertModal/EditListModal/QR share/Reserve/GiftForm use it.
+- **Admin debug tools**: collapsed under “Outils de développement” so the admin page stays visually consistent; behavior is unchanged.
+- **Native**: shared `packages/app` Header/home remain the native versions; no CSS is imported into shared/native code.
+
+See [Phase 2 screenshots](screenshots/phase-2/) for every page at desktop and mobile. Public before/after examples are in [before/](screenshots/phase-2/before/) versus the current page captures.
+
 ## Usage in Phase 2
 
 1. Replace page-local Tailwind strings with `.ds-*` components and tokens, starting with the highest-traffic screens (auth, dashboard, public list).
 2. Remove duplicated button/input/modal recipes; reuse `.ds-btn`, `.ds-field`, `.ds-card`, `.ds-alert`.
 3. Keep only layout utilities from Tailwind initially; if a page needs a new visual value, add a token instead of a raw value.
 4. Every refactor PR links its spec and lists the pages/components changed; screenshots before/after are the acceptance evidence.
-5. Do not introduce page-specific SCSS in `_showcase.scss`; it exists only for the review page.
+5. Do not introduce page-specific SCSS in `_showcase.scss`; it exists only for the review page. Page-specific layout can stay in Tailwind utilities, but visual primitives must use `.ds-*`.
+6. The select must use `.ds-select-wrap` around `.ds-select`.
 
 ## Accessibility baseline
 

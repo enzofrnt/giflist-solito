@@ -9,29 +9,32 @@ export default function SecretModeToggle({
   onToggle,
   variant = 'public'
 }: SecretModeToggleProps) {
+  const message = hasRevealed
+    ? variant === 'public'
+      ? 'Cliquez sur le bouton ci-dessous pour masquer à nouveau les réservations.'
+      : 'Les réservations sont visibles. Cliquez sur le bouton ci-dessous pour masquer à nouveau les réservations.'
+    : 'Les réservations sont masquées. Cliquez sur le bouton ci-dessous pour révéler l’état des réservations.'
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-orange-300 p-6 mb-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
-            Mode secret activé
-          </h3>
-          <p className="text-sm text-gray-600">
-            {hasRevealed
-              ? variant === 'public'
-                ? 'Cliquez sur le bouton ci-dessous pour masquer à nouveau les réservations.'
-                : 'Les réservations sont visibles. Cliquez sur le bouton ci-dessous pour masquer à nouveau les réservations.'
-              : 'Les réservations sont masquées. Cliquez sur le bouton ci-dessous pour révéler l&apos;état des réservations.'}
-          </p>
-        </div>
-        <button
-          onClick={onToggle}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium whitespace-nowrap"
-        >
-          {hasRevealed ? 'Masquer les réservations' : 'Afficher les réservations'}
-        </button>
+    <div className="ds-alert ds-alert--warning mb-6 flex-col items-stretch sm:flex-row sm:items-center">
+      <span className="ds-alert__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" />
+          <path d="M9.5 12l1.8 1.8 3.2-3.4" />
+        </svg>
+      </span>
+      <div className="ds-alert__content flex-1">
+        <p className="ds-alert__title">Mode secret activé</p>
+        <p className="ds-alert__message">{message}</p>
       </div>
+      <button
+        type="button"
+        className="ds-btn ds-btn--secondary"
+        onClick={onToggle}
+        aria-pressed={hasRevealed}
+      >
+        {hasRevealed ? 'Masquer les réservations' : 'Afficher les réservations'}
+      </button>
     </div>
   )
 }
-

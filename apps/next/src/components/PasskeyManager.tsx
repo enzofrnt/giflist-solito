@@ -10,6 +10,29 @@ const subscribe = () => () => {}
 const browserSupport = () => browserSupportsWebAuthn()
 const serverSupport = () => false
 
+function AlertIcon({ tone }: { tone: 'success' | 'danger' | 'info' }) {
+  if (tone === 'success') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="m5 12 4.5 4.5L19 7" />
+      </svg>
+    )
+  }
+  if (tone === 'danger') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 8v5M12 16.5h.01M10.3 3.9 2.6 17.2A1.8 1.8 0 0 0 4.2 20h15.6a1.8 1.8 0 0 0 1.6-2.8L13.7 3.9a1.9 1.9 0 0 0-3.4 0Z" />
+      </svg>
+    )
+  }
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5M12 8h.01" />
+    </svg>
+  )
+}
+
 export default function PasskeyManager() {
   const [keys, setKeys] = useState<Key[]>([])
   const supported = useSyncExternalStore(subscribe, browserSupport, serverSupport)
@@ -59,19 +82,85 @@ export default function PasskeyManager() {
     finally { setBusy(false) }
   }
 
-  return <section className="border-t border-gray-200 pt-5 mb-6" aria-labelledby="passkeys-heading">
-    <h3 id="passkeys-heading" className="text-base font-semibold text-gray-900">Clés d’accès</h3>
-    <p className="text-sm text-gray-600 mt-1">Connectez-vous avec le code, l’empreinte ou la reconnaissance faciale de votre appareil.</p>
-    {keys.length > 0 && <ul className="my-3 space-y-2">
-      {keys.map(key => <li key={key.id} className="flex flex-wrap items-center justify-between gap-2 text-sm text-gray-700">
-        <span>Ajoutée le {new Date(key.createdAt).toLocaleDateString('fr-FR')} {key.rpId !== window.location.hostname && key.rpId !== 'giftlist.fr' ? `(${key.rpId})` : ''}</span>
-        <button type="button" disabled={busy} onClick={() => remove(key.id)} className="text-red-700 hover:underline disabled:opacity-50">Supprimer</button>
-      </li>)}
-    </ul>}
-    {supported ? <form onSubmit={add} className="space-y-2 mt-4">
-      <button type="submit" disabled={busy} className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 disabled:opacity-50">{busy ? 'Patientez…' : 'Ajouter une clé d’accès'}</button>
-    </form> : <p className="mt-3 text-sm text-gray-600">Les clés d’accès ne sont pas disponibles sur ce navigateur ou cette connexion.</p>}
-    {message && <p role="status" className="mt-3 text-sm text-green-700">{message}</p>}
-    {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
-  </section>
+  return (
+    <section className="ds-card" aria-labelledby="passkeys-heading">
+      <div className="ds-card__header">
+        <div className="ds-stack ds-stack--gap-1">
+          <h3 id="passkeys-heading" className="ds-card__title">Clés d’accès</h3>
+          <p className="ds-card__subtitle">
+            Connectez-vous avec le code, l’empreinte ou la reconnaissance faciale de votre appareil.
+          </p>
+        </div>
+      </div>
+
+      <div className="ds-card__body">
+        {keys.length > 0 ? (
+          <ul className="ds-list">
+            {keys.map(key => (
+              <li key={key.id} className="ds-list-item">
+                <span className="ds-body-sm">
+                  Ajoutée le {new Date(key.createdAt).toLocaleDateString('fr-FR')}
+                  {key.rpId !== window.location.hostname && key.rpId !== 'giftlist.fr' ? (
+                    <span className="ds-caption"> · {key.rpId}</span>
+                  ) : null}
+                </span>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => remove(key.id)}
+                  className="ds-btn ds-btn--danger ds-btn--md"
+                >
+                  Supprimer
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="ds-hint">Aucune clé d’accès enregistrée pour le moment.</p>
+        )}
+
+        {supported ? (
+          <form onSubmit={add}>
+            <button type="submit" disabled={busy} className="ds-btn ds-btn--primary ds-btn--md" aria-busy={busy || undefined}>
+              {busy ? (
+                <>
+                  <span className="ds-spinner" aria-hidden="true" />
+                  Patientez…
+                </>
+              ) : (
+                'Ajouter une clé d’accès'
+              )}
+            </button>
+          </form>
+        ) : (
+          <div className="ds-alert ds-alert--info" role="status">
+            <span className="ds-alert__icon"><AlertIcon tone="info" /></span>
+            <div className="ds-alert__content">
+              <p className="ds-alert__message">
+                Les clés d’accès ne sont pas disponibles sur ce navigateur ou cette connexion.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {message ? (
+          <div className="ds-alert ds-alert--success" role="status">
+            <span className="ds-alert__icon"><AlertIcon tone="success" /></span>
+            <div className="ds-alert__content">
+              <p className="ds-alert__message">{message}</p>
+            </div>
+          </div>
+        ) : null}
+
+        {error ? (
+          <div className="ds-alert ds-alert--danger" role="alert">
+            <span className="ds-alert__icon"><AlertIcon tone="danger" /></span>
+            <div className="ds-alert__content">
+              <p className="ds-alert__message">{error}</p>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </section>
+  )
 }

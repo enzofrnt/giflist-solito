@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Modal } from '@/components/Modal';
+import type { ReactNode } from 'react';
 
 interface AlertModalProps {
   isOpen: boolean;
@@ -14,6 +15,42 @@ interface AlertModalProps {
   cancelText?: string;
 }
 
+type AlertType = NonNullable<AlertModalProps['type']>;
+
+const ALERT_TONE: Record<AlertType, 'success' | 'danger' | 'warning' | 'info'> = {
+  success: 'success',
+  error: 'danger',
+  warning: 'warning',
+  info: 'info'
+};
+
+const ALERT_ICONS: Record<AlertType, ReactNode> = {
+  success: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  error: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+    </svg>
+  ),
+  warning: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+    </svg>
+  ),
+  info: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  )
+};
+
+/**
+ * Cross-page feedback dialog. Public API unchanged (manage, public list,
+ * profile, admin, dashboard) — visuals and a11y now come from Modal + ds-alert.
+ */
 export default function AlertModal({
   isOpen,
   onClose,
@@ -25,150 +62,42 @@ export default function AlertModal({
   showCancel = false,
   cancelText = 'Annuler'
 }: AlertModalProps) {
-  // Gestion de la touche Échap
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
-  const getTypeStyles = () => {
-    switch (type) {
-      case 'success':
-        return {
-          icon: (
-            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          ),
-          iconBg: 'bg-green-100',
-          titleColor: 'text-green-900',
-          messageColor: 'text-green-700',
-          buttonBg: 'bg-green-600 hover:bg-green-700',
-          borderColor: 'border-green-200'
-        };
-      case 'error':
-        return {
-          icon: (
-            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          ),
-          iconBg: 'bg-red-100',
-          titleColor: 'text-red-900',
-          messageColor: 'text-red-700',
-          buttonBg: 'bg-red-600 hover:bg-red-700',
-          borderColor: 'border-red-200'
-        };
-      case 'warning':
-        return {
-          icon: (
-            <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          ),
-          iconBg: 'bg-yellow-100',
-          titleColor: 'text-yellow-900',
-          messageColor: 'text-yellow-700',
-          buttonBg: 'bg-yellow-600 hover:bg-yellow-700',
-          borderColor: 'border-yellow-200'
-        };
-      default: // info
-        return {
-          icon: (
-            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          ),
-          iconBg: 'bg-blue-100',
-          titleColor: 'text-blue-900',
-          messageColor: 'text-blue-700',
-          buttonBg: 'bg-blue-600 hover:bg-blue-700',
-          borderColor: 'border-blue-200'
-        };
-    }
-  };
-
-  const styles = getTypeStyles();
-
   const handleConfirm = async () => {
     if (onConfirm) {
       await onConfirm();
-      onClose();
-    } else {
-      onClose();
     }
+    onClose();
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
-        {/* Overlay */}
-        <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm" 
-          onClick={onClose}
-        ></div>
-        
-        {/* Modal */}
-        <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full border border-gray-200">
-          {/* Header */}
-          <div className="flex items-center gap-4 p-6 border-b border-gray-200">
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${styles.iconBg}`}>
-              {styles.icon}
-            </div>
-            <div className="flex-1">
-              <h3 className={`text-lg font-semibold ${styles.titleColor}`}>
-                {title}
-              </h3>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      title={title}
+      size="sm"
+      footer={
+        <>
+          {showCancel && (
+            <button type="button" className="ds-btn ds-btn--secondary flex-1" onClick={onClose}>
+              {cancelText}
             </button>
-          </div>
-
-          {/* Content */}
-          <div className="p-6">
-            <p className={`text-sm leading-relaxed ${styles.messageColor}`}>
-              {message}
-            </p>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-3 p-6 pt-0">
-            {showCancel && (
-              <button
-                onClick={onClose}
-                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-              >
-                {cancelText}
-              </button>
-            )}
-            <button
-              onClick={handleConfirm}
-              className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors font-medium ${styles.buttonBg}`}
-            >
-              {confirmText}
-            </button>
-          </div>
+          )}
+          <button type="button" className="ds-btn ds-btn--primary flex-1" onClick={handleConfirm}>
+            {confirmText}
+          </button>
+        </>
+      }
+    >
+      <div className={`ds-alert ds-alert--${ALERT_TONE[type]}`} role={type === 'error' ? 'alert' : 'status'}>
+        <span className="ds-alert__icon" aria-hidden="true">
+          {ALERT_ICONS[type]}
+        </span>
+        <div className="ds-alert__content">
+          <p className="ds-alert__message">{message}</p>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Modal } from '@/components/Modal'
+import Image from 'next/image'
+import { useEffect, useId, useRef, useState } from 'react'
 
 interface GiftFormData {
   title: string
@@ -22,6 +24,25 @@ interface GiftFormModalProps {
   onScrapingUrlChange?: (url: string) => void
   onScrape?: () => Promise<{ title?: string; url?: string; image?: string; price?: string; description?: string } | null>
   isScraping?: boolean
+  /** Optional inline error returned by the scrape endpoint (kept optional for backward compatibility). */
+  scrapeError?: string
+}
+
+const EMPTY_FORM: GiftFormData = {
+  title: '',
+  url: '',
+  image: '',
+  price: '',
+  description: ''
+}
+
+function isHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value.trim())
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
 }
 
 export default function GiftFormModal({
@@ -35,83 +56,131 @@ export default function GiftFormModal({
   scrapingUrl = '',
   onScrapingUrlChange,
   onScrape,
-  isScraping = false
+  isScraping = false,
+  scrapeError
 }: GiftFormModalProps) {
-  const [formData, setFormData] = useState<GiftFormData>({
-    title: '',
-    url: '',
-    image: '',
-    price: '',
-    description: ''
-  })
+  const [formData, setFormData] = useState<GiftFormData>(EMPTY_FORM)
+  const [titleError, setTitleError] = useState('')
+  const prevIsOpenRef = useRef(isOpen)
+  const formRef = useRef<HTMLFormElement>(null)
+
+  const titleId = useId()
+  const titleErrorId = useId()
+  const priceId = useId()
+  const urlId = useId()
+  const imageId = useId()
+  const descriptionId = useId()
+  const scrapeUrlId = useId()
+  const scrapeHintId = useId()
+  const scrapeErrorId = useId()
 
   useEffect(() => {
-    if (isOpen && initialData) {
-      setFormData(initialData)
-    } else if (isOpen && !initialData) {
-      setFormData({
-        title: '',
-        url: '',
-        image: '',
-        price: '',
-        description: ''
-      })
+    // Synchroniser uniquement à l'ouverture pour ne pas écraser la saisie
+    // quand le parent se re-rend (ex. isSubmitting).
+    if (isOpen && !prevIsOpenRef.current) {
+      setFormData(initialData ?? EMPTY_FORM)
+      setTitleError('')
     }
+    prevIsOpenRef.current = isOpen
   }, [isOpen, initialData])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!formData.title.trim()) {
+      setTitleError('Le titre du cadeau est obligatoire.')
+      return
+    }
+    setTitleError('')
     await onSubmit(formData)
   }
 
   const handleInputChange = (field: keyof GiftFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+    if (field === 'title' && value.trim()) setTitleError('')
   }
 
-  if (!isOpen) return null
-
   const isAddMode = mode === 'add'
-  const submitButtonColor = isAddMode ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'
+  const canSubmit = !isSubmitting
+  const hasImagePreview = isHttpUrl(formData.image)
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-2 sm:p-4">
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" onClick={onClose}></div>
-        <div className="relative bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
-          <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-                {isAddMode ? 'Ajouter un nouveau cadeau' : 'Modifier le cadeau'}
-              </h3>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          </div>
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      title={isAddMode ? 'Ajouter un nouveau cadeau' : 'Modifier le cadeau'}
+      description={
+        isAddMode
+          ? 'Renseignez les informations du cadeau à ajouter à votre liste.'
+          : 'Mettez à jour les informations de ce cadeau.'
+      }
+      size="lg"
+      footer={
+        <>
+          <button type="button" className="ds-btn ds-btn--secondary" onClick={onClose}>
+            Annuler
+          </button>
+          <button
+            type="button"
+            className="ds-btn ds-btn--primary"
+            onClick={() => formRef.current?.requestSubmit()}
+            disabled={!canSubmit}
+            aria-busy={isSubmitting || undefined}
+          >
+            {isSubmitting ? (
+              <>
+                <span className="ds-spinner" aria-hidden="true" />
+                {isAddMode ? 'Ajout…' : 'Modification…'}
+              </>
+            ) : (
+              <>
+                <span className="ds-btn__icon" aria-hidden="true">
+                  {isAddMode ? (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 4v16m8-8H4" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  )}
+                </span>
+                {isAddMode ? 'Ajouter le cadeau' : 'Modifier'}
+              </>
+            )}
+          </button>
+        </>
+      }
+    >
+      <form ref={formRef} onSubmit={handleSubmit} className="ds-stack ds-stack--gap-5" noValidate>
+        {/* Section de scraping automatique (uniquement en mode ajout) */}
+        {showScraping && isAddMode && (
+          <div className="ds-alert ds-alert--info">
+            <span className="ds-alert__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </span>
+            <div className="ds-alert__content">
+              <p className="ds-alert__title">
+                Récupération automatique des informations{' '}
+                <span className="ds-badge ds-badge--warning">BETA</span>
+              </p>
+              <p className="ds-alert__message">*Cette fonctionnalité peut ne pas fonctionner.</p>
 
-          <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 text-gray-900">
-            {/* Section de scraping automatique (uniquement en mode ajout) */}
-            {showScraping && isAddMode && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-blue-900 mb-1 flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  Récupération automatique des informations <span className="text-orange-600 ml-1 tracking-wide">BETA*</span>
-                </h4>
-                <p className="text-xs text-orange-600 opacity-75 mb-3">*Cette fonctionnalité peut ne pas fonctionner.</p>
-                <div className="flex gap-2">
+              <div className="ds-field">
+                <label className="ds-label" htmlFor={scrapeUrlId}>
+                  URL du produit à récupérer
+                </label>
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <input
+                    id={scrapeUrlId}
                     type="url"
                     value={scrapingUrl}
                     onChange={(e) => onScrapingUrlChange?.(e.target.value)}
                     placeholder="Collez l'URL du produit (Amazon, Fnac, etc.)"
-                    className="flex-1 px-3 py-2 text-sm border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+                    className="ds-input flex-1"
+                    aria-describedby={scrapeError ? `${scrapeHintId} ${scrapeErrorId}` : scrapeHintId}
+                    aria-invalid={scrapeError ? true : undefined}
                   />
                   <button
                     type="button"
@@ -130,145 +199,141 @@ export default function GiftFormModal({
                       }
                     }}
                     disabled={!scrapingUrl.trim() || isScraping || !onScrape}
-                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    aria-busy={isScraping || undefined}
+                    className="ds-btn ds-btn--secondary"
                   >
                     {isScraping ? (
                       <>
-                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Récupération...
+                        <span className="ds-spinner" aria-hidden="true" />
+                        Récupération…
                       </>
                     ) : (
                       <>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
+                        <span className="ds-btn__icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                        </span>
                         Récupérer
                       </>
                     )}
                   </button>
                 </div>
-                <p className="text-xs text-blue-700 mt-2">
+                <p className="ds-hint" id={scrapeHintId}>
                   Cette fonctionnalité récupère automatiquement le nom, l&apos;image et le prix du produit depuis l&apos;URL fournie.
                 </p>
+                {scrapeError ? (
+                  <p className="ds-error" id={scrapeErrorId} role="alert">
+                    {scrapeError}
+                  </p>
+                ) : null}
               </div>
-            )}
+            </div>
+          </div>
+        )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-                  Titre du cadeau *
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="Ex: Coque iPhone"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
-                  required
-                />
+        <div className="ds-grid">
+          <div className="ds-field">
+            <label className="ds-label" htmlFor={titleId}>
+              Titre du cadeau <span className="ds-label__required" aria-hidden="true">*</span>
+            </label>
+            <input
+              id={titleId}
+              type="text"
+              value={formData.title}
+              onChange={(e) => handleInputChange('title', e.target.value)}
+              placeholder="Ex : Coque iPhone"
+              className="ds-input"
+              required
+              aria-required="true"
+              aria-invalid={titleError ? true : undefined}
+              aria-describedby={titleError ? titleErrorId : undefined}
+            />
+            {titleError ? (
+              <p className="ds-error" id={titleErrorId} role="alert">
+                {titleError}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="ds-field">
+            <label className="ds-label" htmlFor={priceId}>
+              Prix (€)
+            </label>
+            <input
+              id={priceId}
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min={0}
+              value={formData.price}
+              onChange={(e) => handleInputChange('price', e.target.value)}
+              placeholder="29.99"
+              className="ds-input"
+            />
+          </div>
+
+          <div className="ds-field">
+            <label className="ds-label" htmlFor={urlId}>
+              URL du produit
+            </label>
+            <input
+              id={urlId}
+              type="url"
+              value={formData.url}
+              onChange={(e) => handleInputChange('url', e.target.value)}
+              placeholder="https://…"
+              className="ds-input"
+            />
+            <p className="ds-hint">Utilisée pour le bouton « Voir le produit ».</p>
+          </div>
+
+          <div className="ds-field">
+            <label className="ds-label" htmlFor={imageId}>
+              URL de l&apos;image
+            </label>
+            <input
+              id={imageId}
+              type="url"
+              value={formData.image}
+              onChange={(e) => handleInputChange('image', e.target.value)}
+              placeholder="https://…"
+              className="ds-input"
+            />
+            {hasImagePreview ? (
+              <div className="flex items-center gap-3">
+                <div className="ds-avatar ds-avatar--lg">
+                  <Image
+                    src={formData.image.trim()}
+                    alt="Aperçu de l’image du cadeau"
+                    width={56}
+                    height={56}
+                    className="h-full w-full object-cover"
+                    unoptimized
+                  />
+                </div>
+                <p className="ds-hint">Aperçu de l’image</p>
               </div>
-              <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-                  Prix (€)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) => handleInputChange('price', e.target.value)}
-                  placeholder="29.99"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
-                />
-              </div>
-              <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-                  URL du produit
-                </label>
-                <input
-                  type="url"
-                  value={formData.url}
-                  onChange={(e) => handleInputChange('url', e.target.value)}
-                  placeholder="https://..."
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
-                />
-              </div>
-              <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-                  URL de l&apos;image
-                </label>
-                <input
-                  type="url"
-                  value={formData.image}
-                  onChange={(e) => handleInputChange('image', e.target.value)}
-                  placeholder="https://..."
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-                Description
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="Description du cadeau..."
-                rows={3}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-white text-gray-900"
-              />
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4 border-t border-gray-200">
-              <button
-                type="submit"
-                disabled={!formData.title.trim() || isSubmitting}
-                className={`inline-flex items-center justify-center gap-2 px-4 py-2 sm:px-6 sm:py-2 text-sm ${submitButtonColor} text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-1 sm:flex-none`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    {isAddMode ? 'Ajout...' : 'Modification...'}
-                  </>
-                ) : (
-                  <>
-                    {isAddMode ? (
-                      <>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        Ajouter le cadeau
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Modifier
-                      </>
-                    )}
-                  </>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 sm:px-6 sm:py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex-1 sm:flex-none"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                Annuler
-              </button>
-            </div>
-          </form>
+            ) : (
+              <p className="ds-hint">Laissez vide pour utiliser l’icône cadeau par défaut.</p>
+            )}
+          </div>
         </div>
-      </div>
-    </div>
+
+        <div className="ds-field">
+          <label className="ds-label" htmlFor={descriptionId}>
+            Description
+          </label>
+          <textarea
+            id={descriptionId}
+            value={formData.description}
+            onChange={(e) => handleInputChange('description', e.target.value)}
+            placeholder="Description du cadeau…"
+            rows={3}
+            className="ds-textarea"
+          />
+        </div>
+      </form>
+    </Modal>
   )
 }
-
