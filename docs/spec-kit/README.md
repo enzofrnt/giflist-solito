@@ -112,6 +112,7 @@ This repository has multiple worktrees, and local checkouts can lag `origin/main
 
 | Symptom | Fix |
 |---------|-----|
+| `specify integration status` reports `WARNING` with **2 modified managed files** | Expected: `plan-template.md` and `tasks-template.md` are intentionally customized for Giftlist (cross-platform impact, migration plan, verification gates). Everything else must stay `0`. Do not run `integration upgrade --force` without re-applying those customizations. |
 | Agent does not see the skills | Confirm `.claude/skills/` (Claude) and `.agents/skills/` (Codex/DSH) exist; restart the client so it re-scans. |
 | `Not a Spec Kit project` | Run from the repo root that contains `.specify/`. |
 | Scripts not executable | `chmod +x .specify/scripts/bash/*.sh` (should already be executable). |
