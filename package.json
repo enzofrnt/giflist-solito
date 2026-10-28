@@ -21,7 +21,9 @@
     "prepare": "husky",
     "postinstall": "bun run --cwd apps/next db:generate",
     "native:export": "bun run --cwd apps/expo export",
-    "web:lint": "bun run --cwd apps/next lint ."
+    "web:lint": "bun run --cwd apps/next lint .",
+    "native:typecheck": "bun run --cwd apps/expo typecheck",
+    "native:doctor": "bun run --cwd apps/expo doctor"
   },
   "eslintConfig": {
     "extends": "next",
@@ -41,9 +43,9 @@
   "packageManager": "bun@1.4.4",
   "version": "1.0.0",
   "dependencies": {
-    "expo": "~54.0.22",
-    "react": "19.1.0",
-    "react-native": "0.81.5"
+    "expo": "^57.0.17",
+    "react": "19.2.0",
+    "react-native": "0.86.3"
   },
   "engines": {
     "bun": ">=1.4.4 <1.5.0"

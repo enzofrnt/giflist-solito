@@ -7,7 +7,7 @@
 # Giftlist
 
 Monorepo Solito : application web Next.js 16.4.3 dans `apps/next`, application native
-Expo dans `apps/expo`, composants et logique partagés dans `packages/app`.
+Expo SDK 57 dans `apps/expo`, composants et logique partagés dans `packages/app`.
 
 ## Outils
 
@@ -34,8 +34,19 @@ Les environnements Preview et Production doivent utiliser des bases distinctes.
 bun run web:dev       # Next.js avec le runtime Bun
 bun run native        # Metro / Expo avec Bun
 bun run native:export # Bundles Android et iOS, export non interactif
+bun run native:typecheck
+bun run native:doctor
 bun run android      # Générer et lancer l'application Android
 bun run ios          # Générer et lancer l'application iOS
+```
+
+Configurer l’URL de l’API mobile :
+
+```sh
+cp apps/expo/env.example apps/expo/.env
+# iOS simulator: http://localhost:3000
+# Android emulator: http://10.0.2.2:3000
+# Physical device: http://<IP-LAN>:3000
 ```
 
 Pour préparer la base locale :

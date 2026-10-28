@@ -1,16 +1,37 @@
 {
   "expo": {
-    "name": "solito-blank",
-    "slug": "solito-blank",
+    "name": "Giftlist",
+    "slug": "giftlist",
     "version": "1.0.0",
-    "scheme": "solito-blank",
-    "platforms": ["ios", "android"],
+    "scheme": "giftlist",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "ios": {
-      "bundleIdentifier": "com.enzofournet.giflist"
+      "bundleIdentifier": "com.enzofournet.giflist",
+      "supportsTablet": false
     },
-    "newArchEnabled": true,
-    "experiments": {
-      "reactCanary": true
-    }
+    "android": {
+      "package": "com.enzofournet.giflist",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#2563eb"
+      }
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#faf9f7"
+        }
+      ]
+    ]
   }
 }

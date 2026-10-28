@@ -5,7 +5,7 @@
 - **Review page**: `/design-system` (local and Vercel preview; `404` on production, `noindex`)
 - **Feature artifacts**: [`specs/002-ui-design-system/`](../../specs/002-ui-design-system/spec.md)
 - **UI audit (evidence base)**: [ui-audit.md](ui-audit.md)
-- **Screenshots**: [Phase 1](screenshots/) · [Phase 2 pages](screenshots/phase-2/) · [Phase 3 UX](screenshots/phase-3/) · [Phase 4 share/perf](screenshots/phase-4/) · [Phase 5 SEO/list UX](screenshots/phase-5/)
+- **Screenshots**: [Phase 1](screenshots/) · [Phase 2 pages](screenshots/phase-2/) · [Phase 3 UX](screenshots/phase-3/) · [Phase 4 share/perf](screenshots/phase-4/) · [Phase 5 SEO/list UX](screenshots/phase-5/) · [Phase 6 native](screenshots/phase-6/)
 - **Guardrails**: [`scripts/design-system-guard.sh`](../../scripts/design-system-guard.sh)
 
 ## Aperçu
@@ -118,6 +118,15 @@ See [Phase 4 screenshots](screenshots/phase-4/).
 - **Public lists stay noindex** (share-by-link privacy) but get a list-specific OG preview.
 
 See [Phase 5 screenshots](screenshots/phase-5/).
+
+## Phase 6 — Native app (Expo SDK 57)
+
+- Expo SDK 57 / RN 0.86 / React 19.2, app renamed **Giftlist** with icons and `giftlist` scheme.
+- Shared `packages/app/ui` tokens + `Button`, `Card`, `Badge`, `Field`, `Screen`, `AppHeader` with native/web implementations.
+- Native flows: auth, dashboard, manage list (add/delete/share), public list + reservation, profile.
+- Local simulator blocked on this machine: Xcode 27.1 is installed but `Simulator.app`/runtime is missing; Expo export and React Native Web preview pass.
+
+See [Phase 6 native screenshots](screenshots/phase-6/).
 
 ## UX skill
 
