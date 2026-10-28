@@ -13,7 +13,8 @@ export async function POST(request: NextRequest) {
     const user = await userFor(request)
     if (!user) return failure(401)
     const keys = await prisma.passkey.findMany({ where: { userId: user.id }, select: { id: true, rpId: true, createdAt: true, lastUsedAt: true }, orderBy: { createdAt: 'desc' } })
-    return NextResponse.json({ ok: true, keys }, { headers: { 'Cache-Control': 'no-store' } })
+    const { rpId } = passkeyOrigin(request)
+    return NextResponse.json({ ok: true, keys, hasPasskeyForCurrentOrigin: keys.some(key => key.rpId === rpId) }, { headers: { 'Cache-Control': 'no-store' } })
   } catch { return failure() }
 }
 export async function DELETE(request: NextRequest) {

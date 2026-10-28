@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateRegistrationOptions } from '@simplewebauthn/server'
-import { getCurrentUser, verifyPassword } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/auth'
 import { getClientAddress } from '@/lib/auth-request'
 import { takeAuthQuota } from '@/lib/password-reset'
 import { prisma } from '@/lib/prisma'
@@ -13,10 +13,8 @@ export async function POST(request: NextRequest) {
     const current = token && await getCurrentUser(token)
     if (!current) return failure(401)
     if (!await takeAuthQuota('passkey-register', `${current.id}:${getClientAddress(request)}`, 10, 30 * 60 * 1000)) return failure(429)
-    const { password } = await request.json()
-    if (typeof password !== 'string' || password.length > 1024) return failure()
     const user = await prisma.user.findUnique({ where: { id: current.id }, include: { passkeys: true } })
-    if (!user || !await verifyPassword(password, user.password)) return NextResponse.json({ ok: false, error: 'Mot de passe incorrect.' }, { status: 401 })
+    if (!user) return failure(401)
     const options = await generateRegistrationOptions({
       rpName: 'Giftlist', rpID: rpId, userID: new TextEncoder().encode(String(user.id)),
       userName: user.email, userDisplayName: user.name,

@@ -178,17 +178,17 @@ test('password hashes and recovery data are inaccessible to public Data API role
   assert.ok(grants.every(grant => !grant.allowed))
 })
 
-test('passkey registration requires the current password and challenges are single-use and origin-bound', async () => {
+test('passkey registration requires a valid session and challenges are single-use and origin-bound', async () => {
   const account = await user('passkeys@example.com')
   const token = auth.generateToken(account)
   const { POST: options } = await import('../src/app/api/auth/passkeys/register-options/route')
   const { consumeChallenge } = await import('../src/lib/passkeys')
-  const makeRequest = (password: string, origin = 'http://localhost:3000') => new NextRequest('http://localhost:3000/api/auth/passkeys/register-options', {
-    method: 'POST', headers: { origin, authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify({ password }),
+  const makeRequest = (bearer = token, origin = 'http://localhost:3000') => new NextRequest('http://localhost:3000/api/auth/passkeys/register-options', {
+    method: 'POST', headers: { origin, authorization: `Bearer ${bearer}` },
   })
-  assert.equal((await options(makeRequest('wrong'))).status, 401)
-  assert.equal((await options(makeRequest('OldPassword!1', 'https://evil.example'))).status, 400)
-  const response = await options(makeRequest('OldPassword!1'))
+  assert.equal((await options(makeRequest('invalid-token'))).status, 401)
+  assert.equal((await options(makeRequest(token, 'https://evil.example'))).status, 400)
+  const response = await options(makeRequest())
   assert.equal(response.status, 200)
   const cookie = response.headers.get('set-cookie')!.split(';')[0]
   const request = () => new NextRequest('http://localhost:3000/api/auth/passkeys/register-verify', { method: 'POST', headers: { origin: 'http://localhost:3000', cookie } })
@@ -203,9 +203,13 @@ test('passkeys are private to the owning account and removed during password rec
   await prisma.passkey.create({ data: { id: 'test-credential', userId: account.id, rpId: 'localhost', publicKey: Buffer.from([1]), counter: 0, transports: [], deviceType: 'singleDevice', backedUp: false } })
   const { POST: list, DELETE: remove } = await import('../src/app/api/auth/passkeys/manage/route')
   const request = (method: string, who: typeof account, body?: object) => new NextRequest('http://localhost:3000/api/auth/passkeys/manage', { method, headers: { origin: 'http://localhost:3000', authorization: `Bearer ${auth.generateToken(who)}`, 'content-type': 'application/json' }, ...(body ? { body: JSON.stringify(body) } : {}) })
-  assert.equal((await (await list(request('POST', other))).json()).keys.length, 0)
+  const otherKeys = await (await list(request('POST', other))).json()
+  assert.equal(otherKeys.keys.length, 0)
+  assert.equal(otherKeys.hasPasskeyForCurrentOrigin, false)
   assert.equal((await remove(request('DELETE', other, { id: 'test-credential' }))).status, 404)
-  assert.equal((await (await list(request('POST', account))).json()).keys.length, 1)
+  const ownerKeys = await (await list(request('POST', account))).json()
+  assert.equal(ownerKeys.keys.length, 1)
+  assert.equal(ownerKeys.hasPasskeyForCurrentOrigin, true)
   await recovery.requestPasswordReset(account.email)
   assert.ok(await recovery.resetPassword(lastToken(), 'NewPassword!1'))
   assert.equal(await prisma.passkey.count({ where: { userId: account.id } }), 0)
@@ -248,7 +252,7 @@ test('a virtual authenticator can register, log in, and cannot replay its assert
     await page.goto(`http://localhost:${server.port}/`)
     const registration = await page.evaluate(async (authToken) => {
       const headers = { authorization: `Bearer ${authToken}`, 'content-type': 'application/json' }
-      const opts = await (await fetch('/api/auth/passkeys/register-options', { method: 'POST', headers, body: JSON.stringify({ password: 'OldPassword!1' }) })).json()
+      const opts = await (await fetch('/api/auth/passkeys/register-options', { method: 'POST', headers })).json()
       const publicKey = PublicKeyCredential.parseCreationOptionsFromJSON(opts)
       const credential = await navigator.credentials.create({ publicKey }) as PublicKeyCredential
       const response = await fetch('/api/auth/passkeys/register-verify', { method: 'POST', headers, body: JSON.stringify(credential.toJSON()) })

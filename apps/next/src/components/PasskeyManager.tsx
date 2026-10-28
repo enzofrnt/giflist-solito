@@ -12,7 +12,6 @@ const serverSupport = () => false
 
 export default function PasskeyManager() {
   const [keys, setKeys] = useState<Key[]>([])
-  const [password, setPassword] = useState('')
   const supported = useSyncExternalStore(subscribe, browserSupport, serverSupport)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
@@ -39,14 +38,13 @@ export default function PasskeyManager() {
     event.preventDefault()
     setBusy(true); setError(''); setMessage('')
     try {
-      const optionsJSON = await api('register-options', 'POST', { password })
+      const optionsJSON = await api('register-options', 'POST')
       const credential = await startRegistration({ optionsJSON })
       await api('register-verify', 'POST', credential)
-      setPassword('')
       await refresh()
       setMessage('Clé d’accès ajoutée. Vous pouvez maintenant l’utiliser pour vous connecter.')
-    } catch (err) {
-      setError(err instanceof Error && err.message === 'Mot de passe incorrect.' ? err.message : 'Ajout impossible ou annulé. Vérifiez votre appareil et réessayez.')
+    } catch {
+      setError('Ajout impossible ou annulé. Vérifiez votre appareil et réessayez.')
     } finally { setBusy(false) }
   }
 
@@ -71,9 +69,7 @@ export default function PasskeyManager() {
       </li>)}
     </ul>}
     {supported ? <form onSubmit={add} className="space-y-2 mt-4">
-      <label htmlFor="passkey-password" className="block text-sm font-medium text-gray-700">Mot de passe actuel pour ajouter une clé</label>
-      <input id="passkey-password" type="password" autoComplete="current-password" required value={password} onChange={event => setPassword(event.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white" />
-      <button type="submit" disabled={busy || !password} className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 disabled:opacity-50">{busy ? 'Patientez…' : 'Ajouter une clé d’accès'}</button>
+      <button type="submit" disabled={busy} className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 disabled:opacity-50">{busy ? 'Patientez…' : 'Ajouter une clé d’accès'}</button>
     </form> : <p className="mt-3 text-sm text-gray-600">Les clés d’accès ne sont pas disponibles sur ce navigateur ou cette connexion.</p>}
     {message && <p role="status" className="mt-3 text-sm text-green-700">{message}</p>}
     {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}

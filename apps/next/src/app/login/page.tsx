@@ -42,7 +42,7 @@ export default function LoginPage() {
         if (result instanceof Promise) await result
         // Rediriger vers la page des listes avec rechargement complet
         // pour que le AuthContext détecte le token
-        window.location.href = '/dashboard'
+        window.location.href = '/setup-passkey'
       } else {
         setError(data.error || 'Une erreur est survenue');
       }
