@@ -61,8 +61,8 @@
 - [x] T033 Run `bun run web:typecheck`, `bun run web:lint`, `bun run test`, `bun run web:build`, `bun run --cwd apps/expo export`, `./scripts/design-system-guard.sh`.
 - [x] T034 Route smoke: `/`, auth pages, dashboard, profile, admin, public list, manage.
 - [x] T035 Review `git diff` for behavior changes, secrets, raw hex and scope creep.
-- [ ] T036 Commit on `feat/ui-harmonization`, push, open PR with spec link, evidence and before/after screenshots.
-- [ ] T037 Update the Phase 2 spec/tasks with the final evidence and note any known limitation.
+- [x] T036 Commit on `feat/ui-harmonization`, push, open PR with spec link, evidence and before/after screenshots.
+- [x] T037 Update the Phase 2 spec/tasks with the final evidence and note any known limitation.
 
 ## Dependencies
 
