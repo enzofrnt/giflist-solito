@@ -33,13 +33,6 @@ async function handleGet(request: NextRequest, user: User, { params }: { params:
       include: {
         gifts: {
           orderBy: { createdAt: 'desc' }
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
         }
       }
     });
@@ -77,8 +70,7 @@ async function handleGet(request: NextRequest, user: User, { params }: { params:
         shareCode: giftList.shareCode,
         secret: giftList.secret,
         createdAt: giftList.createdAt.toISOString(),
-        updatedAt: giftList.updatedAt.toISOString(),
-        user: giftList.user
+        updatedAt: giftList.updatedAt.toISOString()
       },
       gifts: formattedGifts
     });

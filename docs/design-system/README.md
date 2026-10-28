@@ -5,7 +5,7 @@
 - **Review page**: `/design-system` (local and Vercel preview; `404` on production, `noindex`)
 - **Feature artifacts**: [`specs/002-ui-design-system/`](../../specs/002-ui-design-system/spec.md)
 - **UI audit (evidence base)**: [ui-audit.md](ui-audit.md)
-- **Screenshots**: [Phase 1](screenshots/) · [Phase 2 pages](screenshots/phase-2/) · [Phase 3 UX](screenshots/phase-3/)
+- **Screenshots**: [Phase 1](screenshots/) · [Phase 2 pages](screenshots/phase-2/) · [Phase 3 UX](screenshots/phase-3/) · [Phase 4 share/perf](screenshots/phase-4/)
 - **Guardrails**: [`scripts/design-system-guard.sh`](../../scripts/design-system-guard.sh)
 
 ## Aperçu
@@ -100,6 +100,15 @@ The design system was not enough; Phase 3 fixes the experience:
 - **Process**: `ui-ux-design` skill + Design Charter in the constitution.
 
 See [Phase 3 screenshots](screenshots/phase-3/).
+
+## Phase 4 — Share branding & list performance
+
+- **README**: centered Giftlist logo at the very top.
+- **QR share**: the center is always the Giftlist logo (never the list image), ~23% of the code with error correction H; SVG and downloaded PNG match; decoded successfully with macOS Vision.
+- **List opening**: no auth re-check on every client navigation; dashboard “Gérer” is a prefetchable link; public list reuses the auth context.
+- **API**: public list fetched in one query with no owner email / reservation email exposure; manage list no longer joins the unused user.
+
+See [Phase 4 screenshots](screenshots/phase-4/).
 
 ## UX skill
 

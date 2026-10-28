@@ -6,13 +6,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { shareCode } = await params;
 
+    // Une seule requête : la liste, ses cadeaux et le profil public du propriétaire.
+    // L'email du propriétaire ne doit jamais être exposé publiquement.
     const giftList = await prisma.giftList.findUnique({
       where: { shareCode },
       include: {
+        gifts: {
+          orderBy: { createdAt: 'desc' }
+        },
         user: {
           select: {
             id: true,
-            email: true,
             name: true
           }
         }
@@ -26,10 +30,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       );
     }
 
-    const gifts = await prisma.gift.findMany({
-      where: { giftListId: giftList.id },
-      orderBy: { createdAt: 'desc' }
-    });
+    const gifts = giftList.gifts;
 
     const formattedGifts = gifts.map(gift => ({
       id: gift.id,
@@ -40,7 +41,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       description: gift.description,
       status: gift.status as 'available' | 'reserved',
       reservedByName: gift.reservedByName,
-      reservedByEmail: gift.reservedByEmail,
       reservedAt: gift.reservedAt?.toISOString(),
       createdAt: gift.createdAt.toISOString(),
       updatedAt: gift.updatedAt.toISOString()

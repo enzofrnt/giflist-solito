@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://giftlist.fr" aria-label="Giftlist">
+    <img src="apps/next/public/logo.webp" alt="Giftlist" width="220">
+  </a>
+</p>
+
 # Giftlist
 
 Monorepo Solito : application web Next.js 16.4.3 dans `apps/next`, application native

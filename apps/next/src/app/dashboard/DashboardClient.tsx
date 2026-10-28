@@ -8,6 +8,7 @@ import { useAuthContext } from '@/contexts/AuthContext'
 import { getAuthToken } from 'app/lib/authStorage'
 import type { GiftListWithCount } from 'app/types'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -482,16 +483,12 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
                     </div>
                   </div>
                   <div className="ds-card__footer ds-card__footer--split">
-                    <button
-                      type="button"
-                      className="ds-btn ds-btn--primary"
-                      onClick={() => router.push(`/manage/${list.id}`)}
-                    >
+                    <Link href={`/manage/${list.id}`} className="ds-btn ds-btn--primary">
                       <span className="ds-btn__icon" aria-hidden="true">
                         {GEAR_ICON}
                       </span>
                       Gérer
-                    </button>
+                    </Link>
                     <DropdownMenu
                       label={`Actions pour ${list.title}`}
                       triggerClassName="ds-icon-btn"

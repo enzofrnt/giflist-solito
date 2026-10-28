@@ -7,7 +7,7 @@ import QRCodeDisplay from '@/components/QRCodeDisplay';
 import ReserveDialog, { type ReservePayload } from '@/components/ReserveDialog';
 import SecretModeToggle from '@/components/SecretModeToggle';
 import { useAlert } from '@/hooks/useAlert';
-import { useAuth } from 'app/hooks/useAuth'
+import { useAuthContext } from '@/contexts/AuthContext';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -42,22 +42,13 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
   const [dialogFor, setDialogFor] = useState<Gift | null>(null);
   const [loadingId, setLoadingId] = useState<number | null>(null);
   const [cancellingId, setCancellingId] = useState<number | null>(null);
-  const [user, setUser] = useState<{ id: number; email: string; name?: string } | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareFeedback, setShareFeedback] = useState<{ tone: 'success' | 'danger'; message: string } | null>(null);
   const [hasRevealed, setHasRevealed] = useState(false); // Par défaut, masquer les réservations sur liste secrète
   const router = useRouter();
   const { alert, showSuccess, showError, showConfirm, hideAlert } = useAlert();
 
-  const { user: authUser } = useAuth({
-    noRedirect: true
-  });
-
-  useEffect(() => {
-    if (authUser) {
-      setUser(authUser);
-    }
-  }, [authUser]);
+  const { user } = useAuthContext();
 
   const loadGiftList = useCallback(async () => {
     try {
@@ -480,7 +471,7 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
             </button>
           }
         >
-          <QRCodeDisplay shareCode={giftList.shareCode} listImage={giftList.image} />
+          <QRCodeDisplay shareCode={giftList.shareCode} />
 
           <div className="ds-field">
             <label htmlFor="share-link" className="ds-label">Lien de partage</label>

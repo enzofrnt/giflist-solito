@@ -758,7 +758,7 @@ export default function ManageListPage({ params }: { params: Promise<{ id: strin
             </>
           }
         >
-          <QRCodeDisplay shareCode={giftList.shareCode} listImage={giftList.image} />
+          <QRCodeDisplay shareCode={giftList.shareCode} />
 
           <div className="ds-field">
             <label className="ds-label" htmlFor="share-link">

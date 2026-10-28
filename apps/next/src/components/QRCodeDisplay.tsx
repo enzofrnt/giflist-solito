@@ -7,7 +7,6 @@ interface QRCodeDisplayProps {
   shareCode: string;
   title?: string;
   className?: string;
-  listImage?: string; // Image de la liste pour le QR code
 }
 
 interface QRCodeRef extends QRCodeStyling {
@@ -22,7 +21,7 @@ function readToken(name: string): string | undefined {
   return value || undefined;
 }
 
-export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appareil mobile", className = "", listImage }: QRCodeDisplayProps) {
+export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appareil mobile", className = "" }: QRCodeDisplayProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
@@ -35,15 +34,8 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
     if (shareCode && qrRef.current) {
       setIsGenerating(true);
 
-      // Utiliser l'image de la liste ou le logo par défaut
-      const getCenterImage = () => {
-        if (listImage && listImage.trim()) {
-          return listImage; // Utiliser l'image de la liste si elle existe
-        }
-
-        // Sinon, utiliser le logo par défaut
-        return '/logo.webp';
-      };
+      // Le centre du QR reste toujours le logo de l'application.
+      const getCenterImage = () => '/logo.webp';
 
       // Couleurs issues des tokens du design system (aucune valeur brute ici)
       const ink = readToken('--ds-color-text');
@@ -61,7 +53,7 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
         qrOptions: {
           typeNumber: 0,
           mode: 'Byte',
-          errorCorrectionLevel: 'M'
+          errorCorrectionLevel: 'H'
         },
         dotsOptions: {
           color: ink, // Modules
@@ -80,7 +72,7 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
         },
         imageOptions: {
           hideBackgroundDots: true, // Cache les points derrière l'image
-          imageSize: 0.8, // Taille de l'image (40% du QR code)
+          imageSize: 0.32, // Logo compact, ~25 % du QR, avec correction H
           saveAsBlob: true
         }
       });
@@ -97,7 +89,7 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
         qrOptions: {
           typeNumber: 0,
           mode: 'Byte',
-          errorCorrectionLevel: 'M'
+          errorCorrectionLevel: 'H'
         },
         dotsOptions: {
           color: ink,
@@ -116,7 +108,7 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
         },
         imageOptions: {
           hideBackgroundDots: true,
-          imageSize: 0.8,
+          imageSize: 0.32,
           saveAsBlob: true
         }
       });
@@ -156,7 +148,7 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
         document.body.removeChild(pngContainer);
       }
     };
-  }, [shareCode, listImage]);
+  }, [shareCode]);
 
   // Vérifier si l'API Web Share est disponible
   const canShare = typeof navigator !== 'undefined' && 'share' in navigator;
