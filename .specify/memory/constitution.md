@@ -132,10 +132,37 @@ Canonical versions as of the baseline snapshot; changes require a plan and a con
 - Reviewers MUST verify constitution compliance; deviations require explicit justification in the plan's Complexity Tracking.
 - Do not push directly to `main`; use a branch and PR. Keep commits scoped and messages imperative.
 
+## Design Charter (Porcelain & Cobalt)
+
+Approved by the owner on 2026-10-28; the showcase in `docs/design-system/` is the visual source of truth.
+
+### Brand
+- The real Giftlist logo is the brand mark; never replace it with a letter/monogram where the logo fits.
+- Palette: porcelain canvas, ink text, cobalt primary, coral accent used sparingly for gifting moments only.
+- Typography: Geist Sans/Mono; no Arial fallback in new UI work. Soft warm shadows, 4 px rhythm, 10–14 px radii, 44 px touch targets.
+- The visual system is only half the work: **the flow, hierarchy and action priority must be right before styling**.
+
+### UX non-negotiables
+- Start from the user job and success moment; ONE primary action per view.
+- Primary navigation is grouped with the logo on the left; never centred in the viewport.
+- Account actions collapse into a compact menu opened from the avatar; logout lives inside it, not as a separate header button.
+- Secondary/destructive actions live in an overflow menu, not as equal large buttons on every card.
+- Public lists are about the list and its gifts, not about the Giftlist brand; no brand-dominant hero there.
+- Empty, loading, error, disabled and success states are designed, not left to chance.
+- Mobile uses a compact drawer/sheet, not a full-width page that hides the product.
+- Accessibility (labels, focus, keyboard, dialogs, contrast, reduced motion, touch targets) is part of UX, not an afterthought.
+- Decorative bands, badges or colours must never compensate for an unclear flow.
+
+### Enforcement
+- Every UI/UX change MUST load the `ui-ux-design` skill and include a short UX brief plus a screen/action audit in the feature spec/plan.
+- Features still follow the Spec Kit pipeline; a visual redesign without a UX audit is incomplete.
+- Shared tokens/classes come from `docs/design-system/`; no page-specific visual exceptions without justification.
+- Verify with desktop/tablet/mobile screenshots, keyboard sweep, state checks and the canonical gates before completion.
+
 ## Governance
 
 - This constitution supersedes conflicting conventions. `AGENTS.md`, `CLAUDE.md`, and Spec Kit templates are operational derivatives and MUST stay consistent with it.
 - Amendments are proposed via PR with rationale, a semver version bump, an update to **Last Amended**, and corresponding updates to agent instructions and templates.
 - Version history and ratification date are recorded below. Compliance is checked by `/speckit-analyze` and in code review.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-28 | **Last Amended**: 2026-10-28
+**Version**: 1.1.0 | **Ratified**: 2026-10-28 | **Last Amended**: 2026-10-28
