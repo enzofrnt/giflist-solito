@@ -1,0 +1,175 @@
+@use 'tokens' as *;
+@use 'mixins' as *;
+
+@layer components {
+  .ds-display,
+  .ds-h1,
+  .ds-h2,
+  .ds-h3,
+  .ds-h4 {
+    margin: 0;
+    font-family: var(--ds-font-sans);
+    color: var(--ds-color-text);
+    text-wrap: balance;
+  }
+
+  .ds-display {
+    font-size: var(--ds-text-display);
+    font-weight: var(--ds-weight-semibold);
+    line-height: var(--ds-leading-none);
+    letter-spacing: var(--ds-tracking-tight);
+  }
+
+  .ds-h1 {
+    font-size: var(--ds-text-3xl);
+    font-weight: var(--ds-weight-semibold);
+    line-height: var(--ds-leading-tight);
+    letter-spacing: var(--ds-tracking-tight);
+  }
+
+  .ds-h2 {
+    font-size: var(--ds-text-2xl);
+    font-weight: var(--ds-weight-semibold);
+    line-height: var(--ds-leading-tight);
+    letter-spacing: var(--ds-tracking-snug);
+  }
+
+  .ds-h3 {
+    font-size: var(--ds-text-xl);
+    font-weight: var(--ds-weight-semibold);
+    line-height: var(--ds-leading-snug);
+    letter-spacing: var(--ds-tracking-snug);
+  }
+
+  .ds-h4 {
+    font-size: var(--ds-text-lg);
+    font-weight: var(--ds-weight-semibold);
+    line-height: var(--ds-leading-snug);
+  }
+
+  .ds-body {
+    margin: 0;
+    font-family: var(--ds-font-sans);
+    font-size: var(--ds-text-base);
+    line-height: var(--ds-leading-relaxed);
+    color: var(--ds-color-text);
+  }
+
+  .ds-body-sm {
+    margin: 0;
+    font-family: var(--ds-font-sans);
+    font-size: var(--ds-text-sm);
+    line-height: var(--ds-leading-normal);
+    color: var(--ds-color-text-muted);
+  }
+
+  .ds-label {
+    display: inline-block;
+    font-family: var(--ds-font-sans);
+    font-size: var(--ds-text-sm);
+    font-weight: var(--ds-weight-semibold);
+    line-height: var(--ds-leading-snug);
+    color: var(--ds-color-text);
+  }
+
+  .ds-overline {
+    display: inline-block;
+    font-family: var(--ds-font-sans);
+    font-size: var(--ds-text-xs);
+    font-weight: var(--ds-weight-semibold);
+    line-height: var(--ds-leading-snug);
+    letter-spacing: var(--ds-tracking-wider);
+    text-transform: uppercase;
+    color: var(--ds-color-text-subtle);
+  }
+
+  .ds-caption {
+    font-family: var(--ds-font-sans);
+    font-size: var(--ds-text-xs);
+    line-height: var(--ds-leading-normal);
+    color: var(--ds-color-text-subtle);
+  }
+
+  .ds-mono {
+    font-family: var(--ds-font-mono);
+    font-size: var(--ds-text-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--ds-color-text-muted);
+  }
+
+  .ds-code {
+    padding: 0.15em 0.38em;
+    border: var(--ds-border-hairline) solid var(--ds-color-border);
+    border-radius: var(--ds-radius-xs);
+    background: var(--ds-color-surface-muted);
+    font-family: var(--ds-font-mono);
+    font-size: 0.9em;
+    color: var(--ds-color-text);
+  }
+
+  .ds-link {
+    color: var(--ds-color-primary);
+    font-weight: var(--ds-weight-medium);
+    text-decoration: underline;
+    text-decoration-color: var(--ds-color-primary-soft-border);
+    text-underline-offset: 0.18em;
+    border-radius: var(--ds-radius-xs);
+    @include ds-transition(color, text-decoration-color);
+
+    &:hover {
+      color: var(--ds-color-primary-hover);
+      text-decoration-color: currentColor;
+    }
+
+    &:focus-visible {
+      @include ds-focus-ring;
+    }
+  }
+
+  .ds-text-muted {
+    color: var(--ds-color-text-muted);
+  }
+
+  .ds-text-subtle {
+    color: var(--ds-color-text-subtle);
+  }
+
+  .ds-text-primary {
+    color: var(--ds-color-primary);
+  }
+
+  .ds-text-accent {
+    color: var(--ds-color-accent);
+  }
+
+  .ds-text-danger {
+    color: var(--ds-color-danger);
+  }
+
+  .ds-text-success {
+    color: var(--ds-color-success);
+  }
+
+  .ds-prose {
+    color: var(--ds-color-text-muted);
+    font-size: var(--ds-text-base);
+    line-height: var(--ds-leading-relaxed);
+
+    p {
+      margin: 0;
+    }
+
+    p + p {
+      margin-top: var(--ds-space-4);
+    }
+
+    strong {
+      color: var(--ds-color-text);
+      font-weight: var(--ds-weight-semibold);
+    }
+  }
+
+  .ds-visually-hidden {
+    @include ds-visually-hidden;
+  }
+}

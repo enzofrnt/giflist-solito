@@ -10,6 +10,26 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Bridge Tailwind utilities to the design-system tokens (defined in
+     src/styles/_tokens.scss and loaded globally by layout.tsx).
+     These aliases do not change existing pages; they enable Phase 2. */
+  --color-primary: var(--ds-color-primary);
+  --color-primary-hover: var(--ds-color-primary-hover);
+  --color-primary-soft: var(--ds-color-primary-soft);
+  --color-accent: var(--ds-color-accent);
+  --color-canvas: var(--ds-color-canvas);
+  --color-surface: var(--ds-color-surface);
+  --color-surface-muted: var(--ds-color-surface-muted);
+  --color-ink: var(--ds-color-text);
+  --color-ink-muted: var(--ds-color-text-muted);
+  --color-ink-subtle: var(--ds-color-text-subtle);
+  --color-line: var(--ds-color-border);
+  --color-line-strong: var(--ds-color-border-strong);
+  --color-success: var(--ds-color-success);
+  --color-warning: var(--ds-color-warning);
+  --color-danger: var(--ds-color-danger);
+  --color-info: var(--ds-color-info);
 }
 
 @media (prefers-color-scheme: dark) {
