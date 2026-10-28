@@ -16,6 +16,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  authVersion Int @default(0)
+  passwordResetToken PasswordResetToken?
+
   giftLists GiftList[]
 
   @@index([email])
@@ -64,4 +67,23 @@ model Gift {
   @@index([status])
   @@index([createdAt])
   @@index([giftListId])
+}
+
+// Only SHA-256 fingerprints of recovery secrets are persisted.
+model PasswordResetToken {
+  tokenHash   String   @id
+  userId      Int      @unique
+  authVersion Int
+  expiresAt   DateTime
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+model AuthRateLimit {
+  key       String   @id
+  count     Int
+  expiresAt DateTime
+
+  @@index([expiresAt])
 }

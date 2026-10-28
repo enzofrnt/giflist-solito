@@ -3,7 +3,11 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from './prisma';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+function getJwtSecret() {
+  if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
+  if (process.env.NODE_ENV === 'production') throw new Error('JWT_SECRET must be configured');
+  return 'development-only-secret';
+}
 
 // Réexporter les types pour compatibilité
 export type { AuthResult, User };
@@ -20,13 +24,14 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 }
 
 // Générer un JWT token
-export function generateToken(user: User): string {
+export function generateToken(user: User, authVersion = 0): string {
   return jwt.sign(
     { 
       userId: user.id, 
-      email: user.email 
+      email: user.email,
+      authVersion
     },
-    JWT_SECRET,
+    getJwtSecret(),
     { expiresIn: '7d' }
   );
 }
@@ -34,17 +39,20 @@ export function generateToken(user: User): string {
 interface JwtPayload {
   userId: number;
   email: string;
+  authVersion?: number;
   iat?: number;
   exp?: number;
 }
 
 // Vérifier un JWT token
-export function verifyToken(token: string): { userId: number; email: string } | null {
+export function verifyToken(token: string): { userId: number; email: string; authVersion: number } | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    const decoded = jwt.verify(token, getJwtSecret(), { algorithms: ['HS256'] }) as JwtPayload;
+    if (!Number.isInteger(decoded.userId) || typeof decoded.email !== 'string') return null;
     return {
       userId: decoded.userId,
-      email: decoded.email
+      email: decoded.email,
+      authVersion: decoded.authVersion ?? 0
     };
   } catch {
     return null;
@@ -61,11 +69,12 @@ export async function getCurrentUser(token: string): Promise<User | null> {
     select: {
       id: true,
       email: true,
-      name: true
+      name: true,
+      authVersion: true
     }
   });
 
-  if (!user) return null;
+  if (!user || user.authVersion !== decoded.authVersion) return null;
 
   return {
     id: user.id,
@@ -160,7 +169,7 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
       id: user.id,
       email: user.email,
       name: user.name || ''
-    });
+    }, user.authVersion);
 
     return {
       success: true,

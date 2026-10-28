@@ -1,7 +1,7 @@
 import { validatePassword } from 'app/lib/passwordValidation'
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { generateToken, getCurrentUser } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function PUT(request: NextRequest) {
@@ -13,14 +13,17 @@ export async function PUT(request: NextRequest) {
 
     const token = authHeader.substring(7);
     
-    // Utiliser le même mécanisme que src/lib/auth.ts pour avoir un fallback
-    const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+    const currentUser = await getCurrentUser(token);
+    if (!currentUser) return NextResponse.json({ error: 'Token invalide' }, { status: 401 });
     
     const { currentPassword, newPassword } = await request.json();
 
-    if (!currentPassword || !newPassword) {
+    if (typeof currentPassword !== 'string' || typeof newPassword !== 'string' || !currentPassword || !newPassword) {
       return NextResponse.json({ error: 'Tous les champs sont requis' }, { status: 400 });
+    }
+
+    if (Buffer.byteLength(newPassword, 'utf8') > 72) {
+      return NextResponse.json({ error: 'Le mot de passe est trop long (72 octets maximum).' }, { status: 400 });
     }
 
     // Validation du nouveau mot de passe avec la fonction réutilisable
@@ -31,10 +34,11 @@ export async function PUT(request: NextRequest) {
 
     // Récupérer l'utilisateur avec le mot de passe actuel
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: currentUser.id },
       select: {
         id: true,
-        password: true
+        password: true,
+        authVersion: true
       }
     });
 
@@ -52,24 +56,24 @@ export async function PUT(request: NextRequest) {
     const hashedNewPassword = await bcrypt.hash(newPassword, 12);
 
     // Mettre à jour le mot de passe
-    await prisma.user.update({
-      where: { id: decoded.userId },
-      data: {
-        password: hashedNewPassword
-      }
+    const updated = await prisma.$transaction(async tx => {
+      const result = await tx.user.updateMany({
+        where: { id: user.id, password: user.password, authVersion: user.authVersion },
+        data: { password: hashedNewPassword, authVersion: { increment: 1 } }
+      });
+      if (result.count === 1) await tx.passwordResetToken.deleteMany({ where: { userId: user.id } });
+      return result.count;
     });
+    if (updated !== 1) return NextResponse.json({ error: 'Votre mot de passe a changé. Reconnectez-vous.' }, { status: 401 });
 
     return NextResponse.json({ 
       success: true,
-      message: 'Mot de passe modifié avec succès'
+      message: 'Mot de passe modifié avec succès',
+      token: generateToken(currentUser, user.authVersion + 1)
     });
 
   } catch (error) {
     console.error('Erreur changement mot de passe:', error);
-    
-    if (error instanceof jwt.JsonWebTokenError) {
-      return NextResponse.json({ error: 'Token invalide' }, { status: 401 });
-    }
     
     return NextResponse.json({ 
       error: 'Erreur lors du changement de mot de passe' 
