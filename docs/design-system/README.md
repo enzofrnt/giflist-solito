@@ -124,7 +124,8 @@ See [Phase 5 screenshots](screenshots/phase-5/).
 - Expo SDK 57 / RN 0.86 / React 19.2, app renamed **Giftlist** with icons and `giftlist` scheme.
 - Shared `packages/app/ui` tokens + `Button`, `Card`, `Badge`, `Field`, `Screen`, `AppHeader` with native/web implementations.
 - Native flows: auth, dashboard, manage list (add/delete/share), public list + reservation, profile.
-- Local simulator blocked on this machine: Xcode 27.1 is installed but `Simulator.app`/runtime is missing; Expo export and React Native Web preview pass.
+- iOS 27.1 simulator runtime installed; release build runs on iPhone 17 Pro; home/login/dashboard/manage/public-list screens verified (see native screenshots).
+- EAS project creation still needs `eas login`.
 
 See [Phase 6 native screenshots](screenshots/phase-6/).
 

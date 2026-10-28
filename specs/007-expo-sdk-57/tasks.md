@@ -21,5 +21,5 @@
 
 ## Phase 4: Verification
 
-- [ ] T011 Simulator smoke blocked: missing Simulator.app/runtime; Expo export + web gates pass.
-- [ ] T012 Commit/push/open PR; merge only after simulator validation.
+- [x] T011 Simulator smoke: release build installed/launched; home/login/dashboard/manage/public verified with mock API.
+- [ ] T012 Commit/push/open PR; merge after final gates.

@@ -39,14 +39,21 @@
 
 Home, Login, Register, Dashboard (create list), Manage list (list gifts, add/delete, share), Public list (load by share code, reserve), Profile/logout. Loading/error/empty states included.
 
-## Runtime evidence / blocker
+## Runtime evidence (native iOS simulator)
 
-- Expo web preview of the native Home rendered (React Native Web) with the Giftlist copy/CTA; screenshots `docs/design-system/screenshots/phase-6/mobile-home.jpg` and `mobile-login.jpg`.
-- **Native iOS simulator could not be launched on this machine**: Xcode 27.1 is present, but `/Applications/Xcode.app/Contents/Developer/Applications/Simulator.app` is absent and `xcrun simctl list` hangs; `open -a Simulator` reports “Unable to find application named 'Simulator'”. A full Xcode simulator runtime (or Expo Simulators access) is required for the native runtime smoke.
+- iOS 27.1 runtime installed; iPhone 17 Pro simulator booted.
+- `expo run:ios --configuration Release` built, installed and launched `com.enzofournet.giflist` successfully.
+- Native flows exercised with idb + a local mock API:
+  - Home renders (screenshot `native-home.jpg`).
+  - Login form → submit → Dashboard with list (screenshots `native-login.jpg`, `native-dashboard.jpg`).
+  - Gérer la liste → Manage screen with gift (screenshot `native-manage.jpg`).
+  - Deep link `giftlist://list/DEMO` → Public list screen (screenshot `native-public.jpg`).
+  - Reservation modal opened; keyboard interaction verified.
+- Native AsyncStorage token persistence fixed via `authStorage.native.ts` after the first login attempt exposed a missing-token bug.
 - No physical-device test was performed.
 
 ## Follow-up required
 
-1. Install the iOS simulator runtime / full Xcode app (or obtain Expo Simulators access).
-2. `eas login` + `eas build:configure` to associate the EAS project.
-3. Run login/dashboard/manage/public flows on the simulator; then merge/deploy the mobile build.
+1. `eas login` + `eas build:configure` to associate the EAS project (not done).
+2. Normal EAS/TestFlight builds, once the account is connected.
+3. Optional: exercise reservation confirmation and profile/logout end-to-end on a physical device.
