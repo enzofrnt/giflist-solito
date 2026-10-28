@@ -20,7 +20,8 @@
     "ios": "bun run --cwd apps/expo ios",
     "prepare": "husky",
     "postinstall": "bun run --cwd apps/next db:generate",
-    "native:export": "bun run --cwd apps/expo export"
+    "native:export": "bun run --cwd apps/expo export",
+    "web:lint": "bun run --cwd apps/next lint ."
   },
   "eslintConfig": {
     "extends": "next",

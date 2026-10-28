@@ -43,15 +43,6 @@ export default function AdminPage() {
   const router = useRouter();
   const { alert, showSuccess, showError, showConfirm, hideAlert } = useAlert();
 
-  useEffect(() => {
-    const authStatus = localStorage.getItem('admin_authenticated');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
-      fetchGifts();
-    }
-    setIsLoading(false);
-  }, []);
-
   const fetchGifts = async () => {
     try {
       const response = await fetch('/api/gift');
@@ -63,6 +54,15 @@ export default function AdminPage() {
       console.error('Erreur lors du chargement des cadeaux:', error);
     }
   };
+
+  useEffect(() => {
+    const authStatus = localStorage.getItem('admin_authenticated');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
+      fetchGifts();
+    }
+    setIsLoading(false);
+  }, []);
 
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

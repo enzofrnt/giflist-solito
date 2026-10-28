@@ -4,7 +4,7 @@
 
 - Projet : `giflist-solito`.
 - Root Directory : `apps/next`.
-- Framework : Next.js.
+- Framework : Next.js 16.4.3 (Webpack pour les alias Solito / React Native).
 - Configuration versionnée : `apps/next/vercel.json`.
 - Installation : `cd ../.. && bun install --frozen-lockfile`.
 - Build : `bun run build:vercel`.

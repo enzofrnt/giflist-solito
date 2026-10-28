@@ -1,6 +1,6 @@
 # Giftlist
 
-Monorepo Solito : application web Next.js dans `apps/next`, application native
+Monorepo Solito : application web Next.js 16.4.3 dans `apps/next`, application native
 Expo dans `apps/expo`, composants et logique partagés dans `packages/app`.
 
 ## Outils
@@ -78,3 +78,7 @@ versionnées, puis build Next.js sous Bun. Les fonctions utilisent le runtime
 Les branches Git déclenchent une preview sur la base de développement. Voir
 [le guide de déploiement](apps/next/DEPLOYMENT.md) et
 [la réinitialisation des mots de passe](apps/next/PASSWORD_RESET.md).
+
+Next.js 16 utilise explicitement Webpack pour conserver la résolution des
+modules `.web.*` et l’alias React Native de Solito. React 19.1 reste commun aux
+applications web et Expo, conformément à leurs dépendances compatibles.
