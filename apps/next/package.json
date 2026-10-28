@@ -30,9 +30,10 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/qrcode": "^1.5.5",
     "@vercel/speed-insights": "^1.2.0",
+    "app": "workspace:*",
     "bcryptjs": "^3.0.2",
     "jsonwebtoken": "^9.0.2",
-    "next": "15.5.2",
+    "next": "15.5.28",
     "puppeteer": "^24.20.0",
     "qr-code-styling": "^1.9.2",
     "qrcode": "^1.5.4",
@@ -42,8 +43,7 @@
     "react-native": "0.81.5",
     "react-native-svg": "^15.14.0",
     "react-native-web": "^0.21.2",
-    "zod": "^4.1.5",
-    "app": "workspace:*"
+    "zod": "^4.1.5"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.13",
@@ -54,7 +54,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.5.2",
+    "eslint-config-next": "15.5.28",
     "prisma": "^6.16.0",
     "tailwindcss": "^4",
     "typescript": "^5"
