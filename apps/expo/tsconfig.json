@@ -1,3 +1,10 @@
 {
-  "extends": "../../tsconfig"
+  "extends": "../../tsconfig",
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "skipLibCheck": true,
+    "types": [
+      "node"
+    ]
+  }
 }
