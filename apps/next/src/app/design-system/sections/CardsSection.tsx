@@ -1,4 +1,4 @@
-import { Section, Specimen } from './Section'
+import { Section } from './Section'
 import { ArrowRightIcon, GiftIcon } from './icons'
 
 export function CardsSection() {

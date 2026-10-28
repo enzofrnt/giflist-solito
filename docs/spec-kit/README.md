@@ -47,7 +47,7 @@ Spec Kit installs two full copies of the ten `speckit-*` skills: `.claude/skills
 
 The script removes/recreates the links and verifies each one resolves to a readable `SKILL.md`. Never edit files under `.claude/skills` or `.agents/skills` by hand: update the canonical `.agents` copy (or upgrade Spec Kit) and re-link.
 
-> Trade-off: `specify integration status` reports the 10 Claude skills as “modified” because the symlinked target carries the canonical Codex/DSH format instead of Spec Kit's Claude copy. That is expected (see Troubleshooting). Before running `specify integration upgrade --force`, remove the links first (or run the upgrade and then the sync script) so the upgrade cannot write through a link into the canonical copy.
+> Trade-off: `specify integration status` reports the 10 Claude Spec Kit skills as “modified” because the symlinked target carries the canonical Codex/DSH format instead of Spec Kit's Claude copy. That is expected (see Troubleshooting). The project also ships an unmanaged `ui-ux-design` skill linked the same way. Before running `specify integration upgrade --force`, remove the links first (or run the upgrade and then the sync script) so the upgrade cannot write through a link into the canonical copy.
 
 ## The working agreement
 
@@ -131,7 +131,7 @@ This repository has multiple worktrees, and local checkouts can lag `origin/main
 
 | Symptom | Fix |
 |---------|-----|
-| `specify integration status` reports `WARNING` with **12 modified managed files** (10 Claude + 2 shared) | Expected and intentional: the 10 `.claude/skills/speckit-*` entries are symlinks to the canonical `.agents` copies, and `plan-template.md` / `tasks-template.md` are customized for Giftlist. `Missing managed files` and `Invalid manifest paths` must stay `0`. Do not run `integration upgrade --force` without re-applying the template customizations and re-running the skill-link sync. |
+| `specify integration status` reports `WARNING` with **12 modified managed files** (10 Claude + 2 shared) | Expected and intentional: the 10 `.claude/skills/speckit-*` entries are symlinks to the canonical `.agents` copies, and `plan-template.md` / `tasks-template.md` are customized for Giftlist. The custom `ui-ux-design` skill is linked too but is not tracked by the integration manifest. `Missing managed files` and `Invalid manifest paths` must stay `0`. Do not run `integration upgrade --force` without re-applying the template customizations and re-running the skill-link sync. |
 | Agent does not see the skills | Confirm `.agents/skills/` exists and `.claude/skills/speckit-*` links resolve (`./.specify/scripts/bash/sync-claude-skill-links.sh`); restart the client so it re-scans. |
 | `Not a Spec Kit project` | Run from the repo root that contains `.specify/`. |
 | Scripts not executable | `chmod +x .specify/scripts/bash/*.sh` (should already be executable). |

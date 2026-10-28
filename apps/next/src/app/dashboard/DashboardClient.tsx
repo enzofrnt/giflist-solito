@@ -1,6 +1,7 @@
 'use client'
 
 import AlertModal from '@/components/AlertModal'
+import { DropdownMenu } from '@/components/DropdownMenu'
 import EditListModal from '@/components/EditListModal'
 import { useAlert } from '@/hooks/useAlert'
 import { useAuthContext } from '@/contexts/AuthContext'
@@ -30,18 +31,6 @@ const GEAR_ICON = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
     <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-  </svg>
-)
-
-const PENCIL_ICON = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-  </svg>
-)
-
-const TRASH_ICON = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
   </svg>
 )
 
@@ -492,7 +481,7 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
                       <span>Créée le {new Date(list.createdAt).toLocaleDateString('fr-FR')}</span>
                     </div>
                   </div>
-                  <div className="ds-card__footer">
+                  <div className="ds-card__footer ds-card__footer--split">
                     <button
                       type="button"
                       className="ds-btn ds-btn--primary"
@@ -503,34 +492,26 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
                       </span>
                       Gérer
                     </button>
-                    <button
-                      type="button"
-                      className="ds-btn ds-btn--secondary"
-                      onClick={() => openEditModal(list)}
-                    >
-                      <span className="ds-btn__icon" aria-hidden="true">
-                        {PENCIL_ICON}
-                      </span>
-                      Modifier
-                    </button>
-                    <button
-                      type="button"
-                      className={`ds-btn ds-btn--danger${deleting === list.id ? ' ds-btn--loading' : ''}`}
-                      onClick={() => confirmDelete(list)}
-                      disabled={deleting === list.id}
-                      aria-busy={deleting === list.id || undefined}
-                    >
-                      {deleting === list.id ? (
-                        <span className="ds-spinner" aria-hidden="true" />
-                      ) : (
-                        <span className="ds-btn__icon" aria-hidden="true">
-                          {TRASH_ICON}
-                        </span>
-                      )}
-                      <span className="ds-btn__label">
-                        {deleting === list.id ? 'Suppression…' : 'Supprimer'}
-                      </span>
-                    </button>
+                    <DropdownMenu
+                      label={`Actions pour ${list.title}`}
+                      triggerClassName="ds-icon-btn"
+                      trigger={
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+                          <circle cx="5" cy="12" r="1" fill="currentColor" />
+                          <circle cx="12" cy="12" r="1" fill="currentColor" />
+                          <circle cx="19" cy="12" r="1" fill="currentColor" />
+                        </svg>
+                      }
+                      items={[
+                        { label: 'Modifier la liste', onSelect: () => openEditModal(list) },
+                        {
+                          label: deleting === list.id ? 'Suppression…' : 'Supprimer la liste',
+                          danger: true,
+                          disabled: deleting === list.id,
+                          onSelect: () => confirmDelete(list),
+                        },
+                      ]}
+                    />
                   </div>
                 </article>
               ))}

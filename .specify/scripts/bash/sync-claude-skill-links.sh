@@ -24,7 +24,7 @@ fi
 mkdir -p "$ADAPTER"
 
 linked=0
-for dir in "$CANON"/speckit-*; do
+for dir in "$CANON"/*; do
   [ -d "$dir" ] || continue
   name="$(basename "$dir")"
   if [ ! -f "$dir/SKILL.md" ]; then
@@ -38,12 +38,12 @@ for dir in "$CANON"/speckit-*; do
 done
 
 if [ "$linked" -eq 0 ]; then
-  echo "error: no .agents/skills/speckit-* directories found" >&2
+  echo "error: no .agents/skills/* directories found" >&2
   exit 1
 fi
 
 # Verify every adapter is a link that resolves to a readable SKILL.md.
-for link in "$ADAPTER"/speckit-*; do
+for link in "$ADAPTER"/*; do
   [ -L "$link" ] || { echo "error: not a symlink: $link" >&2; exit 1; }
   [ -f "$link/SKILL.md" ] || { echo "error: broken link: $link" >&2; exit 1; }
 done
