@@ -32,6 +32,12 @@ Ajouter aussi `JWT_SECRET`. Pour les e-mails de récupération, configurer
 Voir [PASSWORD_RESET.md](PASSWORD_RESET.md). Les secrets restent dans Vercel ou
 un fichier `.env` ignoré par Git.
 
+Une clé JWT distincte est configurée pour la branche `codex/bun-migration` en
+Preview. Vercel capture les variables lors de la création du déploiement : après
+une modification de configuration, un nouveau push doit déclencher une nouvelle
+preview pour qu’elle prenne effet. Les variables d’envoi d’e-mails Preview restent
+à renseigner séparément pour tester la récupération par e-mail.
+
 ## Build de déploiement
 
 `scripts/build-vercel.mjs` exécute sous Bun :
