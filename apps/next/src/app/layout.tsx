@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "@/styles/index.scss";
+import { DEFAULT_DESCRIPTION, OG_IMAGE, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,40 +18,62 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://gift.enzo-frnt.fr'),
-  title: "Liste de cadeaux 🎁",
-  description: "Application de gestion de liste de cadeaux",
-  icons: {
-    icon: '/logo.webp',
-    shortcut: '/logo.webp',
-    apple: '/logo.webp',
+  metadataBase: new URL(SITE_URL),
+  applicationName: SITE_NAME,
+  title: {
+    default: "Giftlist — listes de cadeaux à partager",
+    template: `%s · ${SITE_NAME}`,
+  },
+  description: DEFAULT_DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
   openGraph: {
-    title: "Liste de cadeaux 🎁",
-    description: "Application de gestion de liste de cadeaux",
-    images: [
-      {
-        url: '/logo.webp',
-        width: 1200,
-        height: 1400,
-        alt: 'Photo de profil - Liste de cadeaux',
-      },
-    ],
-    locale: 'fr_FR',
-    type: 'website',
+    type: "website",
+    locale: "fr_FR",
+    url: "/",
+    siteName: SITE_NAME,
+    title: "Giftlist — listes de cadeaux à partager",
+    description: DEFAULT_DESCRIPTION,
+    images: [OG_IMAGE],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: "Liste de cadeaux 🎁",
-    description: "Application de gestion de liste de cadeaux",
-    images: ['/logo.webp'],
+    card: "summary_large_image",
+    title: "Giftlist — listes de cadeaux à partager",
+    description: DEFAULT_DESCRIPTION,
+    images: [OG_IMAGE.url],
   },
+  manifest: "/manifest.webmanifest",
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: SITE_URL,
+      description: DEFAULT_DESCRIPTION,
+      inLanguage: "fr-FR",
+    },
+    {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: `${SITE_URL}/icons/icon-512.png`,
+    },
+  ],
 };
 
 export const viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
-  viewportFit: 'cover',
+  viewportFit: "cover",
+  themeColor: "#faf9f7",
 };
 
 export default function RootLayout({
@@ -63,6 +86,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <AuthProvider>
           <AppChrome>{children}</AppChrome>
           <SpeedInsights />

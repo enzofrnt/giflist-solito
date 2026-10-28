@@ -1,9 +1,14 @@
 import type { Metadata } from 'next'
 import PasswordRecoveryForm from '@/components/PasswordRecoveryForm'
+import { pageMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = {
-  title: 'Mot de passe oublié | Giftlist',
-  robots: { index: false, follow: false },
+  ...pageMetadata({
+    title: 'Mot de passe oublié',
+    description: 'Recevez un lien sécurisé pour réinitialiser votre mot de passe Giftlist.',
+    path: '/forgot-password',
+    private: true,
+  }),
   referrer: 'no-referrer',
 }
 

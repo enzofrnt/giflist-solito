@@ -345,16 +345,18 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
                             alt={g.title}
                             width={480}
                             height={320}
-                            className="h-44 w-full object-contain"
+                            className="h-36 w-full rounded-md bg-[var(--ds-color-surface-muted)] object-contain p-2"
                             unoptimized
                           />
                         ) : (
-                          <div className="flex h-32 items-center justify-center rounded-md bg-[var(--ds-color-surface-muted)]" aria-hidden="true">
-                            <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <div className="flex h-24 items-center justify-center rounded-md bg-[var(--ds-color-surface-muted)]" aria-hidden="true">
+                            <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                             </svg>
                           </div>
                         )}
+
+                        <h3 className="ds-card__title">{g.title}</h3>
 
                         <div className="ds-cluster">
                           {g.price != null ? (
@@ -369,10 +371,8 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
                           />
                         </div>
 
-                        <h3 className="ds-card__title">{g.title}</h3>
-
                         {g.description ? (
-                          <p className="ds-body-sm">{g.description}</p>
+                          <p className="ds-body-sm line-clamp-3">{g.description}</p>
                         ) : null}
 
                         {g.url ? (
