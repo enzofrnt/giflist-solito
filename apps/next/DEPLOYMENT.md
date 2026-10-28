@@ -1,145 +1,72 @@
-# 🚀 Guide de déploiement
+# Déploiement Giftlist sur Vercel
 
-## Configuration hybride SQLite/PostgreSQL
+## Configuration du projet
 
-### 🏠 **Développement local (SQLite)**
-```bash
-# Variables d'environnement
-DATABASE_URL="file:./dev.db"
-NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+- Projet : `giflist-solito`.
+- Root Directory : `apps/next`.
+- Framework : Next.js.
+- Configuration versionnée : `apps/next/vercel.json`.
+- Installation : `cd ../.. && bun install --frozen-lockfile`.
+- Build : `bun run build:vercel`.
+- Runtime des fonctions : Bun `1.4.x`.
 
-# Commandes
-pnpm dev                    # Démarrer en mode dev
-pnpm db:push               # Synchroniser la DB SQLite
-pnpm db:generate           # Générer le client Prisma
+Bun 1.4.4 est la version de référence du monorepo (`packageManager` et
+`.bun-version`). Le fichier `bun.lock` est le seul lockfile. Ne pas ajouter de
+lockfile npm, pnpm ou Yarn. L’installation génère le client Prisma sans ouvrir
+une connexion à la base de données.
+
+## Bases et environnements
+
+Les variables Vercel sont propres à chaque environnement. Preview et Development
+pointent sur `Gift-dev`, Production sur `Gift-Production`. Ne pas recopier les
+identifiants de production dans une preview.
+
+Variables de connexion serveur :
+
+- `POSTGRES_PRISMA_URL` : connexion Prisma utilisée par l’application.
+- `DATABASE_URL` : alternative si `POSTGRES_PRISMA_URL` n’est pas définie.
+- `POSTGRES_URL_NON_POOLING` : connexion directe pour les migrations, si disponible.
+
+Ajouter aussi `JWT_SECRET`. Pour les e-mails de récupération, configurer
+`RESEND_API_KEY`, `EMAIL_FROM` et `APP_URL` dans chaque environnement concerné.
+Voir [PASSWORD_RESET.md](PASSWORD_RESET.md). Les secrets restent dans Vercel ou
+un fichier `.env` ignoré par Git.
+
+## Build de déploiement
+
+`scripts/build-vercel.mjs` exécute sous Bun :
+
+1. `prisma migrate deploy` sur la base de **cet environnement**, avec un délai
+   maximal de 120 secondes. La connexion non poolée est prioritaire, puis
+   `DATABASE_URL`, puis `POSTGRES_PRISMA_URL`.
+2. La génération du client à partir de `prisma/schema.production.prisma`.
+3. `next build` avec le runtime Bun.
+
+Le build échoue si la migration échoue ou si une connexion de base manque sur
+Vercel. Il n’utilise aucun `db push`, reset ou mécanisme acceptant une perte de
+données. Les schémas PostgreSQL local et production restent identiques ; aucune
+base SQLite n’est utilisée.
+
+Le build local `bun run web:build` génère le client et compile le web sans lancer
+de migration. Le build ne recopie et ne modifie plus les schémas Prisma.
+
+## Commandes
+
+Depuis la racine du dépôt :
+
+```sh
+bun install --frozen-lockfile
+bun run test
+bun run web:typecheck
+bun run web:build
+
+# Migrations locales : vérifier sa connexion avant de lancer ces commandes
+bun run --cwd apps/next db:migrate:dev --name description
+bun run --cwd apps/next db:migrate:create --name description
+bun run --cwd apps/next db:migrate
 ```
 
-### 🌐 **Production Vercel (PostgreSQL)**
-
-#### Variables d'environnement requises dans Vercel :
-- `POSTGRES_PRISMA_URL` : URL de connexion PostgreSQL pour Prisma (format pooling)
-- `DATABASE_URL` : URL de connexion PostgreSQL (alternative, utilisée en fallback)
-- `NEXT_PUBLIC_BASE_URL` : URL de votre application Vercel
-- `JWT_SECRET` : Clé secrète pour les tokens JWT
-
-#### Processus de déploiement automatique :
-
-1. **Copie du schéma de production** : Le script `build.sh` copie `schema.production.prisma` vers `schema.prisma`
-
-2. **Génération du client Prisma** : Le client Prisma est généré avec le schéma PostgreSQL
-
-3. **Synchronisation de la base de données** :
-   - Si des migrations existent dans `prisma/migrations/` : utilisation de `prisma migrate deploy`
-   - Sinon : utilisation de `prisma db push` pour synchroniser le schéma directement
-
-4. **Build Next.js** : Compilation de l'application
-
-#### 📋 **Étapes de déploiement Vercel**
-
-### 1. **Préparer la base de données PostgreSQL**
-- Créer un projet sur [Supabase](https://supabase.com) ou [Vercel Postgres](https://vercel.com)
-- Copier l'URL de connexion PostgreSQL
-- Pour Supabase : utiliser l'URL de connexion directe (non-pooling) dans `DATABASE_URL`
-- Pour Vercel Postgres : utiliser `POSTGRES_PRISMA_URL` qui est automatiquement configuré
-
-### 2. **Configurer Vercel**
-- Aller sur [vercel.com](https://vercel.com)
-- Importer votre projet GitHub
-- Ajouter les variables d'environnement :
-  - `POSTGRES_PRISMA_URL` = URL PostgreSQL (format Prisma)
-  - `DATABASE_URL` = URL PostgreSQL (alternative, fallback)
-  - `NEXT_PUBLIC_BASE_URL` = URL de votre app Vercel
-  - `JWT_SECRET` = Clé secrète pour les tokens (générer avec `openssl rand -base64 32`)
-
-### 3. **Déployer**
-- Vercel détecte automatiquement Next.js
-- Le script `build.sh` est exécuté automatiquement
-- Les migrations sont appliquées automatiquement pendant le build
-- La base de données est synchronisée avec le schéma
-
-## 🔧 **Commandes utiles**
-
-```bash
-# Développement local
-pnpm dev
-
-# Build local pour tester
-pnpm build
-
-# Générer client Prisma (local)
-pnpm db:generate
-
-# Synchroniser DB (local - SQLite)
-pnpm db:push
-
-# Créer une migration (production)
-# Sur votre machine locale, avec DATABASE_URL pointant vers PostgreSQL :
-cp prisma/schema.production.prisma prisma/schema.prisma
-npx prisma migrate dev --name init
-
-# Appliquer les migrations (production)
-pnpm db:migrate
-```
-
-## 📁 **Structure des fichiers**
-
-```
-prisma/
-├── schema.prisma           # Schema copié depuis schema.production.prisma pendant le build
-├── schema.production.prisma # Schema PostgreSQL (production)
-├── migrations/             # Migrations Prisma (optionnel, créé avec migrate dev)
-└── dev.db                  # Base SQLite locale
-
-build.sh                    # Script de build pour Vercel
-vercel.json                 # Configuration Vercel
-env.example                 # Variables d'environnement
-```
-
-## 🗄️ **Gestion des migrations**
-
-### ✅ Migrations créées et versionnées
-
-Le projet utilise maintenant **des migrations Prisma versionnées** pour gérer l'évolution de la base de données PostgreSQL en production. Les migrations sont stockées dans `prisma/migrations/` et doivent être versionnées dans Git.
-
-### 📦 Créer une nouvelle migration
-
-Quand vous modifiez `schema.production.prisma`, créez une nouvelle migration :
-
-```bash
-# Option 1 : Créer et appliquer la migration (si vous avez accès à une DB PostgreSQL)
-pnpm db:migrate:dev --name nom_de_la_migration
-
-# Option 2 : Créer uniquement la migration (sans l'appliquer)
-pnpm db:migrate:create --name nom_de_la_migration
-```
-
-**Important** : Les migrations créées doivent être committées dans Git :
-```bash
-git add prisma/migrations/
-git commit -m "Add migration: description"
-```
-
-### 🚀 Déploiement avec migrations
-
-Le script `build.sh` applique automatiquement les migrations lors du déploiement sur Vercel :
-- Si des migrations existent : `prisma migrate deploy` est utilisé (recommandé)
-- Si aucune migration n'existe : `prisma db push` est utilisé comme fallback
-
-### ⚠️ Migration initiale
-
-La migration initiale (`20250101000000_init`) crée toutes les tables, index et contraintes nécessaires. Elle sera automatiquement appliquée lors du premier déploiement.
-
-### 🔄 Workflow recommandé
-
-1. **Modifier** `prisma/schema.production.prisma`
-2. **Créer une migration** : `pnpm db:migrate:create --name description`
-3. **Vérifier** le fichier SQL généré dans `prisma/migrations/`
-4. **Commit** la migration : `git add prisma/migrations/ && git commit -m "Add migration: description"`
-5. **Déployer** : Les migrations sont appliquées automatiquement sur Vercel
-
-## ⚠️ **Notes importantes**
-
-- Le script `build.sh` gère automatiquement les migrations pendant le déploiement
-- Si `POSTGRES_PRISMA_URL` ou `DATABASE_URL` n'est pas défini, la synchronisation est ignorée
-- Les migrations sont appliquées avant le build Next.js
-- En cas d'échec des migrations, le build échoue pour éviter des déploiements avec une DB non synchronisée
+Les migrations versionnées sont stockées dans `apps/next/prisma/migrations`.
+Garder `schema.prisma` et `schema.production.prisma` synchronisés et committer la
+migration avec les deux schémas. Les previews sont déclenchées par un push Git,
+sans commande de déploiement manuelle.

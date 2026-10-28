@@ -32,7 +32,7 @@ dans Cloudflare. Conserver les CNAME d’envoi en mode DNS uniquement.
    base cible, **avant** de déployer le nouveau serveur :
 
    ```sh
-   pnpm --dir apps/next db:migrate
+   bun run --cwd apps/next db:migrate
    ```
 
    Cette commande applique **toutes** les migrations en attente.
@@ -90,10 +90,10 @@ transmis par un client.
 ## Vérification
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm --dir apps/next test:password-reset
-pnpm --dir apps/next exec tsc --noEmit
-pnpm --dir apps/next exec next build
+bun install --frozen-lockfile
+bun run test
+bun run web:typecheck
+bun run web:build
 ```
 
 Les tests démarrent un Postgres PGlite en mémoire, appliquent les migrations,

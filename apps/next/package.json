@@ -3,25 +3,26 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test:password-reset": "prisma generate && tsx --test tests/password-reset.test.ts",
-    "dev": "NODE_OPTIONS='--inspect' next dev --turbopack",
-    "dev:debug": "NODE_OPTIONS='--inspect' next dev --turbopack",
-    "dev:no-debug": "next dev --turbopack",
-    "build": "cp prisma/schema.production.prisma prisma/schema.prisma && prisma generate && next build",
-    "start": "next start",
-    "lint": "eslint",
-    "postinstall": "prisma generate",
-    "db:push": "prisma db push",
-    "db:migrate": "prisma migrate deploy",
-    "db:generate": "prisma generate",
-    "db:migrate:dev": "prisma migrate dev",
-    "db:migrate:create": "prisma migrate dev --create-only",
-    "db:migrate:reset": "prisma migrate reset",
-    "db:studio": "prisma studio",
+    "test:password-reset": "bun run db:generate && bun test tests/password-reset.test.ts",
+    "dev": "bun run --bun next dev --turbopack",
+    "dev:debug": "bun --inspect run --bun next dev --turbopack",
+    "dev:no-debug": "bun run dev",
+    "build": "bun run db:generate && bun run --bun next build",
+    "start": "bun run --bun next start",
+    "lint": "bun run --bun eslint",
+    "db:push": "bun run --bun prisma db push",
+    "db:migrate": "bun run --bun prisma migrate deploy",
+    "db:generate": "bun run --bun prisma generate --schema prisma/schema.production.prisma",
+    "db:migrate:dev": "bun run --bun prisma migrate dev",
+    "db:migrate:create": "bun run --bun prisma migrate dev --create-only",
+    "db:migrate:reset": "bun run --bun prisma migrate reset",
+    "db:studio": "bun run --bun prisma studio",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f postgres",
-    "docker:reset": "docker-compose down -v && docker-compose up -d"
+    "docker:reset": "docker-compose down -v && docker-compose up -d",
+    "build:vercel": "bun scripts/build-vercel.mjs",
+    "typecheck": "bun run --bun tsc --noEmit"
   },
   "dependencies": {
     "@prisma/client": "^6.16.0",
@@ -41,7 +42,8 @@
     "react-native": "0.81.5",
     "react-native-svg": "^15.14.0",
     "react-native-web": "^0.21.2",
-    "zod": "^4.1.5"
+    "zod": "^4.1.5",
+    "app": "workspace:*"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.13",
@@ -55,7 +57,7 @@
     "eslint-config-next": "15.5.2",
     "prisma": "^6.16.0",
     "tailwindcss": "^4",
-    "tsx": "4.23.15",
     "typescript": "^5"
-  }
+  },
+  "packageManager": "bun@1.4.4"
 }
