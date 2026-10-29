@@ -1,11 +1,10 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useEffect, useState } from 'react'
 import { Modal, Pressable, Share, StyleSheet, Text, View } from 'react-native'
-import { Heart } from 'lucide-react-native'
 import type { Gift, GiftList } from 'app/types'
 import type { RootStackParamList } from 'app/navigation/native'
 import { API_URL, api } from 'app/lib/api'
-import { AppHeader, Button, Card, Field, GiftCard, Screen, ShareAction, colors, spacing, typography } from 'app/ui'
+import { AppHeader, Button, Card, FavoriteButton, Field, GiftCard, Screen, ShareAction, colors, spacing, typography } from 'app/ui'
 import { useSession } from 'app/provider/session.native'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'public'>
@@ -123,10 +122,7 @@ export function PublicListScreen({ navigation, route }: Props) {
             <View style={styles.titleRow}>
               <Text style={styles.meta}>Par {list.user?.username ? `@${list.user.username}` : 'un proche'} · {gifts.length} cadeau{gifts.length > 1 ? 'x' : ''}</Text>
               {user ? (
-                <Pressable onPress={toggleFavorite} disabled={favoriteBusy} accessibilityRole="button" accessibilityLabel={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'} style={styles.favorite}>
-                  <Heart size={17} color={isFavorite ? colors.accent : colors.textMuted} fill={isFavorite ? colors.accent : 'transparent'} strokeWidth={1.9} />
-                  <Text style={[styles.favoriteText, { color: isFavorite ? colors.accent : colors.textMuted }]}>{isFavorite ? 'Favori' : 'Ajouter aux favoris'}</Text>
-                </Pressable>
+                <FavoriteButton active={isFavorite} onPress={toggleFavorite} busy={favoriteBusy} withLabel />
               ) : null}
             </View>
           </View>

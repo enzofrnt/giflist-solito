@@ -24,6 +24,12 @@
     },
     "plugins": [
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Giftlist utilise vos photos pour illustrer vos listes et vos cadeaux."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/splash-light.png",

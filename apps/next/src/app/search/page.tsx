@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import type { FavoriteSummary, SearchPayload } from 'app/lib/api'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { getAuthToken } from 'app/lib/authStorage'
+import { FavoriteButton } from '@/components/FavoriteButton'
 
 export default function SearchPage() {
   const [query, setQuery] = useState('')
@@ -55,6 +56,38 @@ export default function SearchPage() {
           </div>
         </header>
 
+        {favorites.length > 0 ? (
+          <section className="ds-stack ds-stack--gap-3">
+            <h2 className="ds-h3" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Heart size={17} fill="currentColor" color="var(--ds-color-favorite)" aria-hidden="true" />
+              Favoris
+            </h2>
+            <div className="ds-favorites-row">
+            {favorites.map((favorite) => (
+              <article key={favorite.list.shareCode} className="ds-card ds-favorite-shortcut">
+                <div className="ds-card__body ds-cluster" style={{ justifyContent: 'space-between' }}>
+                  <Link href={`/list/${favorite.list.shareCode}`} className="ds-stack ds-stack--gap-1" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <strong>{favorite.list.title}</strong>
+                    <span className="ds-hint">@{favorite.list.owner.username} · {favorite.list.giftsCount} cadeau{favorite.list.giftsCount > 1 ? 'x' : ''}</span>
+                  </Link>
+                  <div className="flex items-center gap-2">
+                    <FavoriteButton
+                      shareCode={favorite.list.shareCode}
+                      initialFavorite
+                      withLabel={false}
+                      onChange={(active) => {
+                        if (!active) setFavorites((current) => current.filter((item) => item.list.shareCode !== favorite.list.shareCode))
+                      }}
+                    />
+                    <Link href={`/list/${favorite.list.shareCode}`} aria-label="Ouvrir la liste"><ArrowRight size={17} aria-hidden="true" /></Link>
+                  </div>
+                </div>
+              </article>
+            ))}
+            </div>
+          </section>
+        ) : null}
+
         <div className="ds-card">
           <div className="ds-card__body">
             <label htmlFor="search-q" className="ds-label">Pseudo ou code de liste</label>
@@ -73,26 +106,6 @@ export default function SearchPage() {
             <p className="ds-hint" id="search-hint">Le code complet ouvre la liste directement, même si elle est privée.</p>
           </div>
         </div>
-
-        {favorites.length > 0 ? (
-          <section className="ds-stack ds-stack--gap-3">
-            <h2 className="ds-h3" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Heart size={17} fill="currentColor" color="var(--ds-color-accent)" aria-hidden="true" />
-              Favoris
-            </h2>
-            {favorites.map((favorite) => (
-              <Link key={favorite.list.shareCode} href={`/list/${favorite.list.shareCode}`} className="ds-card" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div className="ds-card__body ds-cluster" style={{ justifyContent: 'space-between' }}>
-                  <div className="ds-stack ds-stack--gap-1">
-                    <strong>{favorite.list.title}</strong>
-                    <span className="ds-hint">@{favorite.list.owner.username} · {favorite.list.giftsCount} cadeau{favorite.list.giftsCount > 1 ? 'x' : ''}</span>
-                  </div>
-                  <ArrowRight size={17} aria-hidden="true" />
-                </div>
-              </Link>
-            ))}
-          </section>
-        ) : null}
 
         {loading ? <p className="ds-body-sm ds-text-muted" role="status">Recherche…</p> : null}
         {error ? <p className="ds-error" role="alert">{error}</p> : null}
@@ -122,7 +135,7 @@ export default function SearchPage() {
                     <strong>@{user.username}</strong>
                     <span className="ds-hint">{user.publicListsCount} liste{user.publicListsCount > 1 ? 's' : ''} publique{user.publicListsCount > 1 ? 's' : ''}</span>
                   </div>
-                  <span className="ds-hint">{user.publicListsCount} liste{user.publicListsCount > 1 ? 's' : ''} publique{user.publicListsCount > 1 ? 's' : ''}</span>
+                  <ArrowRight size={17} aria-hidden="true" />
                 </div>
               </Link>
             ))}

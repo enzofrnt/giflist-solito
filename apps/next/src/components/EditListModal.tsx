@@ -3,6 +3,7 @@
 import { Modal } from '@/components/Modal'
 import { InfoHint } from '@/components/InfoHint'
 import Image from 'next/image'
+import { ImageUploadButton } from './ImageUploadButton'
 import { useEffect, useId, useRef, useState } from 'react'
 
 interface EditListModalProps {
@@ -155,8 +156,9 @@ export default function EditListModal({
             aria-describedby={imageHintId}
           />
           <p className="ds-hint" id={imageHintId}>
-            Lien direct vers une image (JPG, PNG ou WebP).
+            Collez un lien ou téléversez une image (JPG, PNG, WebP, GIF · 5 Mo max).
           </p>
+          <ImageUploadButton onChange={(url) => setFormData(prev => ({ ...prev, image: url }))} />
           {formData.image && (
             <div>
               <Image

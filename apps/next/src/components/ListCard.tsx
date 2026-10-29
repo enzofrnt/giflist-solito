@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { Gift } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 export type ListCardData = {
@@ -35,7 +36,11 @@ export function ListCard({
           className="h-32 w-full object-cover"
           unoptimized
         />
-      ) : null}
+      ) : (
+        <div className="flex h-32 w-full items-center justify-center bg-[var(--ds-color-surface-muted)] text-[var(--ds-color-text-subtle)]" aria-hidden="true">
+          <Gift size={30} strokeWidth={1.8} />
+        </div>
+      )}
       <div className="ds-card__body">
         <div className="flex flex-wrap items-start justify-between gap-2">
           {title}

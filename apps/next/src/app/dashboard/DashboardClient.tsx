@@ -3,6 +3,7 @@
 import AlertModal from '@/components/AlertModal'
 import { DropdownMenu } from '@/components/DropdownMenu'
 import EditListModal from '@/components/EditListModal'
+import { ImageUploadButton } from '@/components/ImageUploadButton'
 import { ListCard } from '@/components/ListCard'
 import { InfoHint } from '@/components/InfoHint'
 import { useAlert } from '@/hooks/useAlert'
@@ -373,8 +374,9 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
                     aria-describedby="create-list-image-hint"
                   />
                   <p className="ds-hint" id="create-list-image-hint">
-                    Lien direct vers une image (JPG, PNG ou WebP).
+                    Collez un lien ou téléversez une image (JPG, PNG, WebP, GIF · 5 Mo max).
                   </p>
+                  <ImageUploadButton onChange={setNewListImage} />
                   {newListImage && (
                     <div>
                       <Image

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ListCard } from '@/components/ListCard'
+import { FavoriteButton } from '@/components/FavoriteButton'
 import { getPublicProfile } from '@/lib/public-profile'
 import { pageMetadata } from '@/lib/seo'
 import { normalizeUsername } from '@/lib/usernames'
@@ -60,16 +61,18 @@ export default async function PublicUserPage({ params }: PublicUserPageProps) {
         </header>
         <section className="ds-stack ds-stack--gap-3">
           <h2 className="ds-h3">Listes publiques</h2>
+          <div className="ds-grid">
           {user.giftLists.length === 0 ? <div className="ds-card"><div className="ds-card__body ds-body-sm ds-text-muted">Aucune liste publique.</div></div> : null}
-          {user.giftLists.map((list) => (
-            <ListCard
-              key={list.shareCode}
-              list={{ title: list.title, description: list.description, image: list.image, giftsCount: list._count.gifts, createdAt: list.createdAt.toISOString() }}
-              context="public"
-              href={`/list/${list.shareCode}`}
-              footer={<Link href={`/list/${list.shareCode}`} className="ds-btn ds-btn--primary ds-btn--sm">Voir la liste</Link>}
-            />
-          ))}
+            {user.giftLists.map((list) => (
+              <ListCard
+                key={list.shareCode}
+                list={{ title: list.title, description: list.description, image: list.image, giftsCount: list._count.gifts, createdAt: list.createdAt.toISOString() }}
+                context="public"
+                href={`/list/${list.shareCode}`}
+                footer={<div className="flex items-center justify-end gap-2"><FavoriteButton shareCode={list.shareCode} withLabel={false} /><Link href={`/list/${list.shareCode}`} className="ds-btn ds-btn--primary ds-btn--sm">Voir la liste</Link></div>}
+              />
+            ))}
+          </div>
         </section>
       </main>
     </div>

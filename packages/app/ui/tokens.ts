@@ -28,6 +28,9 @@ export type ThemeColors = {
   successSoft: string
   warning: string
   warningSoft: string
+  favorite: string
+  favoriteSoft: string
+  favoriteBorder: string
 }
 
 export const lightColors: ThemeColors = {
@@ -50,6 +53,9 @@ export const lightColors: ThemeColors = {
   successSoft: '#e9f5ee',
   warning: '#b45309',
   warningSoft: '#fff4e5',
+  favorite: '#e05a4f',
+  favoriteSoft: '#fdeceb',
+  favoriteBorder: '#f4c7c2',
 }
 
 export const darkColors: ThemeColors = {
@@ -72,6 +78,9 @@ export const darkColors: ThemeColors = {
   successSoft: '#152a20',
   warning: '#ffc46b',
   warningSoft: '#332614',
+  favorite: '#ffb0a8',
+  favoriteSoft: '#3a1e1c',
+  favoriteBorder: '#6b302b',
 }
 
 function dynamicColor(light: string, dark: string): ColorValue {
@@ -101,6 +110,9 @@ export const colors: ThemeColorMap = {
   successSoft: dynamicColor(lightColors.successSoft, darkColors.successSoft),
   warning: dynamicColor(lightColors.warning, darkColors.warning),
   warningSoft: dynamicColor(lightColors.warningSoft, darkColors.warningSoft),
+  favorite: dynamicColor(lightColors.favorite, darkColors.favorite),
+  favoriteSoft: dynamicColor(lightColors.favoriteSoft, darkColors.favoriteSoft),
+  favoriteBorder: dynamicColor(lightColors.favoriteBorder, darkColors.favoriteBorder),
 }
 
 export const spacing = {

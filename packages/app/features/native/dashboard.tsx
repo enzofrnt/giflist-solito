@@ -6,7 +6,7 @@ import type { GiftListWithCount } from 'app/types'
 import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
 import { useSession } from 'app/provider/session.native'
-import { AppHeader, Button, Card, Field, InfoHint, ListCard, Screen, colors, spacing, typography } from 'app/ui'
+import { AppHeader, Button, Card, Field, ImageUploadButton, InfoHint, ListCard, Screen, colors, spacing, typography } from 'app/ui'
 
 type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'main'> }
 
@@ -20,6 +20,7 @@ export function DashboardScreen({ navigation }: Props) {
   const [title, setTitle] = useState('')
   const [secret, setSecret] = useState(false)
   const [listPublic, setListPublic] = useState(true)
+  const [listImage, setListImage] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -47,11 +48,12 @@ export function DashboardScreen({ navigation }: Props) {
     setCreating(true)
     setError('')
     try {
-      const data = await api.createGiftList({ title: title.trim(), secret, isPublic: listPublic })
+      const data = await api.createGiftList({ title: title.trim(), image: listImage.trim() || undefined, secret, isPublic: listPublic })
       setLists((current) => [data.giftList, ...current])
       setTitle('')
       setSecret(false)
       setListPublic(true)
+      setListImage('')
       setShowCreate(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Création impossible')
@@ -74,6 +76,8 @@ export function DashboardScreen({ navigation }: Props) {
       {showCreate ? (
         <Card>
           <Field label="Titre de la liste" value={title} onChangeText={setTitle} placeholder="Anniversaire, Noël…" />
+          <Field label="Image (URL)" value={listImage} onChangeText={setListImage} autoCapitalize="none" keyboardType="url" placeholder="https://…/photo.jpg" />
+          <ImageUploadButton onChange={setListImage} />
           <Pressable onPress={() => setSecret((value) => !value)} style={styles.switchRow} accessibilityRole="switch" accessibilityState={{ checked: secret }}>
             <View style={[styles.checkbox, secret && styles.checkboxOn]}>{secret ? <Text style={styles.check}>✓</Text> : null}</View>
             <Text style={styles.switchText}>Mode secret</Text>
