@@ -50,7 +50,8 @@ Home, Login, Register, Dashboard (create list), Manage list (list gifts, add/del
   - Deep link `giftlist://list/DEMO` → Public list screen (screenshot `native-public.jpg`).
   - Reservation modal opened; keyboard interaction verified.
 - Native AsyncStorage token persistence fixed via `authStorage.native.ts` after the first login attempt exposed a missing-token bug.
-- No physical-device test was performed.
+- Physical iPhone 17 Pro release build: signed, installed, launched; a launch crash on iOS 27 (`EXC_BREAKPOINT`, `UIApplicationEvaluateRuntimeIssueForNoSceneLifecycleAdoption`) was fixed with a local `withSceneLifecycle` config plugin (Expo `EXExpoAppSceneDelegate` + scene manifest).
+- Personal Apple team cannot use Associated Domains; the webcredential association is now opt-in for paid/EAS builds.
 
 ## Follow-up required
 

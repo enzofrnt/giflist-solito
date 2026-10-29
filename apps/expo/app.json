@@ -13,10 +13,7 @@
     ],
     "ios": {
       "bundleIdentifier": "com.enzofournet.giflist",
-      "supportsTablet": false,
-      "associatedDomains": [
-        "webcredentials:giftlist.fr"
-      ]
+      "supportsTablet": false
     },
     "android": {
       "package": "com.enzofournet.giflist",
@@ -34,7 +31,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#faf9f7"
         }
-      ]
+      ],
+      "./plugins/withSceneLifecycle"
     ]
   }
 }
