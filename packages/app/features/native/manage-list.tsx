@@ -55,7 +55,6 @@ export function ManageListScreen({ navigation, route }: Props) {
     await Share.share({
       title: list.title,
       message: `Voilà ma liste de cadeaux Giftlist : ${API_URL}/list/${list.shareCode}`,
-      url: `${API_URL}/list/${list.shareCode}`,
     }).catch(() => undefined)
   }
 
