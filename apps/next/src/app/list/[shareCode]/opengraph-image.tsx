@@ -26,7 +26,7 @@ function truncate(value: string, max: number): string {
 export default async function Image({ params }: { params: Promise<{ shareCode: string }> }) {
   const { shareCode } = await params
   let list:
-    | { title: string; description: string | null; user: { name: string } | null; _count: { gifts: number } }
+    | { title: string; description: string | null; user: { username: string } | null; _count: { gifts: number } }
     | null = null
 
   try {
@@ -35,7 +35,7 @@ export default async function Image({ params }: { params: Promise<{ shareCode: s
       select: {
         title: true,
         description: true,
-        user: { select: { name: true } },
+        user: { select: { username: true } },
         _count: { select: { gifts: true } },
       },
     })
@@ -48,7 +48,7 @@ export default async function Image({ params }: { params: Promise<{ shareCode: s
     list?.description?.trim() || 'Une liste de cadeaux à découvrir et à réserver sur Giftlist.',
     120,
   )
-  const owner = list?.user?.name?.trim() || 'Un proche'
+  const owner = list?.user?.username?.trim() ? `@${list.user.username}` : 'Un proche'
   const giftCount = list?._count.gifts ?? 0
   const logo = logoDataUri()
 

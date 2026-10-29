@@ -18,7 +18,8 @@ function ChevronDownIcon() {
 export function Header() {
   const pathname = usePathname()
   const { user, loading, logout } = useAuthContext()
-  const initials = user?.name?.trim()?.slice(0, 2)?.toUpperCase() || 'GL'
+  const displayName = user?.username || user?.name || 'Mon compte'
+  const initials = displayName.replace(/^@/, '').slice(0, 2).toUpperCase() || 'GL'
 
   return (
     <header className="ds-header">
@@ -67,7 +68,7 @@ export function Header() {
                 trigger={
                   <>
                     <span className="ds-avatar ds-header__avatar" aria-hidden="true">{initials}</span>
-                    <span className="ds-header__account-name">{user.name}</span>
+                    <span className="ds-header__account-name">{displayName}</span>
                     <span className="ds-header__account-chevron" aria-hidden="true"><ChevronDownIcon /></span>
                   </>
                 }

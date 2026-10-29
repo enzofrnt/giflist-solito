@@ -14,7 +14,7 @@ const RegisterSchema = z.object({
       })
     }
   }),
-  name: z.string().min(1, 'Le nom est requis').max(100, 'Le nom ne peut pas dépasser 100 caractères'),
+  name: z.string().min(1).max(100).optional(),
   username: z.string().trim().min(3, 'Le pseudo doit contenir au moins 3 caractères').max(30, 'Le pseudo ne peut pas dépasser 30 caractères').regex(/^[a-zA-Z0-9_]+$/, 'Le pseudo ne peut contenir que des lettres, chiffres et _').optional(),
 });
 
@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email, password, name, username } = RegisterSchema.parse(body);
 
-    const result = await registerUser(email, password, name, username);
+    if (!username) return NextResponse.json({ ok: false, error: 'Le pseudo est requis.' }, { status: 400 })
+    const result = await registerUser(email, password, name || username, username);
 
     if (!result.success) {
       return NextResponse.json(

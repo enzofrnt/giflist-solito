@@ -1,12 +1,12 @@
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useCallback, useEffect, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { Plus, Settings } from 'lucide-react-native'
+import { Plus } from 'lucide-react-native'
 import type { GiftListWithCount } from 'app/types'
 import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
 import { useSession } from 'app/provider/session.native'
-import { AppHeader, Badge, Button, Card, Field, InfoHint, Screen, colors, spacing, typography } from 'app/ui'
+import { AppHeader, Button, Card, Field, InfoHint, ListCard, Screen, colors, spacing, typography } from 'app/ui'
 
 type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'main'> }
 
@@ -26,7 +26,7 @@ export function DashboardScreen({ navigation }: Props) {
     setError('')
     try {
       const data = await api.giftLists()
-      setLists(data.giftLists)
+      setLists(data.giftLists ?? [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Chargement impossible')
     } finally {
@@ -79,7 +79,7 @@ export function DashboardScreen({ navigation }: Props) {
 
       <View style={styles.heading}>
         <View style={styles.flex}>
-          <Text style={styles.title}>{user ? `Bonjour ${user.name.split(' ')[0]}` : 'Mes listes'}</Text>
+          <Text style={styles.title}>{user ? `Bonjour ${user.username ? `@${user.username}` : user.email}` : 'Mes listes'}</Text>
           <Text style={styles.lead}>Créez, partagez et gérez vos listes.</Text>
         </View>
         <Button title={showCreate ? 'Fermer' : 'Nouvelle liste'} icon={showCreate ? undefined : Plus} variant={showCreate ? 'ghost' : 'primary'} onPress={() => setShowCreate((value) => !value)} />
@@ -119,25 +119,16 @@ export function DashboardScreen({ navigation }: Props) {
       ) : null}
 
       {lists.map((list) => (
-        <Card key={list.id}>
-          <View style={styles.rowBetween}>
-            <Text style={styles.cardTitle}>{list.title}</Text>
-            <Badge label={list.secret ? 'Secret' : 'Visible'} tone={list.secret ? 'warning' : 'success'} />
-          </View>
-          {list.description ? <Text style={styles.muted}>{list.description}</Text> : null}
-          <Text style={styles.meta}>{list.giftsCount} cadeau{list.giftsCount > 1 ? 'x' : ''}</Text>
-          <View style={styles.rowBetween}>
-            <View style={styles.inline}>
-              <Text style={styles.switchText}>Liste publique</Text>
-              <InfoHint title="Liste publique" message="Une liste publique apparaît sur votre profil public et dans la recherche. Une liste privée reste accessible uniquement avec son code complet." />
-            </View>
-            <Pressable onPress={() => toggleListPublic(list)} style={styles.switchRow} accessibilityRole="switch" accessibilityState={{ checked: list.isPublic !== false }} accessibilityLabel="Liste publique">
-              <View style={[styles.checkbox, list.isPublic !== false && styles.checkboxOn]}>{list.isPublic !== false ? <Text style={styles.check}>✓</Text> : null}</View>
-            </Pressable>
-          </View>
-          <Button title="Gérer la liste" icon={Settings} onPress={() => navigation.navigate('manage', { id: String(list.id) })} fullWidth />
-        </Card>
+        <ListCard
+          key={list.id}
+          list={list}
+          context="owner"
+          onOpen={() => navigation.navigate('manage', { id: String(list.id) })}
+          onManage={() => navigation.navigate('manage', { id: String(list.id) })}
+          onTogglePublic={() => toggleListPublic(list)}
+        />
       ))}
+
     </Screen>
   )
 }

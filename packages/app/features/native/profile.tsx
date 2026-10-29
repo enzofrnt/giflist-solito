@@ -47,7 +47,7 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
     setProfileError('')
     setProfileSuccess('')
     try {
-      await api.updateProfile({ name: user.name, username, isPublic: accountPublic })
+      await api.updateProfile({ name: username, username, isPublic: accountPublic })
       await refresh()
       setProfileSuccess('Profil public mis à jour.')
     } catch (err) {
@@ -103,7 +103,7 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
   return (
     <Screen header={<AppHeader />}>
       <Card>
-        <Text style={styles.name}>{user?.name ?? 'Mon compte'}</Text>
+        <Text style={styles.name}>{user?.username ? `@${user.username}` : 'Mon compte'}</Text>
         {user?.username ? <Text style={styles.username}>@{user.username}</Text> : null}
         {user?.email ? <Text style={styles.muted}>{user.email}</Text> : null}
       </Card>

@@ -12,7 +12,6 @@ export default function RegisterPage() {
     email: '',
     password: '',
     passwordConfirm: '',
-    name: '',
     username: '',
   })
   const [loading, setLoading] = useState(false)
@@ -27,12 +26,6 @@ export default function RegisterPage() {
 
     if (formData.password !== formData.passwordConfirm) {
       setError('Les mots de passe ne correspondent pas')
-      setLoading(false)
-      return
-    }
-
-    if (!formData.name || formData.name.trim().length === 0) {
-      setError('Le nom est requis')
       setLoading(false)
       return
     }
@@ -57,7 +50,6 @@ export default function RegisterPage() {
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
-          name: formData.name,
           username: formData.username,
         }),
       })
@@ -94,47 +86,6 @@ export default function RegisterPage() {
       }
     >
       <form onSubmit={handleSubmit} className="ds-stack ds-stack--gap-5">
-        <div className="ds-field">
-          <label htmlFor="name" className="ds-label">
-            Nom <span className="ds-label__required">*</span>
-          </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            required
-            value={formData.name}
-            onChange={handleInputChange}
-            className="ds-input"
-            placeholder="Votre nom"
-            minLength={1}
-            maxLength={100}
-            autoComplete="name"
-          />
-        </div>
-
-        <div className="ds-field">
-          <label htmlFor="username" className="ds-label">
-            Pseudo <span className="ds-label__required">*</span>
-          </label>
-          <input
-            id="username"
-            name="username"
-            type="text"
-            required
-            value={formData.username}
-            onChange={(event) => setFormData((previous) => ({ ...previous, username: event.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30) }))}
-            className="ds-input"
-            placeholder="enzo"
-            minLength={3}
-            maxLength={30}
-            pattern="[a-z0-9_]{3,30}"
-            autoComplete="username"
-            aria-describedby="username-hint"
-          />
-          <p className="ds-hint" id="username-hint">Unique, 3–30 caractères : a-z, chiffres et _. Il sert à vous retrouver dans la recherche.</p>
-        </div>
-
         <div className="ds-field">
           <label htmlFor="email" className="ds-label">
             Adresse e-mail <span className="ds-label__required">*</span>

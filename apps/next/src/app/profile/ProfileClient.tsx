@@ -43,7 +43,6 @@ export default function ProfileClient() {
   const [feedback, setFeedback] = useState<Feedback | null>(null)
 
   const [formData, setFormData] = useState({
-    name: '',
     username: '',
     email: ''
   })
@@ -63,7 +62,6 @@ export default function ProfileClient() {
   useEffect(() => {
     if (user) {
       setFormData({
-        name: user.name || '',
         username: user.username || '',
         email: user.email
       })
@@ -72,11 +70,6 @@ export default function ProfileClient() {
   }, [user])
 
   async function updateProfile() {
-    if (!formData.name.trim()) {
-      setFeedback({ tone: 'danger', title: 'Erreur', message: 'Le nom est requis' })
-      return
-    }
-
     setUpdating(true)
     try {
       const token = getAuthToken()
@@ -91,7 +84,6 @@ export default function ProfileClient() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          name: formData.name.trim(),
           username: formData.username.trim().toLowerCase(),
           isPublic: accountPublic,
         })
@@ -216,7 +208,7 @@ export default function ProfileClient() {
     return null
   }
 
-  const initials = (formData.name || user.name || 'GL').trim().slice(0, 2).toUpperCase() || 'GL'
+  const initials = (formData.username || user.username || 'GL').trim().slice(0, 2).toUpperCase() || 'GL'
 
   return (
     <div className="ds-page">
@@ -254,32 +246,12 @@ export default function ProfileClient() {
               <div className="ds-card__header">
                 <div className="ds-stack ds-stack--gap-1">
                   <h2 className="ds-card__title">Informations personnelles</h2>
-                  <p className="ds-card__subtitle">Votre nom apparaît sur vos listes partagées.</p>
+                  <p className="ds-card__subtitle">Votre pseudo apparaît sur vos listes partagées et dans la recherche.</p>
                 </div>
                 <span className="ds-avatar ds-avatar--lg" aria-hidden="true">{initials}</span>
               </div>
 
               <div className="ds-card__body">
-                <div className="ds-field">
-                  <label htmlFor="profile-name" className="ds-label">
-                    Nom d’utilisateur <span className="ds-label__required">*</span>
-                  </label>
-                  <input
-                    id="profile-name"
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className="ds-input"
-                    placeholder="Votre nom"
-                    minLength={1}
-                    maxLength={100}
-                    autoComplete="name"
-                    aria-describedby="profile-name-hint"
-                  />
-                  <p className="ds-hint" id="profile-name-hint">Obligatoire, 100 caractères maximum.</p>
-                </div>
-
                 <div className="ds-field">
                   <label htmlFor="profile-username" className="ds-label">
                     Pseudo public <span className="ds-label__required">*</span>
@@ -392,7 +364,7 @@ export default function ProfileClient() {
               <div className="ds-card__footer">
                 <button
                   type="submit"
-                  disabled={!formData.name.trim() || updating}
+                  disabled={!formData.username.trim() || updating}
                   className="ds-btn ds-btn--primary ds-btn--md"
                   aria-busy={updating || undefined}
                 >
