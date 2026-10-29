@@ -155,6 +155,14 @@ See [Phase 8 screenshots](screenshots/phase-8/).
 
 See [Phase 9 screenshots](screenshots/phase-9/).
 
+## Phase 15 — Semantic action colours
+
+- Cobalt = one primary action; neutral = support; red = destructive only; coral = celebration.
+- Delete is always red + Trash2 + confirmation; never styled as secondary/ghost neutral.
+- Showcase includes the action matrix and Modifier/Supprimer pair.
+
+See [Phase 15 screenshots](screenshots/phase-15/).
+
 ## Phase 14 — Password visibility & icon system
 
 - Eye/EyeOff toggle on every native and web password field.

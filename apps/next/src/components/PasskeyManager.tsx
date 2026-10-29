@@ -1,5 +1,6 @@
 'use client'
 
+import { Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { browserSupportsWebAuthn, startRegistration } from '@simplewebauthn/browser'
 import { getAuthToken } from 'app/lib/authStorage'
@@ -110,7 +111,8 @@ export default function PasskeyManager() {
                   onClick={() => remove(key.id)}
                   className="ds-btn ds-btn--danger ds-btn--md"
                 >
-                  Supprimer
+                  <span className="ds-btn__icon" aria-hidden="true"><Trash2 size={16} strokeWidth={1.9} /></span>
+                  <span className="ds-btn__label">Supprimer</span>
                 </button>
               </li>
             ))}

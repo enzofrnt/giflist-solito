@@ -103,7 +103,7 @@ export function ManageListScreen({ navigation, route }: Props) {
               </View>
               <View style={styles.actions}>
                 <Button title="Modifier" icon={Pencil} variant="secondary" onPress={() => navigation.navigate('giftForm', { listId: id, gift })} style={styles.flex} />
-                <Button title="Supprimer" icon={Trash2} variant="ghost" onPress={() => confirmDelete(gift)} style={styles.flex} />
+                <Button title="Supprimer" icon={Trash2} variant="danger" onPress={() => confirmDelete(gift)} style={styles.flex} />
               </View>
             </Card>
           ))}
