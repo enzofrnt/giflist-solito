@@ -10,6 +10,20 @@ export type PublicListSummary = {
   createdAt: string
 }
 
+export type FavoriteSummary = {
+  createdAt: string
+  list: {
+    shareCode: string
+    title: string
+    description?: string | null
+    image?: string | null
+    isPublic: boolean
+    createdAt: string
+    owner: { username: string }
+    giftsCount: number
+  }
+}
+
 export type SearchPayload = {
   ok: boolean
   list: {
@@ -88,6 +102,18 @@ export const api = {
     }),
 
   me: () => request<{ user: User }>('/api/auth/me', { auth: true }),
+
+  favorites: () => request<{ ok: boolean; favorites: FavoriteSummary[] }>('/api/favorites', { auth: true }),
+
+  addFavorite: (shareCode: string) => request<{ ok: boolean }>(
+    '/api/favorites',
+    { method: 'POST', auth: true, body: { shareCode } },
+  ),
+
+  removeFavorite: (shareCode: string) => request<{ ok: boolean }>(
+    `/api/favorites/${encodeURIComponent(shareCode)}`,
+    { method: 'DELETE', auth: true },
+  ),
 
   search: (q: string) =>
     request<SearchPayload>(`/api/search?q=${encodeURIComponent(q)}`, { method: 'GET' }),

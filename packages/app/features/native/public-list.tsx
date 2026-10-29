@@ -1,11 +1,12 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useEffect, useState } from 'react'
 import { Modal, Pressable, Share, StyleSheet, Text, View } from 'react-native'
-import { Gift as GiftIcon } from 'lucide-react-native'
+import { Heart } from 'lucide-react-native'
 import type { Gift, GiftList } from 'app/types'
 import type { RootStackParamList } from 'app/navigation/native'
 import { API_URL, api } from 'app/lib/api'
-import { AppHeader, Badge, Button, Card, Field, Screen, ShareAction, colors, spacing, typography } from 'app/ui'
+import { AppHeader, Button, Card, Field, GiftCard, Screen, ShareAction, colors, spacing, typography } from 'app/ui'
+import { useSession } from 'app/provider/session.native'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'public'>
 
@@ -20,6 +21,9 @@ export function PublicListScreen({ navigation, route }: Props) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [reserving, setReserving] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [favoriteBusy, setFavoriteBusy] = useState(false)
+  const { user } = useSession()
 
   async function load(shareCode = code) {
     if (!shareCode.trim()) return
@@ -43,6 +47,29 @@ export function PublicListScreen({ navigation, route }: Props) {
     // The code is a route capability when coming from search/profile; load it once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCode])
+
+  useEffect(() => {
+    if (!user) { setIsFavorite(false); return }
+    let cancelled = false
+    api.favorites()
+      .then((data) => { if (!cancelled) setIsFavorite(data.favorites.some((favorite) => favorite.list.shareCode === list?.shareCode)) })
+      .catch(() => undefined)
+    return () => { cancelled = true }
+  }, [user, list?.shareCode])
+
+  async function toggleFavorite() {
+    if (!list || !user) return
+    setFavoriteBusy(true)
+    try {
+      if (isFavorite) await api.removeFavorite(list.shareCode)
+      else await api.addFavorite(list.shareCode)
+      setIsFavorite((current) => !current)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Favori impossible')
+    } finally {
+      setFavoriteBusy(false)
+    }
+  }
 
   async function reserve() {
     if (!list || !selected || !name.trim()) return
@@ -93,23 +120,25 @@ export function PublicListScreen({ navigation, route }: Props) {
           <View>
             <Text style={styles.title}>{list.title}</Text>
             {list.description ? <Text style={styles.muted}>{list.description}</Text> : null}
-            <Text style={styles.meta}>Par {list.user?.username ? `@${list.user.username}` : 'un proche'} · {gifts.length} cadeau{gifts.length > 1 ? 'x' : ''}</Text>
+            <View style={styles.titleRow}>
+              <Text style={styles.meta}>Par {list.user?.username ? `@${list.user.username}` : 'un proche'} · {gifts.length} cadeau{gifts.length > 1 ? 'x' : ''}</Text>
+              {user ? (
+                <Pressable onPress={toggleFavorite} disabled={favoriteBusy} accessibilityRole="button" accessibilityLabel={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'} style={styles.favorite}>
+                  <Heart size={17} color={isFavorite ? colors.accent : colors.textMuted} fill={isFavorite ? colors.accent : 'transparent'} strokeWidth={1.9} />
+                  <Text style={[styles.favoriteText, { color: isFavorite ? colors.accent : colors.textMuted }]}>{isFavorite ? 'Favori' : 'Ajouter aux favoris'}</Text>
+                </Pressable>
+              ) : null}
+            </View>
           </View>
 
-          {gifts.map((gift) => {
-            const reserved = gift.status === 'reserved'
-            return (
-              <Card key={gift.id}>
-                <View style={styles.rowBetween}>
-                  <Text style={styles.cardTitle}>{gift.title}</Text>
-                  <Badge label={reserved ? 'Réservé' : 'Disponible'} tone={reserved ? 'warning' : 'success'} />
-                </View>
-                {gift.price != null ? <Text style={styles.meta}>{gift.price} €</Text> : null}
-                {gift.description ? <Text style={styles.muted}>{gift.description}</Text> : null}
-                {!reserved ? <Button title="Réserver ce cadeau" icon={GiftIcon} onPress={() => setSelected(gift)} fullWidth /> : null}
-              </Card>
-            )
-          })}
+          {gifts.map((gift) => (
+            <GiftCard
+              key={gift.id}
+              gift={gift}
+              context="public"
+              onReserve={() => setSelected(gift)}
+            />
+          ))}
         </>
       ) : null}
 
@@ -133,6 +162,9 @@ const styles = StyleSheet.create({
   muted: { color: colors.textMuted, fontSize: typography.small, lineHeight: 19 },
   meta: { color: colors.textSubtle, fontSize: typography.caption },
   error: { color: colors.danger, fontSize: typography.small },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
+  favorite: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 36 },
+  favoriteText: { fontSize: typography.caption, fontWeight: '600' },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
   cardTitle: { color: colors.text, fontSize: typography.body, fontWeight: '700', flex: 1 },
   link: { minHeight: 44, justifyContent: 'center', paddingHorizontal: spacing.sm },

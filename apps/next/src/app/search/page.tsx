@@ -1,15 +1,29 @@
 'use client'
 
-import { Search as SearchIcon, ArrowRight, ListChecks } from 'lucide-react'
+import { Search as SearchIcon, ArrowRight, Heart, ListChecks } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import type { SearchPayload } from 'app/lib/api'
+import type { FavoriteSummary, SearchPayload } from 'app/lib/api'
+import { useAuthContext } from '@/contexts/AuthContext'
+import { getAuthToken } from 'app/lib/authStorage'
 
 export default function SearchPage() {
   const [query, setQuery] = useState('')
   const [result, setResult] = useState<SearchPayload | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [favorites, setFavorites] = useState<FavoriteSummary[]>([])
+  const { user } = useAuthContext()
+
+  useEffect(() => {
+    if (!user) { setFavorites([]); return }
+    const token = getAuthToken()
+    if (!token || token instanceof Promise) return
+    fetch('/api/favorites', { headers: { Authorization: `Bearer ${token}` } })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => setFavorites(data?.favorites ?? []))
+      .catch(() => undefined)
+  }, [user])
 
   useEffect(() => {
     const q = query.trim()
@@ -59,6 +73,26 @@ export default function SearchPage() {
             <p className="ds-hint" id="search-hint">Le code complet ouvre la liste directement, même si elle est privée.</p>
           </div>
         </div>
+
+        {favorites.length > 0 ? (
+          <section className="ds-stack ds-stack--gap-3">
+            <h2 className="ds-h3" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Heart size={17} fill="currentColor" color="var(--ds-color-accent)" aria-hidden="true" />
+              Favoris
+            </h2>
+            {favorites.map((favorite) => (
+              <Link key={favorite.list.shareCode} href={`/list/${favorite.list.shareCode}`} className="ds-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div className="ds-card__body ds-cluster" style={{ justifyContent: 'space-between' }}>
+                  <div className="ds-stack ds-stack--gap-1">
+                    <strong>{favorite.list.title}</strong>
+                    <span className="ds-hint">@{favorite.list.owner.username} · {favorite.list.giftsCount} cadeau{favorite.list.giftsCount > 1 ? 'x' : ''}</span>
+                  </div>
+                  <ArrowRight size={17} aria-hidden="true" />
+                </div>
+              </Link>
+            ))}
+          </section>
+        ) : null}
 
         {loading ? <p className="ds-body-sm ds-text-muted" role="status">Recherche…</p> : null}
         {error ? <p className="ds-error" role="alert">{error}</p> : null}

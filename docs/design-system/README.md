@@ -155,7 +155,10 @@ See [Phase 8 screenshots](screenshots/phase-8/).
 
 See [Phase 9 screenshots](screenshots/phase-9/).
 
-## Phase 17 — Unified identity & shared list cards
+## Phase 17 — Unified identity, shared list cards & favorites
+
+- Owner/public gift cards share one visual contract; owner/public list cards too.
+- Favorites are available from a viewed list and shown in search.
 
 - One identity: @username + email; no separate display name in UI.
 - Shared ListCard for own lists and public profiles; public cards have no management controls.

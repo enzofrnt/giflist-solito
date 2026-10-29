@@ -5,5 +5,6 @@
 - Search/profile list links open `PublicListScreen` with the code; the code entry form is hidden for route-provided codes.
 - UI identity is now `@username + email`; registration/profile no longer collect a separate name.
 - Public list/search/profile APIs expose username, never email; uniqueness still enforced for username/email.
-- Web typecheck/build ✅ · native typecheck/export ✅ · tests **30/30** ✅.
+- Favorites API/model with unique per-user/list; favorites appear in search and open directly.
+- Web typecheck/build ✅ · native typecheck/export ✅ · tests **37/37** ✅.
 - Screenshot: `docs/design-system/screenshots/phase-17/mobile-direct-list.jpg`.

@@ -372,3 +372,17 @@ test('registration refuses a duplicate username', async () => {
   assert.equal(result.success, false)
   assert.match(result.error || '', /pseudo/)
 })
+
+test('favorites are unique per account/list and cascade with the list', async () => {
+  const account = await user('favorite@example.com')
+  const list = await prisma.giftList.create({
+    data: { title: 'Favori', shareCode: 'FAV0R1', userId: account.id, isPublic: false },
+  })
+  await prisma.favoriteList.create({ data: { userId: account.id, giftListId: list.id } })
+  await assert.rejects(
+    prisma.favoriteList.create({ data: { userId: account.id, giftListId: list.id } }),
+  )
+  assert.equal(await prisma.favoriteList.count({ where: { userId: account.id } }), 1)
+  await prisma.giftList.delete({ where: { id: list.id } })
+  assert.equal(await prisma.favoriteList.count({ where: { userId: account.id } }), 0)
+})

@@ -5,3 +5,4 @@
 - [x] T003 Remove separate display name from auth/profile/public UI.
 - [x] T004 Auto-load shared list and hide code form.
 - [x] T005 Verify builds/tests/screenshots.
+- [x] T006 Add favorites model/API/UI and direct access.
