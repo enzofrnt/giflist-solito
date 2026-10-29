@@ -12,5 +12,6 @@ export interface AuthResult {
   user?: User
   token?: string
   error?: string
+  requiresEmailVerification?: boolean
 }
 

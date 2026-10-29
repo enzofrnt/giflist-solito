@@ -16,6 +16,7 @@ let server: PGLiteSocketServer
 let prisma: typeof import('../src/lib/prisma').prisma
 let recovery: typeof import('../src/lib/password-reset')
 let auth: typeof import('../src/lib/auth')
+let verification: typeof import('../src/lib/email-verification')
 const originalFetch = globalThis.fetch
 const emails: { to: string[]; text: string; subject: string }[] = []
 let rejectEmail = false
@@ -40,6 +41,7 @@ before(async () => {
   ;({ prisma } = await import('../src/lib/prisma'))
   recovery = await import('../src/lib/password-reset')
   auth = await import('../src/lib/auth')
+  verification = await import('../src/lib/email-verification')
   globalThis.fetch = (async (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
     assert.equal(input, 'https://api.resend.com/emails')
     assert.equal(new Headers(init?.headers).get('Authorization'), 'Bearer test-only-key')
@@ -50,6 +52,7 @@ before(async () => {
 })
 
 beforeEach(async () => {
+  await prisma.emailVerificationToken.deleteMany()
   await prisma.passwordResetToken.deleteMany()
   await prisma.authRateLimit.deleteMany()
   await prisma.user.deleteMany()
@@ -364,6 +367,77 @@ test('public profile exposes only public lists and rejects private accounts', as
 
   const privateResponse = await GET(request, { params: Promise.resolve({ username: privateAccount.username! }) })
   assert.equal(privateResponse.status, 404)
+})
+
+test('new accounts are unverified, cannot log in, and activate only with the e-mail token', async () => {
+  const result = await auth.registerUser('verify-me@example.com', 'Password!123', 'Verify', 'verify_me')
+  assert.equal(result.success, true)
+  assert.equal(result.requiresEmailVerification, true)
+  assert.equal(result.token, undefined)
+  const account = await prisma.user.findUniqueOrThrow({ where: { email: 'verify-me@example.com' } })
+  assert.equal(account.emailVerified, false)
+
+  const blocked = await auth.loginUser(account.email, 'Password!123')
+  assert.equal(blocked.success, false)
+  assert.equal(blocked.requiresEmailVerification, true)
+
+  await verification.sendVerificationEmail({ id: account.id, email: account.email })
+  const mail = emails.at(-1)
+  assert.match(mail?.text || '', /https:\/\/giftlist\.fr\/verify-email\?email=[^#]+#token=/)
+  const token = lastToken()
+
+  assert.equal(await verification.verifyEmailToken('0'.repeat(64)), false)
+  assert.equal(await verification.verifyEmailToken(token), true)
+  assert.equal(await verification.verifyEmailToken(token), false)
+  assert.equal(await prisma.emailVerificationToken.count(), 0)
+
+  const login = await auth.loginUser(account.email, 'Password!123')
+  assert.equal(login.success, true)
+  assert.ok(await auth.getCurrentUser(login.token!))
+})
+
+test('an expired verification link is rejected and can be resent', async () => {
+  const account = await prisma.user.create({
+    data: {
+      email: 'expired-verification@example.com',
+      username: 'expired_verification',
+      name: 'Expired',
+      password: await bcrypt.hash('Password!123', 4),
+      emailVerified: false,
+    },
+  })
+  await verification.sendVerificationEmail({ id: account.id, email: account.email })
+  const token = lastToken()
+  await prisma.emailVerificationToken.updateMany({ data: { expiresAt: new Date(Date.now() - 1000) } })
+  assert.equal(await verification.verifyEmailToken(token), false)
+
+  await verification.resendVerificationEmail(account.email)
+  assert.equal(emails.length, 2)
+  assert.equal(await verification.verifyEmailToken(lastToken()), true)
+})
+
+test('the registration endpoint sends a confirmation e-mail and returns no session', async () => {
+  const { POST } = await import('../src/app/api/auth/register/route')
+  const request = new NextRequest('http://localhost:3000/api/auth/register', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      email: 'route-register@example.com',
+      password: 'Password!123',
+      username: 'route_register',
+    }),
+  })
+  const response = await POST(request)
+  const data = await response.json()
+  assert.equal(response.status, 200)
+  assert.equal(data.ok, true)
+  assert.equal(data.requiresEmailVerification, true)
+  assert.equal(data.token, undefined)
+  assert.equal(emails.length, 1)
+  const account = await prisma.user.findUniqueOrThrow({ where: { email: 'route-register@example.com' } })
+  assert.equal(account.emailVerified, false)
+  assert.equal(await verification.verifyEmailToken(lastToken()), true)
+  assert.equal((await auth.loginUser(account.email, 'Password!123')).success, true)
 })
 
 test('registration refuses a duplicate username', async () => {

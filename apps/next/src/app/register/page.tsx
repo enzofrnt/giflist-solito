@@ -5,7 +5,8 @@ import { useState } from 'react'
 import { AuthCard } from '@/components/AuthCard'
 import PasswordInput from '@/components/PasswordInput'
 import { validatePassword } from 'app/lib/passwordValidation'
-import { setAuthToken } from 'app/lib/authStorage'
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -24,14 +25,23 @@ export default function RegisterPage() {
     setLoading(true)
     setError('')
 
-    if (formData.password !== formData.passwordConfirm) {
-      setError('Les mots de passe ne correspondent pas')
+    const email = formData.email.trim()
+    const username = formData.username.trim()
+
+    if (!EMAIL_PATTERN.test(email)) {
+      setError('Adresse e-mail invalide. Utilisez le format nom@domaine.com.')
       setLoading(false)
       return
     }
 
-    if (!/^[a-z0-9_]{3,30}$/.test(formData.username)) {
-      setError('Le pseudo doit contenir 3 à 30 caractères (a-z, chiffres, _).')
+    if (!/^[a-z0-9_]{3,30}$/.test(username)) {
+      setError('Le pseudo doit contenir 3 à 30 caractères (lettres, chiffres, _).')
+      setLoading(false)
+      return
+    }
+
+    if (formData.password !== formData.passwordConfirm) {
+      setError('Les mots de passe ne correspondent pas.')
       setLoading(false)
       return
     }
@@ -48,17 +58,15 @@ export default function RegisterPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: formData.email,
+          email,
           password: formData.password,
-          username: formData.username,
+          username,
         }),
       })
       const data = await response.json()
 
-      if (data.ok) {
-        const result = setAuthToken(data.token)
-        if (result instanceof Promise) await result
-        window.location.href = '/setup-passkey'
+      if (data.ok && data.requiresEmailVerification) {
+        window.location.href = `/verify-email?email=${encodeURIComponent(data.email || email)}`
       } else {
         setError(data.error || 'Une erreur est survenue')
       }
@@ -85,7 +93,7 @@ export default function RegisterPage() {
         </div>
       }
     >
-      <form onSubmit={handleSubmit} className="ds-stack ds-stack--gap-5">
+      <form onSubmit={handleSubmit} className="ds-stack ds-stack--gap-5" noValidate>
         <div className="ds-field">
           <label htmlFor="email" className="ds-label">
             Adresse e-mail <span className="ds-label__required">*</span>
@@ -99,8 +107,31 @@ export default function RegisterPage() {
             onChange={handleInputChange}
             className="ds-input"
             placeholder="votre@email.com"
-            autoComplete="username"
+            autoComplete="email"
+            autoCapitalize="none"
           />
+        </div>
+
+        <div className="ds-field">
+          <label htmlFor="username" className="ds-label">
+            Pseudo <span className="ds-label__required">*</span>
+          </label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            required
+            minLength={3}
+            maxLength={30}
+            value={formData.username}
+            onChange={handleInputChange}
+            className="ds-input"
+            placeholder="ex : camille_demo"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+          />
+          <p className="ds-hint">3 à 30 caractères : lettres, chiffres et _.</p>
         </div>
 
         <div className="ds-field">

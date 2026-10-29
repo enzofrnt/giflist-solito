@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { registerUser } from '@/lib/auth';
+import { sendVerificationEmail } from '@/lib/email-verification';
 import { validatePassword } from 'app/lib/passwordValidation'
 
 const RegisterSchema = z.object({
-  email: z.string().email('Email invalide'),
+  email: z.string().trim().email('Adresse e-mail invalide. Utilisez le format nom@domaine.com.'),
   password: z.string().superRefine((password, ctx) => {
     const validation = validatePassword(password)
     if (!validation.isValid) {
@@ -33,10 +34,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!result.user) {
+      return NextResponse.json({ ok: false, error: 'Erreur lors de la création du compte' }, { status: 500 });
+    }
+
+    try {
+      await sendVerificationEmail({ id: result.user.id, email: result.user.email });
+    } catch {
+      return NextResponse.json(
+        { ok: false, error: 'Le compte a été créé, mais l’e-mail de confirmation n’a pas pu être envoyé. Réessayez depuis la page de vérification.' },
+        { status: 502 },
+      );
+    }
+
     return NextResponse.json({
       ok: true,
-      user: result.user,
-      token: result.token
+      requiresEmailVerification: true,
+      email: result.user.email,
     });
   } catch (error) {
     console.error('Erreur API register:', error);
