@@ -2,6 +2,8 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { useAuthContext } from '@/contexts/AuthContext'
 
 const GITHUB_URL = 'https://github.com/enzofrnt/giflist-solito'
@@ -25,13 +27,53 @@ function BugIcon() {
 
 export function Footer() {
   const { user } = useAuthContext()
-  const year = new Date().getFullYear()
+  const pathname = usePathname()
+  const [year, setYear] = useState(new Date().getFullYear())
+  const [logoClicks, setLogoClicks] = useState(0)
+  const [eggOpen, setEggOpen] = useState(false)
+  const [eggClosing, setEggClosing] = useState(false)
+
+  // The footer is prerendered: refresh the copyright year after hydration so it
+  // never stays stuck on the build year.
+  useEffect(() => { setYear(new Date().getFullYear()) }, [])
+
+  // Warm the easter-egg image so the overlay does not open on an empty frame.
+  useEffect(() => {
+    const image = new window.Image()
+    image.src = '/easter-egg/william-le-voleur.jpg'
+  }, [])
+
+  useEffect(() => {
+    if (!eggOpen) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeEgg()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [eggOpen])
+
+  function closeEgg() {
+    setEggClosing(true)
+    window.setTimeout(() => { setEggOpen(false); setEggClosing(false) }, 240)
+  }
+
+  function handleLogoClick(event: React.MouseEvent<HTMLAnchorElement>) {
+    // Keep the normal footer link behaviour outside the home page; on the home
+    // page, collect ten clicks for the William easter egg instead of reloading.
+    if (pathname !== '/') return
+    event.preventDefault()
+    setLogoClicks((current) => {
+      const next = current + 1
+      if (next >= 10) { setEggOpen(true); return 0 }
+      return next
+    })
+  }
 
   return (
     <footer className="ds-footer">
       <div className="ds-footer__inner">
         <div className="ds-footer__brand">
-          <Link href="/" className="ds-footer__brand-link" aria-label="Giftlist — accueil">
+          <Link href="/" className="ds-footer__brand-link" aria-label="Giftlist — accueil" onClick={handleLogoClick}>
             <Image
               src="/logo.webp"
               alt="Giftlist"
@@ -90,9 +132,37 @@ export function Footer() {
       </div>
 
       <div className="ds-footer__bottom">
-        <p>© {year} Giftlist. Tous droits réservés.</p>
+        <p suppressHydrationWarning>© {year} Giftlist. Tous droits réservés.</p>
         <p>Fait avec soin, pour le web et le mobile.</p>
       </div>
+
+      {eggOpen ? (
+        <div
+          className={`ds-easter-egg${eggClosing ? ' ds-easter-egg--closing' : ''}`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="William le voleur de cadeau"
+          onClick={closeEgg}
+        >
+          <div className="ds-easter-egg__panel" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="ds-easter-egg__close" onClick={closeEgg} aria-label="Fermer l’easter egg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+            <p className="ds-easter-egg__title">William le voleur de cadeau !</p>
+            <Image
+              src="/easter-egg/william-le-voleur.jpg"
+              alt="William, un chat roux, vole un cadeau sous le sapin"
+              width={1145}
+              height={1374}
+              className="ds-easter-egg__image"
+              unoptimized
+              priority
+            />
+          </div>
+        </div>
+      ) : null}
     </footer>
   )
 }
