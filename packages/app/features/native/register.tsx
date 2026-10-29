@@ -33,8 +33,7 @@ export function RegisterScreen({ navigation }: Props) {
   }
 
   return (
-    <Screen>
-      <AppHeader onBack={() => navigation.goBack()} />
+    <Screen header={<AppHeader onBack={() => navigation.goBack()} />}>
       <Card>
         <Text style={styles.title}>Créer un compte</Text>
         <Text style={styles.lead}>Votre première liste prend quelques secondes.</Text>

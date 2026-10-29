@@ -51,8 +51,7 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
   }
 
   return (
-    <Screen>
-      <AppHeader />
+    <Screen header={<AppHeader />}>
       <Card>
         <Text style={styles.name}>{user?.name ?? 'Mon compte'}</Text>
         {user?.email ? <Text style={styles.muted}>{user.email}</Text> : null}

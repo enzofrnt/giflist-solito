@@ -60,11 +60,14 @@ export function ManageListScreen({ navigation, route }: Props) {
   }
 
   return (
-    <Screen>
-      <AppHeader
-        onBack={() => navigation.goBack()}
-        right={list ? <Pressable onPress={shareList} style={styles.link} accessibilityRole="button"><Text style={styles.linkText}>Partager</Text></Pressable> : null}
-      />
+    <Screen
+      header={(
+        <AppHeader
+          onBack={() => navigation.goBack()}
+          right={list ? <Pressable onPress={shareList} style={styles.link} accessibilityRole="button"><Text style={styles.linkText}>Partager</Text></Pressable> : null}
+        />
+      )}
+    >
       {loading ? <Text style={styles.muted}>Chargement de la liste…</Text> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
 

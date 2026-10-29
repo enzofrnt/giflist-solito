@@ -95,9 +95,9 @@ export function NativeNavigation() {
       <Stack.Screen name="login" component={LoginScreen} />
       <Stack.Screen name="register" component={RegisterScreen} />
       <Stack.Screen name="main" component={MainScreen} />
-      <Stack.Screen name="manage" component={ManageListScreen} />
-      <Stack.Screen name="giftForm" component={GiftFormScreen} />
-      <Stack.Screen name="public" component={PublicListScreen} />
+      <Stack.Screen name="manage" component={ManageListScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="giftForm" component={GiftFormScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="public" component={PublicListScreen} options={{ animation: 'fade' }} />
     </Stack.Navigator>
   )
 }

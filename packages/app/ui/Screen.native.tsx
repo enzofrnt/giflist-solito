@@ -6,10 +6,12 @@ export function Screen({
   children,
   scroll = true,
   contentStyle,
+  header,
 }: {
   children: React.ReactNode
   scroll?: boolean
   contentStyle?: StyleProp<ViewStyle>
+  header?: React.ReactNode
 }) {
   const content = scroll ? (
     <ScrollView
@@ -25,6 +27,7 @@ export function Screen({
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+      {header ? <View style={styles.header}>{header}</View> : null}
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.fill}>
         {content}
       </KeyboardAvoidingView>
@@ -35,5 +38,6 @@ export function Screen({
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.canvas },
   fill: { flex: 1 },
+  header: { paddingHorizontal: spacing.lg },
   content: { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xxxl },
 })

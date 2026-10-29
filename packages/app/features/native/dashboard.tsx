@@ -58,8 +58,7 @@ export function DashboardScreen({ navigation }: Props) {
   }
 
   return (
-    <Screen>
-      <AppHeader />
+    <Screen header={<AppHeader />}>
 
       <View style={styles.heading}>
         <View style={styles.flex}>

@@ -62,11 +62,14 @@ export function PublicListScreen({ navigation, route }: Props) {
   }
 
   return (
-    <Screen>
-      <AppHeader
-        onBack={() => navigation.goBack()}
-        right={list ? <Pressable onPress={shareList} style={styles.link}><Text style={styles.linkText}>Partager</Text></Pressable> : null}
-      />
+    <Screen
+      header={(
+        <AppHeader
+          onBack={() => navigation.goBack()}
+          right={list ? <Pressable onPress={shareList} style={styles.link}><Text style={styles.linkText}>Partager</Text></Pressable> : null}
+        />
+      )}
+    >
 
       <Card>
         <Field label="Code de partage" value={code} onChangeText={setCode} autoCapitalize="characters" placeholder="Ex. A1B2C3D4" />

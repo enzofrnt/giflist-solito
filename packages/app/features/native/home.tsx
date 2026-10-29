@@ -10,8 +10,7 @@ export function HomeScreen({ navigation }: Props) {
   const { user } = useSession()
 
   return (
-    <Screen>
-      <AppHeader />
+    <Screen header={<AppHeader />}>
 
       <Card style={styles.hero}>
         <Text style={styles.overline}>Listes de cadeaux</Text>
