@@ -72,5 +72,5 @@ export function validatePasswordForZod(password: string): { success: true } | { 
     return { success: true }
   }
   
-  return { success: false, error: validation.errors[0] }
+  return { success: false, error: validation.errors[0] ?? 'Mot de passe invalide' }
 }

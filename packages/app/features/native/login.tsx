@@ -36,8 +36,8 @@ export function LoginScreen({ navigation }: Props) {
       <Card>
         <Text style={styles.title}>Connexion</Text>
         <Text style={styles.lead}>Retrouvez vos listes de cadeaux.</Text>
-        <Field label="Adresse e-mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" />
-        <Field label="Mot de passe" value={password} onChangeText={setPassword} secureTextEntry autoComplete="current-password" />
+        <Field label="Adresse e-mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="username" textContentType="username" />
+        <Field label="Mot de passe" value={password} onChangeText={setPassword} secureTextEntry autoComplete="current-password" textContentType="password" />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Button title="Se connecter" onPress={submit} loading={loading} disabled={!email.trim() || !password} fullWidth />
         <Pressable onPress={() => navigation.navigate('register')} style={styles.link}>

@@ -118,7 +118,7 @@ export default function RegisterPage() {
             onChange={handleInputChange}
             className="ds-input"
             placeholder="votre@email.com"
-            autoComplete="email"
+            autoComplete="username"
           />
         </div>
 

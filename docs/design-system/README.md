@@ -5,7 +5,7 @@
 - **Review page**: `/design-system` (local and Vercel preview; `404` on production, `noindex`)
 - **Feature artifacts**: [`specs/002-ui-design-system/`](../../specs/002-ui-design-system/spec.md)
 - **UI audit (evidence base)**: [ui-audit.md](ui-audit.md)
-- **Screenshots**: [Phase 1](screenshots/) · [Phase 2 pages](screenshots/phase-2/) · [Phase 3 UX](screenshots/phase-3/) · [Phase 4 share/perf](screenshots/phase-4/) · [Phase 5 SEO/list UX](screenshots/phase-5/) · [Phase 6 native](screenshots/phase-6/)
+- **Screenshots**: [Phase 1](screenshots/) · [Phase 2 pages](screenshots/phase-2/) · [Phase 3 UX](screenshots/phase-3/) · [Phase 4 share/perf](screenshots/phase-4/) · [Phase 5 SEO/list UX](screenshots/phase-5/) · [Phase 6 native](screenshots/phase-6/) · [Phase 7 password UX](screenshots/phase-7/)
 - **Guardrails**: [`scripts/design-system-guard.sh`](../../scripts/design-system-guard.sh)
 
 ## Aperçu
@@ -128,6 +128,14 @@ See [Phase 5 screenshots](screenshots/phase-5/).
 - EAS project creation still needs `eas login`.
 
 See [Phase 6 native screenshots](screenshots/phase-6/).
+
+## Phase 7 — Password strength & password managers
+
+- Web register: strength track always visible, empty until typing.
+- Mobile register: same shared strength component, empty track + rules, confirm password.
+- iOS/web credential linking: associated domain `webcredentials:giftlist.fr` + AASA + `textContentType`/autocomplete semantics.
+
+See [Phase 7 screenshots](screenshots/phase-7/).
 
 ## Shared-list OpenGraph
 

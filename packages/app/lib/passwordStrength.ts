@@ -43,8 +43,8 @@ export function calculatePasswordStrength(password: string): PasswordStrength {
 
   return {
     level,
-    label: LABELS[level],
-    tone: TONES[level],
+    label: LABELS[level]!,
+    tone: TONES[level]!,
     percent: level === 0 ? 10 : level * 25,
     rulesPassed,
     isEmpty: false,
