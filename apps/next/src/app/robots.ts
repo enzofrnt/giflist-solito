@@ -18,11 +18,11 @@ export default function robots(): MetadataRoute.Robots {
           '/setup-passkey',
           '/forgot-password',
           '/reset-password',
+          '/email-change',
           '/design-system',
         ],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
-    host: SITE_URL,
   }
 }
