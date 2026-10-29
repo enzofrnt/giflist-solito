@@ -1,4 +1,4 @@
-import type { NativeStackScreenProps } from '@react-navigation/native-stack'
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useEffect, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import type { RootStackParamList } from 'app/navigation/native'
@@ -6,9 +6,12 @@ import { api } from 'app/lib/api'
 import { useSession } from 'app/provider/session.native'
 import { AppHeader, Button, Card, Field, PasswordStrength, Screen, colors, spacing, typography } from 'app/ui'
 
-type Props = NativeStackScreenProps<RootStackParamList, 'profile'>
+type Props = {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'main'>
+  onShowLists: () => void
+}
 
-export function ProfileScreen({ navigation }: Props) {
+export function ProfileScreen({ navigation, onShowLists }: Props) {
   const { user, loading, signIn, signOut } = useSession()
   const [showPassword, setShowPassword] = useState(false)
   const [currentPassword, setCurrentPassword] = useState('')
@@ -19,7 +22,7 @@ export function ProfileScreen({ navigation }: Props) {
   const [passwordSuccess, setPasswordSuccess] = useState('')
 
   useEffect(() => {
-    if (!loading && !user) navigation.replace('login')
+    if (!loading && !user) navigation.reset({ index: 0, routes: [{ name: 'login' }] })
   }, [user, loading, navigation])
 
   async function logout() {
@@ -49,7 +52,7 @@ export function ProfileScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <AppHeader title="Mon profil" onBack={() => navigation.navigate('dashboard')} />
+      <AppHeader />
       <Card>
         <Text style={styles.name}>{user?.name ?? 'Mon compte'}</Text>
         {user?.email ? <Text style={styles.muted}>{user.email}</Text> : null}
@@ -107,7 +110,7 @@ export function ProfileScreen({ navigation }: Props) {
       </Card>
 
       <Card>
-        <Button title="Mes listes" onPress={() => navigation.navigate('dashboard')} fullWidth />
+        <Button title="Mes listes" onPress={onShowLists} fullWidth />
         <Button title="Se déconnecter" variant="danger" onPress={logout} fullWidth />
       </Card>
       <View style={styles.footer}>

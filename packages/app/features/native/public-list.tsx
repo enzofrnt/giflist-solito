@@ -64,7 +64,6 @@ export function PublicListScreen({ navigation, route }: Props) {
   return (
     <Screen>
       <AppHeader
-        title="Liste partagée"
         onBack={() => navigation.goBack()}
         right={list ? <Pressable onPress={shareList} style={styles.link}><Text style={styles.linkText}>Partager</Text></Pressable> : null}
       />

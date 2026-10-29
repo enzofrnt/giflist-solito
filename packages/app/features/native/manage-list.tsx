@@ -1,14 +1,13 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Alert, Image, Pressable, Share, StyleSheet, Text, View } from 'react-native'
+import { useFocusEffect } from '@react-navigation/native'
 import type { Gift, GiftList } from 'app/types'
 import type { RootStackParamList } from 'app/navigation/native'
 import { API_URL, api } from 'app/lib/api'
-import { AppHeader, Badge, Button, Card, Field, Screen, colors, spacing, typography } from 'app/ui'
+import { AppHeader, Badge, Button, Card, Screen, colors, spacing, typography } from 'app/ui'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'manage'>
-
-const EMPTY_FORM = { title: '', url: '', image: '', price: '', description: '' }
 
 export function ManageListScreen({ navigation, route }: Props) {
   const { id } = route.params
@@ -16,10 +15,6 @@ export function ManageListScreen({ navigation, route }: Props) {
   const [gifts, setGifts] = useState<Gift[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [showForm, setShowForm] = useState(false)
-  const [editingGift, setEditingGift] = useState<Gift | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState(EMPTY_FORM)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -35,58 +30,7 @@ export function ManageListScreen({ navigation, route }: Props) {
     }
   }, [id])
 
-  useEffect(() => { load() }, [load])
-
-  function resetForm() {
-    setForm(EMPTY_FORM)
-    setEditingGift(null)
-    setShowForm(false)
-  }
-
-  function openAdd() {
-    setForm(EMPTY_FORM)
-    setEditingGift(null)
-    setShowForm(true)
-  }
-
-  function openEdit(gift: Gift) {
-    setForm({
-      title: gift.title,
-      url: gift.url ?? '',
-      image: gift.image ?? '',
-      price: gift.price != null ? String(gift.price) : '',
-      description: gift.description ?? '',
-    })
-    setEditingGift(gift)
-    setShowForm(true)
-  }
-
-  async function saveGift() {
-    if (!form.title.trim()) return
-    setSaving(true)
-    setError('')
-    try {
-      const payload = {
-        title: form.title.trim(),
-        url: form.url.trim() || undefined,
-        image: form.image.trim() || undefined,
-        price: form.price.trim() ? Number(form.price.replace(',', '.')) : undefined,
-        description: form.description.trim() || undefined,
-      }
-      if (editingGift) {
-        const data = await api.updateGift(id, editingGift.id, payload)
-        setGifts((current) => current.map((gift) => gift.id === data.gift.id ? data.gift : gift))
-      } else {
-        const data = await api.createGift(id, payload)
-        setGifts((current) => [data.gift, ...current])
-      }
-      resetForm()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Enregistrement impossible')
-    } finally {
-      setSaving(false)
-    }
-  }
+  useFocusEffect(useCallback(() => { load() }, [load]))
 
   function confirmDelete(gift: Gift) {
     Alert.alert('Supprimer le cadeau', `Supprimer « ${gift.title} » ?`, [
@@ -118,8 +62,7 @@ export function ManageListScreen({ navigation, route }: Props) {
   return (
     <Screen>
       <AppHeader
-        title="Gérer"
-        onBack={() => navigation.navigate('dashboard')}
+        onBack={() => navigation.goBack()}
         right={list ? <Pressable onPress={shareList} style={styles.link} accessibilityRole="button"><Text style={styles.linkText}>Partager</Text></Pressable> : null}
       />
       {loading ? <Text style={styles.muted}>Chargement de la liste…</Text> : null}
@@ -132,24 +75,7 @@ export function ManageListScreen({ navigation, route }: Props) {
             {list.description ? <Text style={styles.muted}>{list.description}</Text> : null}
           </View>
 
-          {!showForm ? (
-            <Button title="Ajouter un cadeau" onPress={openAdd} fullWidth />
-          ) : null}
-
-          {showForm ? (
-            <Card>
-              <Text style={styles.formTitle}>{editingGift ? 'Modifier le cadeau' : 'Nouveau cadeau'}</Text>
-              <Field label="Titre" value={form.title} onChangeText={(value) => setForm((current) => ({ ...current, title: value }))} placeholder="Casque audio…" />
-              <Field label="Lien produit" value={form.url} onChangeText={(value) => setForm((current) => ({ ...current, url: value }))} autoCapitalize="none" keyboardType="url" placeholder="https://…" />
-              <Field label="Image (URL)" value={form.image} onChangeText={(value) => setForm((current) => ({ ...current, image: value }))} autoCapitalize="none" keyboardType="url" placeholder="https://…/photo.jpg" />
-              <Field label="Prix (€)" value={form.price} onChangeText={(value) => setForm((current) => ({ ...current, price: value }))} keyboardType="decimal-pad" placeholder="29,90" />
-              <Field label="Description" value={form.description} onChangeText={(value) => setForm((current) => ({ ...current, description: value }))} multiline placeholder="Optionnel" />
-              <View style={styles.formActions}>
-                <Button title="Annuler" variant="ghost" onPress={resetForm} style={styles.flex} />
-                <Button title={editingGift ? 'Enregistrer' : 'Ajouter'} onPress={saveGift} loading={saving} disabled={!form.title.trim()} style={styles.flex} />
-              </View>
-            </Card>
-          ) : null}
+          <Button title="Ajouter un cadeau" onPress={() => navigation.navigate('giftForm', { listId: id })} fullWidth />
 
           <Text style={styles.sectionTitle}>Les cadeaux <Text style={styles.count}>{gifts.length}</Text></Text>
           {gifts.length === 0 ? <Card><Text style={styles.muted}>Aucun cadeau pour le moment.</Text></Card> : null}
@@ -173,7 +99,7 @@ export function ManageListScreen({ navigation, route }: Props) {
                 </View>
               </View>
               <View style={styles.actions}>
-                <Button title="Modifier" variant="secondary" onPress={() => openEdit(gift)} style={styles.flex} />
+                <Button title="Modifier" variant="secondary" onPress={() => navigation.navigate('giftForm', { listId: id, gift })} style={styles.flex} />
                 <Button title="Supprimer" variant="ghost" onPress={() => confirmDelete(gift)} style={styles.flex} />
               </View>
             </Card>
@@ -186,7 +112,6 @@ export function ManageListScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   title: { color: colors.text, fontSize: typography.title, fontWeight: '800' },
-  formTitle: { color: colors.text, fontSize: typography.heading, fontWeight: '700' },
   sectionTitle: { color: colors.text, fontSize: typography.heading, fontWeight: '700' },
   count: { color: colors.textMuted, fontSize: typography.small, fontWeight: '500' },
   muted: { color: colors.textMuted, fontSize: typography.small, lineHeight: 19 },
@@ -200,7 +125,6 @@ const styles = StyleSheet.create({
   thumbFallbackImage: { width: 44, height: 44, borderRadius: 10 },
   cardTitle: { color: colors.text, fontSize: typography.body, fontWeight: '700', flex: 1 },
   actions: { flexDirection: 'row', gap: spacing.sm, justifyContent: 'flex-end' },
-  formActions: { flexDirection: 'row', gap: spacing.sm },
   flex: { flex: 1 },
   link: { minHeight: 44, justifyContent: 'center', paddingHorizontal: spacing.sm },
   linkText: { color: colors.primary, fontSize: typography.small, fontWeight: '600' },

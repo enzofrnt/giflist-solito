@@ -1,4 +1,4 @@
-import type { NativeStackScreenProps } from '@react-navigation/native-stack'
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useCallback, useEffect, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import type { GiftListWithCount } from 'app/types'
@@ -7,10 +7,10 @@ import { api } from 'app/lib/api'
 import { useSession } from 'app/provider/session.native'
 import { AppHeader, Badge, Button, Card, Field, Screen, colors, spacing, typography } from 'app/ui'
 
-type Props = NativeStackScreenProps<RootStackParamList, 'dashboard'>
+type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'main'> }
 
 export function DashboardScreen({ navigation }: Props) {
-  const { user, loading: sessionLoading, signOut } = useSession()
+  const { user, loading: sessionLoading } = useSession()
   const [lists, setLists] = useState<GiftListWithCount[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -34,7 +34,7 @@ export function DashboardScreen({ navigation }: Props) {
 
   useEffect(() => {
     if (!sessionLoading && !user) {
-      navigation.replace('login')
+      navigation.reset({ index: 0, routes: [{ name: 'login' }] })
       return
     }
     if (user) load()
@@ -57,21 +57,9 @@ export function DashboardScreen({ navigation }: Props) {
     }
   }
 
-  async function logout() {
-    await signOut()
-    navigation.reset({ index: 0, routes: [{ name: 'home' }] })
-  }
-
   return (
     <Screen>
-      <AppHeader
-        title="Mes listes"
-        right={
-          <Pressable onPress={() => navigation.navigate('profile')} style={styles.link} accessibilityRole="button">
-            <Text style={styles.linkText}>{user?.name?.split(' ')[0] ?? 'Profil'}</Text>
-          </Pressable>
-        }
-      />
+      <AppHeader />
 
       <View style={styles.heading}>
         <View style={styles.flex}>
@@ -114,10 +102,6 @@ export function DashboardScreen({ navigation }: Props) {
           <Button title="Gérer la liste" onPress={() => navigation.navigate('manage', { id: String(list.id) })} fullWidth />
         </Card>
       ))}
-
-      <Pressable onPress={logout} style={styles.logout}>
-        <Text style={styles.logoutText}>Déconnexion</Text>
-      </Pressable>
     </Screen>
   )
 }
@@ -138,8 +122,4 @@ const styles = StyleSheet.create({
   checkboxOn: { backgroundColor: colors.primary, borderColor: colors.primary },
   check: { color: colors.surface, fontWeight: '700' },
   switchText: { color: colors.text, fontSize: typography.small, fontWeight: '600' },
-  link: { minHeight: 44, justifyContent: 'center', paddingHorizontal: spacing.sm },
-  linkText: { color: colors.primary, fontSize: typography.small, fontWeight: '600' },
-  logout: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
-  logoutText: { color: colors.danger, fontSize: typography.small, fontWeight: '600' },
 })

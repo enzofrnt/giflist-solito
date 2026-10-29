@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import type { RootStackParamList } from 'app/navigation/native'
 import { useSession } from 'app/provider/session.native'
 import { AppHeader, Button, Card, Screen, spacing, typography, colors } from 'app/ui'
@@ -11,15 +11,7 @@ export function HomeScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <AppHeader
-        right={
-          user ? (
-            <Pressable onPress={() => navigation.navigate('profile')} accessibilityRole="button" style={styles.link}>
-              <Text style={styles.linkText}>Profil</Text>
-            </Pressable>
-          ) : null
-        }
-      />
+      <AppHeader />
 
       <Card style={styles.hero}>
         <Text style={styles.overline}>Listes de cadeaux</Text>
@@ -29,7 +21,7 @@ export function HomeScreen({ navigation }: Props) {
         </Text>
         <Button
           title={user ? 'Voir mes listes' : 'Se connecter'}
-          onPress={() => navigation.navigate(user ? 'dashboard' : 'login')}
+          onPress={() => user ? navigation.reset({ index: 0, routes: [{ name: 'main' }] }) : navigation.navigate('login')}
           fullWidth
         />
         <Button
@@ -74,6 +66,4 @@ const styles = StyleSheet.create({
   step: { color: colors.text, fontSize: typography.body, fontWeight: '700' },
   stepText: { color: colors.textMuted, fontSize: typography.small, lineHeight: 19 },
   note: { color: colors.textSubtle, fontSize: typography.caption, textAlign: 'center' },
-  link: { minHeight: 44, justifyContent: 'center', paddingHorizontal: spacing.sm },
-  linkText: { color: colors.primary, fontSize: typography.small, fontWeight: '600' },
 })

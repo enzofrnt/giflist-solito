@@ -22,7 +22,7 @@ export function LoginScreen({ navigation }: Props) {
     try {
       const result = await api.login(email.trim(), password)
       await signIn(result.token, result.user)
-      navigation.reset({ index: 0, routes: [{ name: 'dashboard' }] })
+      navigation.reset({ index: 0, routes: [{ name: 'main' }] })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Connexion impossible')
     } finally {
