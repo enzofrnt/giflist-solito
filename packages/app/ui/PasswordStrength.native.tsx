@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Animated, StyleSheet, Text, View } from 'react-native'
+import { useEffect, useRef } from 'react'
 import { calculatePasswordStrength } from 'app/lib/passwordStrength'
 import { getPasswordRules } from 'app/lib/passwordValidation'
 import { colors, radius, spacing, typography } from './tokens'
@@ -14,6 +15,15 @@ const RULES = [
 export function PasswordStrength({ password, showRules = true }: { password: string; showRules?: boolean }) {
   const strength = calculatePasswordStrength(password)
   const rules = getPasswordRules(password)
+  const progress = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    Animated.timing(progress, {
+      toValue: strength.percent,
+      duration: 260,
+      useNativeDriver: false,
+    }).start()
+  }, [progress, strength.percent])
   const tone = strength.isEmpty
     ? colors.borderStrong
     : strength.level <= 1
@@ -35,7 +45,15 @@ export function PasswordStrength({ password, showRules = true }: { password: str
         accessibilityRole="progressbar"
         accessibilityValue={{ min: 0, max: 4, now: strength.level, text: strength.isEmpty ? 'Mot de passe vide' : strength.label }}
       >
-        <View style={[styles.fill, { width: `${strength.percent}%`, backgroundColor: tone }]} />
+        <Animated.View
+          style={[
+            styles.fill,
+            {
+              width: progress.interpolate({ inputRange: [0, 100], outputRange: ['0%', '100%'] }),
+              backgroundColor: tone,
+            },
+          ]}
+        />
       </View>
       {showRules ? (
         <View style={styles.rules}>

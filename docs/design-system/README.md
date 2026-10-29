@@ -137,6 +137,15 @@ See [Phase 6 native screenshots](screenshots/phase-6/).
 
 See [Phase 7 screenshots](screenshots/phase-7/).
 
+## Phase 8 — Mobile polish
+
+- Visible “Créer un compte” secondary button.
+- Gift thumbnails and edit flow in managed lists.
+- Password change in mobile profile/settings.
+- Smooth animated strength bar (260 ms).
+
+See [Phase 8 screenshots](screenshots/phase-8/).
+
 ## Shared-list OpenGraph
 
 - `/list/[shareCode]` now owns a dynamic 1200×630 OG card (title, description, owner, gift count, Giftlist logo), independent of the list’s remote image.

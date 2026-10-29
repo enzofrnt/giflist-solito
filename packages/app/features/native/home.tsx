@@ -39,7 +39,7 @@ export function HomeScreen({ navigation }: Props) {
           fullWidth
         />
         {!user ? (
-          <Button title="Créer un compte" variant="ghost" onPress={() => navigation.navigate('register')} fullWidth />
+          <Button title="Créer un compte" variant="secondary" onPress={() => navigation.navigate('register')} fullWidth />
         ) : null}
       </Card>
 
