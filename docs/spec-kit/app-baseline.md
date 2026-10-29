@@ -14,7 +14,7 @@ Factual inventory for the Spec Kit constitution and `AGENTS.md`. Descriptive, no
 |---|---|---|
 | Runtime / package manager | **Bun 1.4.4** — `packageManager: "bun@1.4.4"`, `.bun-version` `1.4.4`, `engines.bun: ">=1.4.4 <1.5.0"`; Vercel runtime `1.4.x` | `package.json`, `.bun-version`, `apps/next/vercel.json` |
 | Lockfile / install | **`bun.lock` only**; npm+pnpm lockfiles and `pnpm-workspace.yaml` deleted; workspaces declared in root `package.json`; `bunfig.toml` `[install] linker = "hoisted"` for Metro | root tree, `bunfig.toml` |
-| Next.js | **16.4.3** (`next`, `eslint-config-next`); Webpack is explicit (`next dev --webpack`, `next build --webpack`) to keep `.web.*` resolution and the RN→RNW alias | `apps/next/package.json`, `readme.md` |
+| Next.js | **16.4.3** (`next`, `eslint-config-next`); Turbopack is explicit (`next dev --turbopack`, `next build --turbopack`) with the RN→RNW alias and `.web.*` resolution in `turbopack` config | `apps/next/package.json`, `apps/next/next.config.ts` |
 | React | 19.1.0, react-dom 19.1.0, react-native 0.81.5, react-native-web ^0.21.2 | manifests |
 | Expo | `^54.0.16` (app) / `~54.0.22` (root), New Architecture on | `apps/expo/package.json`, `app.json` |
 | DB / ORM | PostgreSQL via `POSTGRES_PRISMA_URL`; Prisma `^6.16.0`; client emitted to `src/generated/prisma` | `prisma/schema.prisma` |
@@ -50,8 +50,8 @@ giflist-solito/  .bun-version  bunfig.toml  bun.lock  package.json  turbo.json  
 | Root command | Expands to |
 |---|---|
 | `bun install --frozen-lockfile` | install; root postinstall runs `bun run --cwd apps/next db:generate` |
-| `bun run web:dev` | `bun run --cwd apps/next dev` → `next dev --webpack` |
-| `bun run web:build` | `db:generate && next build --webpack` (**no migration**) |
+| `bun run web:dev` | `bun run --cwd apps/next dev` → `next dev --turbopack` |
+| `bun run web:build` | `db:generate && next build --turbopack` (**no migration**) |
 | `bun run web:build:vercel` | `bun scripts/build-vercel.mjs` (**migrate deploy, then build**) |
 | `bun run web:start` | `next start` under Bun |
 | `bun run web:typecheck` | `tsc --noEmit` |
@@ -115,7 +115,7 @@ API routes (`src/app/api/**/route.ts`), auth as implemented:
 | `gift` (legacy) | GET, POST, PUT, DELETE | **none** — global gift CRUD across all lists |
 | `scrape-product` | POST | none, no quota; 647-line parser (ScrapingBee if `SCRAPINGBEE_API_KEY`, else direct fetch + OpenGraph/CSS heuristics, Amazon-specific) |
 
-`next.config.ts`: `transpilePackages: ['app', 'expo-image']`, webpack alias
+`next.config.ts`: `transpilePackages: ['app', 'expo-image']`, Turbopack alias
 `react-native` → `react-native-web`, `.web.{js,jsx,ts,tsx}` resolved first,
 `images.remotePatterns` for `https://m.media-amazon.com/**`. No `headers()`, CSP,
 redirects or rewrites.
@@ -202,7 +202,7 @@ code): `SUPABASE_*`, `NEXT_PUBLIC_SUPABASE_*`, `RESEND_EMAIL_DOMAIN`,
 - `apps/next/scripts/build-vercel.mjs`: picks
   `POSTGRES_URL_NON_POOLING || DATABASE_URL || POSTGRES_PRISMA_URL`, runs `db:migrate`
   (`prisma migrate deploy`, 120 s timeout), then `build` (`db:generate` from
-  `schema.production.prisma` + `next build --webpack`); throws when `VERCEL` is set and
+  `schema.production.prisma` + `next build --turbopack`); throws when `VERCEL` is set and
   no DB URL exists. Local `bun run web:build` never migrates and never rewrites schemas.
 - `.husky/pre-commit` = `bun run web:build` (full production build per commit).
 - **Vercel project** (Lead-verified via MCP; IDs also in the gitignored local
@@ -385,7 +385,7 @@ bun install --frozen-lockfile
 bun run test            # apps/next: bun run db:generate && bun test tests/*.test.ts
 bun run web:typecheck   # apps/next: tsc --noEmit
 bun run web:lint        # apps/next: eslint
-bun run web:build       # db:generate + next build --webpack (no migration)
+bun run web:build       # db:generate + next build --turbopack (no migration)
 bun run web:build:vercel  # migrate deploy (120 s) then build
 ```
 

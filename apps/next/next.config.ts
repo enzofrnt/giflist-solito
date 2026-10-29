@@ -7,23 +7,24 @@ const nextConfig: NextConfig = {
   sassOptions: {
     includePaths: [path.join(process.cwd(), "src/styles")],
   },
-  webpack: (config) => {
-    // Alias react-native vers react-native-web pour le web (client et serveur)
-    config.resolve.alias = {
-      ...config.resolve.alias,
+  turbopack: {
+    // Alias React Native to react-native-web for both client and server.
+    resolveAlias: {
       'react-native': 'react-native-web',
-    }
-    
-    // Exclure certains modules React Native qui ne sont pas nécessaires sur le web
-    config.resolve.extensions = [
-      '.web.js',
-      '.web.jsx',
-      '.web.ts',
+    },
+    // Prefer web-specific implementations, matching the former webpack setup.
+    resolveExtensions: [
       '.web.tsx',
-      ...config.resolve.extensions,
-    ]
-    
-    return config
+      '.web.ts',
+      '.web.jsx',
+      '.web.js',
+      '.tsx',
+      '.ts',
+      '.jsx',
+      '.js',
+      '.mjs',
+      '.json',
+    ],
   },
   images: {
     remotePatterns: [

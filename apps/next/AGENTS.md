@@ -12,7 +12,7 @@ Read the root [`AGENTS.md`](../../AGENTS.md) first. It contains the mandatory Sp
 
 ## Rules specific to this app
 
-- Webpack is intentional (`next dev --webpack` / `next build --webpack`) because of Solito/react-native-web aliases in `next.config.ts`. Do not switch to Turbopack without a plan proving Solito parity.
+- Turbopack is the bundler (`next dev --turbopack` / `next build --turbopack`). `next.config.ts` must keep the Solito `react-native → react-native-web` alias and `.web.*` resolution order in `turbopack.resolveAlias` / `turbopack.resolveExtensions`. Verify `/`, auth, search, public-list and manage routes after changing them.
 - Every route handler validates input with Zod and enforces ownership server-side. Use the auth helpers; do not re-implement JWT/cookie parsing.
 - `schema.prisma` and `schema.production.prisma` must stay identical, with a committed forward-only migration for every change. Never `db push`/`reset` against shared databases. Production migrations run in the Vercel build, so a bad migration fails deployment.
 - Tests: `apps/next/tests/*.test.ts` via `bun test`, using the ephemeral pglite PostgreSQL fixture (never a shared database).
