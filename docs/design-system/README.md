@@ -158,7 +158,7 @@ See [Phase 9 screenshots](screenshots/phase-9/).
 ## Phase 10 — Stable mobile header
 
 - Brand header fixed outside scroll; back/share appear without moving the centered logo.
-- Detail screens fade instead of sliding horizontally.
+- Detail screens switch instantly (`animation: none`): no slide, no fade.
 
 ## Shared-list OpenGraph
 
