@@ -263,7 +263,7 @@ export default function ProfileClient() {
                     value={formData.username}
                     onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30) }))}
                     className="ds-input"
-                    placeholder="enzo"
+                    placeholder="votre_pseudo"
                     minLength={3}
                     maxLength={30}
                     pattern="[a-z0-9_]{3,30}"

@@ -51,7 +51,7 @@ export default async function PublicUserPage({ params, searchParams }: PublicUse
   return (
     <div className="ds-page">
       <main className="ds-page__main">
-        <header className="ds-page-header">
+        <header className="ds-page-header ds-page-header--stacked">
           <Link href={backTo} className="ds-btn ds-btn--ghost ds-btn--sm self-start">← Retour à la recherche</Link>
           <div className="ds-page-header__copy">
             <span className="ds-page-kicker">Profil public</span>

@@ -2,6 +2,7 @@ import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ['127.0.0.1', 'localhost'],
   transpilePackages: ['app', 'expo-image'],
   sassOptions: {
     includePaths: [path.join(process.cwd(), "src/styles")],
@@ -30,6 +31,11 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'm.media-amazon.com',
         port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
         pathname: '/**',
       },
     ],

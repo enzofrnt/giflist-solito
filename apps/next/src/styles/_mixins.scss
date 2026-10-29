@@ -1,5 +1,6 @@
 // Shared design-system mixins. Use with `@use 'mixins' as *;`.
 @use 'sass:map';
+@use 'sass:list';
 @use 'tokens' as *;
 
 @mixin ds-focus-ring {
@@ -67,7 +68,7 @@
 @mixin ds-transition($properties...) {
   $transition-properties: all;
 
-  @if length($properties) > 0 {
+  @if list.length($properties) > 0 {
     $transition-properties: $properties;
   }
 

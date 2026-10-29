@@ -102,63 +102,76 @@ export default function SearchPage() {
 
         {favorites.length > 0 ? <hr className="ds-search-separator" /> : null}
 
-        <div className="ds-card">
-          <div className="ds-card__body">
-            <label htmlFor="search-q" className="ds-label">Pseudo ou code de liste</label>
-            <div className="ds-search-field">
-              <SearchIcon size={18} aria-hidden="true" />
-              <input
-                id="search-q"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="ds-input ds-search-field__input"
-                placeholder="enzo ou A1B2C3D4"
-                autoComplete="off"
-                aria-describedby="search-hint"
-              />
-            </div>
-            <p className="ds-hint" id="search-hint">Le code complet ouvre la liste directement, même si elle est privée.</p>
+        <div className="ds-search-hero">
+          <div className="ds-search-field ds-search-field--hero">
+            <SearchIcon size={20} aria-hidden="true" />
+            <input
+              id="search-q"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="ds-input ds-search-field__input"
+              placeholder="Rechercher un pseudo ou un code de liste"
+              autoComplete="off"
+              aria-describedby="search-hint"
+              aria-label="Rechercher un pseudo ou un code de liste"
+            />
           </div>
+          <p className="ds-hint" id="search-hint">Le code complet ouvre la liste directement, même si elle est privée.</p>
         </div>
 
+        <div className="ds-search-results">
         {loading ? <p className="ds-body-sm ds-text-muted" role="status">Recherche…</p> : null}
         {error ? <p className="ds-error" role="alert">{error}</p> : null}
 
-        {result?.list ? (
-          <section className="ds-card">
-            <div className="ds-card__body">
-              <span className="ds-overline">Liste trouvée</span>
-              <h2 className="ds-card__title">{result.list.title}</h2>
-              {result.list.description ? <p className="ds-body-sm ds-text-muted">{result.list.description}</p> : null}
-              <p className="ds-hint">Par {result.list.owner.username ? `@${result.list.owner.username}` : 'un membre'}</p>
-              <Link href={`/list/${result.list.shareCode}?from=${encodeURIComponent(`/search?q=${query.trim()}`)}`} className="ds-btn ds-btn--primary ds-btn--md">
-                <ArrowRight size={16} className="ds-btn__icon" aria-hidden="true" />
-                Ouvrir la liste
-              </Link>
+        {result && (result.list || result.users.length) ? (
+          <section className="ds-search-results-panel" aria-label="Résultats de recherche">
+            <div className="ds-search-results__header">
+              <h2 className="ds-search-results__title">Résultats pour « {query.trim()} »</h2>
+              <span className="ds-search-results__count">
+                {result.list
+                  ? '1 liste'
+                  : `${result.users.length} compte${result.users.length > 1 ? 's' : ''} public${result.users.length > 1 ? 's' : ''}`}
+              </span>
             </div>
-          </section>
-        ) : null}
-
-        {!result?.list && result?.users.length ? (
-          <section className="ds-stack ds-stack--gap-3">
-            <h2 className="ds-h3">Comptes publics</h2>
-            {result.users.map((user) => (
-              <Link key={user.username} href={`/u/${user.username}?from=${encodeURIComponent(`/search?q=${query.trim()}`)}`} className="ds-card" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div className="ds-card__body ds-cluster" style={{ justifyContent: 'space-between' }}>
-                  <div className="ds-stack ds-stack--gap-1">
+            <div className="ds-search-result-list">
+              {result.list ? (
+                <Link
+                  href={`/list/${result.list.shareCode}?from=${encodeURIComponent(`/search?q=${query.trim()}`)}`}
+                  className="ds-search-result-row"
+                >
+                  <div className="ds-search-result-row__icon" aria-hidden="true"><ListChecks size={18} /></div>
+                  <div className="ds-search-result-row__body">
+                    <span className="ds-search-result-row__kicker">Liste trouvée</span>
+                    <strong>{result.list.title}</strong>
+                    {result.list.description ? <span className="ds-hint">{result.list.description}</span> : null}
+                    <span className="ds-hint">Par {result.list.owner.username ? `@${result.list.owner.username}` : 'un membre'} · {result.list.shareCode}</span>
+                  </div>
+                  <ArrowRight size={17} aria-hidden="true" />
+                </Link>
+              ) : null}
+              {result.users.map((user) => (
+                <Link
+                  key={user.username}
+                  href={`/u/${user.username}?from=${encodeURIComponent(`/search?q=${query.trim()}`)}`}
+                  className="ds-search-result-row"
+                >
+                  <div className="ds-search-result-row__icon" aria-hidden="true">@</div>
+                  <div className="ds-search-result-row__body">
+                    <span className="ds-search-result-row__kicker">Compte public</span>
                     <strong>@{user.username}</strong>
                     <span className="ds-hint">{user.publicListsCount} liste{user.publicListsCount > 1 ? 's' : ''} publique{user.publicListsCount > 1 ? 's' : ''}</span>
                   </div>
                   <ArrowRight size={17} aria-hidden="true" />
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
           </section>
         ) : null}
 
         {!loading && query.trim().length >= 2 && result && !result.list && result.users.length === 0 ? (
           <p className="ds-body-sm ds-text-muted">Aucun compte public ne correspond à « {query.trim()} ».</p>
         ) : null}
+        </div>
       </main>
     </div>
   )

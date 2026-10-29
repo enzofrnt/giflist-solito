@@ -22,7 +22,8 @@
     "docker:logs": "docker-compose logs -f postgres",
     "docker:reset": "docker-compose down -v && docker-compose up -d",
     "build:vercel": "bun scripts/build-vercel.mjs",
-    "typecheck": "bun run --bun tsc --noEmit"
+    "typecheck": "bun run --bun tsc --noEmit",
+    "db:seed:demo": "bun prisma/seed-demo.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.16.0",
