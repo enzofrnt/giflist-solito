@@ -123,6 +123,9 @@ export async function registerUser(email: string, password: string, name: string
         password: hashedPassword,
         name,
         isPublic: true,
+        // Accounts created through the registration flow must confirm their
+        // e-mail before they can log in. Existing accounts default to true.
+        emailVerified: false,
       },
       select: {
         id: true,
@@ -133,15 +136,9 @@ export async function registerUser(email: string, password: string, name: string
       }
     });
 
-    // Générer le token
-    const token = generateToken({
-      id: user.id,
-      email: user.email,
-      name: user.name || ''
-    });
-
     return {
       success: true,
+      requiresEmailVerification: true,
       user: {
         id: user.id,
         email: user.email,
@@ -149,7 +146,6 @@ export async function registerUser(email: string, password: string, name: string
         username: user.username,
         isPublic: user.isPublic,
       },
-      token
     };
   } catch (error) {
     console.error('Erreur lors de l\'inscription:', error);
@@ -181,6 +177,14 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
       return {
         success: false,
         error: 'Email ou mot de passe incorrect'
+      };
+    }
+
+    if (!user.emailVerified) {
+      return {
+        success: false,
+        requiresEmailVerification: true,
+        error: 'Confirmez votre adresse e-mail avant de vous connecter. Vérifiez votre boîte de réception.',
       };
     }
 

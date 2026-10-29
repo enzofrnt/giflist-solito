@@ -16,8 +16,12 @@ export async function POST(request: NextRequest) {
 
     if (!result.success) {
       return NextResponse.json(
-        { ok: false, error: result.error },
-        { status: 401 }
+        {
+          ok: false,
+          error: result.error,
+          ...(result.requiresEmailVerification ? { requiresEmailVerification: true } : {}),
+        },
+        { status: result.requiresEmailVerification ? 403 : 401 }
       );
     }
 
