@@ -1,10 +1,10 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useEffect, useState } from 'react'
-import { Modal, Pressable, Share, StyleSheet, Text, View } from 'react-native'
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 import type { Gift, GiftList } from 'app/types'
 import type { RootStackParamList } from 'app/navigation/native'
-import { API_URL, api } from 'app/lib/api'
-import { AppHeader, Button, Card, FavoriteButton, Field, GiftCard, Screen, ShareAction, colors, spacing, typography } from 'app/ui'
+import { WEB_URL, api } from 'app/lib/api'
+import { AppHeader, Button, Card, FavoriteButton, Field, GiftCard, Screen, ShareAction, ShareSheet, colors, spacing, typography } from 'app/ui'
 import { useSession } from 'app/provider/session.native'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'public'>
@@ -22,6 +22,7 @@ export function PublicListScreen({ navigation, route }: Props) {
   const [reserving, setReserving] = useState(false)
   const [isFavorite, setIsFavorite] = useState(false)
   const [favoriteBusy, setFavoriteBusy] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
   const { user } = useSession()
 
   async function load(shareCode = code) {
@@ -90,17 +91,12 @@ export function PublicListScreen({ navigation, route }: Props) {
     }
   }
 
-  async function shareList() {
-    if (!list) return
-    await Share.share({ title: list.title, message: `${list.title} — ${API_URL}/list/${list.shareCode}` }).catch(() => undefined)
-  }
-
   return (
     <Screen
       header={(
         <AppHeader
           onBack={() => navigation.goBack()}
-          right={list ? <ShareAction onPress={shareList} /> : null}
+          right={list ? <ShareAction onPress={() => setShareOpen(true)} /> : null}
         />
       )}
     >
@@ -149,6 +145,15 @@ export function PublicListScreen({ navigation, route }: Props) {
           </View>
         </View>
       </Modal>
+
+      {list ? (
+        <ShareSheet
+          visible={shareOpen}
+          title={list.title}
+          url={`${WEB_URL}/list/${list.shareCode}`}
+          onClose={() => setShareOpen(false)}
+        />
+      ) : null}
     </Screen>
   )
 }

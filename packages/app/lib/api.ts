@@ -42,6 +42,11 @@ export const API_URL = (
   'http://localhost:3000'
 ).replace(/\/$/, '')
 
+export const WEB_URL = (
+  process.env.EXPO_PUBLIC_WEB_URL ||
+  'https://giftlist.fr'
+).replace(/\/$/, '')
+
 export class ApiError extends Error {
   status: number
   constructor(message: string, status: number) {
@@ -111,9 +116,15 @@ export const api = {
     }),
 
   register: (name: string, email: string, password: string, username: string) =>
-    request<{ token: string; user: User }>('/api/auth/register', {
+    request<{ ok: boolean; requiresEmailVerification?: boolean; email?: string; token?: string; user?: User }>('/api/auth/register', {
       method: 'POST',
       body: { name, email, password, username },
+    }),
+
+  resendVerification: (email: string) =>
+    request<{ ok: boolean; message?: string }>('/api/auth/resend-verification', {
+      method: 'POST',
+      body: { email },
     }),
 
   me: () => request<{ user: User }>('/api/auth/me', { auth: true }),

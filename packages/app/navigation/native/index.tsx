@@ -12,6 +12,7 @@ import { useTheme } from 'app/theme/ThemeProvider.native'
 import { HomeScreen } from 'app/features/native/home'
 import { LoginScreen } from 'app/features/native/login'
 import { RegisterScreen } from 'app/features/native/register'
+import { VerifyEmailScreen } from 'app/features/native/verify-email'
 import { DashboardScreen } from 'app/features/native/dashboard'
 import { ManageListScreen } from 'app/features/native/manage-list'
 import { GiftFormScreen } from 'app/features/native/gift-form'
@@ -23,6 +24,7 @@ export type RootStackParamList = {
   home: undefined
   login: undefined
   register: undefined
+  verifyEmail: { email?: string }
   main: undefined
   userProfile: { username: string }
   manage: { id: string }
@@ -104,6 +106,7 @@ export function NativeNavigation() {
       <Stack.Screen name="home" component={HomeScreen} />
       <Stack.Screen name="login" component={LoginScreen} />
       <Stack.Screen name="register" component={RegisterScreen} />
+      <Stack.Screen name="verifyEmail" component={VerifyEmailScreen} />
       <Stack.Screen name="main" component={MainScreen} />
       <Stack.Screen name="userProfile" component={PublicUserScreen} options={{ animation: 'none' }} />
       <Stack.Screen name="manage" component={ManageListScreen} options={{ animation: 'none' }} />

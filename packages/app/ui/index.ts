@@ -2,6 +2,7 @@ export { colors, lightColors, darkColors, spacing, radius, typography, shadow } 
 export type { ThemeColors } from './tokens'
 export { Button } from './Button.native'
 export { ShareAction } from './ShareAction.native'
+export { ShareSheet } from './ShareSheet.native'
 export { Card } from './Card.native'
 export { FavoriteButton } from './FavoriteButton.native'
 export { ImageUploadButton } from './ImageUploadButton.native'
