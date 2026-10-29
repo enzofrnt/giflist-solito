@@ -129,6 +129,12 @@ See [Phase 5 screenshots](screenshots/phase-5/).
 
 See [Phase 6 native screenshots](screenshots/phase-6/).
 
+## Shared-list OpenGraph
+
+- `/list/[shareCode]` now owns a dynamic 1200×630 OG card (title, description, owner, gift count, Giftlist logo), independent of the list’s remote image.
+- Metadata points OG/Twitter to `/list/<code>/opengraph-image`; private lists stay `noindex`.
+- Generic card fallback if the share code is invalid or the DB is unavailable.
+
 ## UX skill
 
 The project ships a reusable `ui-ux-design` skill at [`.agents/skills/ui-ux-design/SKILL.md`](../../.agents/skills/ui-ux-design/SKILL.md) (Claude adapter: `.claude/skills/ui-ux-design`). It covers hierarchy, navigation, action priority, friction, states, accessibility, mobile and the Design Charter. Use it before any UI/UX change; the design system alone is not a UX process.

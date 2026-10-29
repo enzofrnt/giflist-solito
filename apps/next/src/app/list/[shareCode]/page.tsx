@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: PublicListPageProps): Promise
 
   const title = list.title
   const description = list.description?.trim() || `Découvrez la liste de cadeaux « ${title} » sur Giftlist.`
-  const image = list.image || OG_IMAGE.url
+  const image = `${SITE_URL}/list/${list.shareCode}/opengraph-image`
 
   return {
     title,
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: PublicListPageProps): Promise
       url: `${SITE_URL}/list/${list.shareCode}`,
       title: `${title} · ${SITE_NAME}`,
       description,
-      images: [{ url: image, alt: title }],
+      images: [{ url: image, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: 'summary_large_image',
