@@ -1,6 +1,7 @@
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useCallback, useEffect, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Plus, Settings } from 'lucide-react-native'
 import type { GiftListWithCount } from 'app/types'
 import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
@@ -65,7 +66,7 @@ export function DashboardScreen({ navigation }: Props) {
           <Text style={styles.title}>{user ? `Bonjour ${user.name.split(' ')[0]}` : 'Mes listes'}</Text>
           <Text style={styles.lead}>Créez, partagez et gérez vos listes.</Text>
         </View>
-        <Button title={showCreate ? 'Fermer' : 'Nouvelle liste'} variant={showCreate ? 'ghost' : 'primary'} onPress={() => setShowCreate((value) => !value)} />
+        <Button title={showCreate ? 'Fermer' : 'Nouvelle liste'} icon={showCreate ? undefined : Plus} variant={showCreate ? 'ghost' : 'primary'} onPress={() => setShowCreate((value) => !value)} />
       </View>
 
       {showCreate ? (
@@ -86,7 +87,7 @@ export function DashboardScreen({ navigation }: Props) {
         <Card>
           <Text style={styles.emptyTitle}>Aucune liste</Text>
           <Text style={styles.muted}>Créez votre première liste pour commencer.</Text>
-          <Button title="Créer ma première liste" onPress={() => setShowCreate(true)} />
+          <Button title="Créer ma première liste" icon={Plus} onPress={() => setShowCreate(true)} />
         </Card>
       ) : null}
 
@@ -98,7 +99,7 @@ export function DashboardScreen({ navigation }: Props) {
           </View>
           {list.description ? <Text style={styles.muted}>{list.description}</Text> : null}
           <Text style={styles.meta}>{list.giftsCount} cadeau{list.giftsCount > 1 ? 'x' : ''}</Text>
-          <Button title="Gérer la liste" onPress={() => navigation.navigate('manage', { id: String(list.id) })} fullWidth />
+          <Button title="Gérer la liste" icon={Settings} onPress={() => navigation.navigate('manage', { id: String(list.id) })} fullWidth />
         </Card>
       ))}
     </Screen>

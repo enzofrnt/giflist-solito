@@ -142,6 +142,13 @@ Approved by the owner on 2026-10-28; the showcase in `docs/design-system/` is th
 - Typography: Geist Sans/Mono; no Arial fallback in new UI work. Soft warm shadows, 4 px rhythm, 10–14 px radii, 44 px touch targets.
 - The visual system is only half the work: **the flow, hierarchy and action priority must be right before styling**.
 
+### Iconography
+- Icons exist to clarify actions, not to decorate. Use **Lucide** as the single icon language on web/Android (`lucide-react` / `lucide-react-native`) and **SF Symbols** on iOS where a system icon is more native (theme selector).
+- Default button: **icon + label**, icon 16–18 px, 1.9–2 px stroke, 8 px gap. Icon-only controls are allowed only when the meaning is universal and MUST have a 44 px target + `aria-label`/`accessibilityLabel`.
+- Use `Share2` for sharing, `Eye`/`EyeOff` for password visibility, `Plus` for creation, `Pencil` for edit, `Trash2` for delete, `Check` for save, `X` for cancel, `LogIn`/`LogOut` for session actions, `List` for lists.
+- Never mix two icon families in one control; never use emoji as a functional icon.
+- Implementations: native `Button.icon`, `PasswordField`, `ShareAction`; web `.ds-btn__icon`, `.ds-icon-btn`, `PasswordInput`.
+
 ### UX non-negotiables
 - Start from the user job and success moment; ONE primary action per view.
 - Primary navigation is grouped with the logo on the left; never centred in the viewport.
@@ -168,4 +175,4 @@ Approved by the owner on 2026-10-28; the showcase in `docs/design-system/` is th
 - Amendments are proposed via PR with rationale, a semver version bump, an update to **Last Amended**, and corresponding updates to agent instructions and templates.
 - Version history and ratification date are recorded below. Compliance is checked by `/speckit-analyze` and in code review.
 
-**Version**: 1.1.2 | **Ratified**: 2026-10-28 | **Last Amended**: 2026-10-28
+**Version**: 1.2.0 | **Ratified**: 2026-10-28 | **Last Amended**: 2026-10-29

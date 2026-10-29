@@ -1,11 +1,12 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useCallback, useState } from 'react'
-import { Alert, Image, Pressable, Share, StyleSheet, Text, View } from 'react-native'
+import { Alert, Image, Share, StyleSheet, Text, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
+import { Pencil, Plus, Trash2 } from 'lucide-react-native'
 import type { Gift, GiftList } from 'app/types'
 import type { RootStackParamList } from 'app/navigation/native'
 import { API_URL, api } from 'app/lib/api'
-import { AppHeader, Badge, Button, Card, Screen, colors, spacing, typography } from 'app/ui'
+import { AppHeader, Badge, Button, Card, Screen, ShareAction, colors, spacing, typography } from 'app/ui'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'manage'>
 
@@ -63,7 +64,7 @@ export function ManageListScreen({ navigation, route }: Props) {
       header={(
         <AppHeader
           onBack={() => navigation.goBack()}
-          right={list ? <Pressable onPress={shareList} style={styles.link} accessibilityRole="button"><Text style={styles.linkText}>Partager</Text></Pressable> : null}
+          right={list ? <ShareAction onPress={shareList} /> : null}
         />
       )}
     >
@@ -77,7 +78,7 @@ export function ManageListScreen({ navigation, route }: Props) {
             {list.description ? <Text style={styles.muted}>{list.description}</Text> : null}
           </View>
 
-          <Button title="Ajouter un cadeau" onPress={() => navigation.navigate('giftForm', { listId: id })} fullWidth />
+          <Button title="Ajouter un cadeau" icon={Plus} onPress={() => navigation.navigate('giftForm', { listId: id })} fullWidth />
 
           <Text style={styles.sectionTitle}>Les cadeaux <Text style={styles.count}>{gifts.length}</Text></Text>
           {gifts.length === 0 ? <Card><Text style={styles.muted}>Aucun cadeau pour le moment.</Text></Card> : null}
@@ -101,8 +102,8 @@ export function ManageListScreen({ navigation, route }: Props) {
                 </View>
               </View>
               <View style={styles.actions}>
-                <Button title="Modifier" variant="secondary" onPress={() => navigation.navigate('giftForm', { listId: id, gift })} style={styles.flex} />
-                <Button title="Supprimer" variant="ghost" onPress={() => confirmDelete(gift)} style={styles.flex} />
+                <Button title="Modifier" icon={Pencil} variant="secondary" onPress={() => navigation.navigate('giftForm', { listId: id, gift })} style={styles.flex} />
+                <Button title="Supprimer" icon={Trash2} variant="ghost" onPress={() => confirmDelete(gift)} style={styles.flex} />
               </View>
             </Card>
           ))}

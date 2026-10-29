@@ -1,11 +1,12 @@
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useEffect, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { KeyRound, List, LogOut, Mail } from 'lucide-react-native'
 import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
 import { ThemeSettings } from 'app/features/native/theme-settings'
 import { useSession } from 'app/provider/session.native'
-import { AppHeader, Button, Card, Field, PasswordStrength, Screen, colors, spacing, typography } from 'app/ui'
+import { AppHeader, Button, Card, Field, PasswordField, PasswordStrength, Screen, colors, spacing, typography } from 'app/ui'
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'main'>
@@ -90,6 +91,7 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
           </View>
           <Button
             title={showEmailForm ? 'Fermer' : 'Modifier'}
+            icon={Mail}
             variant={showEmailForm ? 'ghost' : 'secondary'}
             onPress={() => {
               setShowEmailForm((value) => !value)
@@ -102,7 +104,7 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
         {showEmailForm ? (
           <View style={styles.form}>
             <Field label="Nouvelle adresse e-mail" value={newEmail} onChangeText={setNewEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" />
-            <Field label="Mot de passe actuel" value={emailPassword} onChangeText={setEmailPassword} secureTextEntry autoComplete="current-password" textContentType="password" />
+            <PasswordField label="Mot de passe actuel" value={emailPassword} onChangeText={setEmailPassword} autoComplete="current-password" textContentType="password" />
             {emailError ? <Text style={styles.error}>{emailError}</Text> : null}
             <Button title="Envoyer la confirmation" onPress={requestEmailChange} loading={emailSaving} disabled={!newEmail.trim() || !emailPassword} fullWidth />
             <Text style={styles.muted}>Un lien de confirmation sera envoyé à la nouvelle adresse. L’ancienne reste active jusqu’à validation.</Text>
@@ -120,6 +122,7 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
           </View>
           <Button
             title={showPassword ? 'Fermer' : 'Modifier'}
+            icon={KeyRound}
             variant={showPassword ? 'ghost' : 'secondary'}
             onPress={() => {
               setShowPassword((value) => !value)
@@ -131,22 +134,20 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
         {passwordSuccess ? <Text style={styles.success}>{passwordSuccess}</Text> : null}
         {showPassword ? (
           <View style={styles.form}>
-            <Field label="Mot de passe actuel" value={currentPassword} onChangeText={setCurrentPassword} secureTextEntry autoComplete="current-password" textContentType="password" />
-            <Field
+            <PasswordField label="Mot de passe actuel" value={currentPassword} onChangeText={setCurrentPassword} autoComplete="current-password" textContentType="password" />
+            <PasswordField
               label="Nouveau mot de passe"
               value={newPassword}
               onChangeText={setNewPassword}
-              secureTextEntry
               autoComplete="new-password"
               textContentType="newPassword"
               passwordRules="minlength: 8; required: lower; required: upper; required: digit; required: special;"
             />
             <PasswordStrength password={newPassword} />
-            <Field
+            <PasswordField
               label="Confirmer le nouveau mot de passe"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              secureTextEntry
               autoComplete="new-password"
               textContentType="newPassword"
               error={confirmPassword && newPassword !== confirmPassword ? 'Les mots de passe ne correspondent pas.' : undefined}
@@ -164,8 +165,8 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
       </Card>
 
       <Card>
-        <Button title="Mes listes" onPress={onShowLists} fullWidth />
-        <Button title="Se déconnecter" variant="danger" onPress={logout} fullWidth />
+        <Button title="Mes listes" icon={List} onPress={onShowLists} fullWidth />
+        <Button title="Se déconnecter" icon={LogOut} variant="danger" onPress={logout} fullWidth />
       </Card>
       <View style={styles.footer}>
         <Text style={styles.muted}>Giftlist · application mobile</Text>

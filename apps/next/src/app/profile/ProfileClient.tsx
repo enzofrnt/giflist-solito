@@ -319,15 +319,16 @@ export default function ProfileClient() {
                       </div>
                       <div className="ds-field">
                         <label htmlFor="email-change-password" className="ds-label">Mot de passe actuel</label>
-                        <input
+                        <PasswordInput
                           id="email-change-password"
-                          type="password"
+                          name="emailChangePassword"
                           required
                           value={emailData.currentPassword}
                           onChange={(event) => setEmailData((current) => ({ ...current, currentPassword: event.target.value }))}
-                          className="ds-input"
                           placeholder="Votre mot de passe actuel"
                           autoComplete="current-password"
+                          showStrength={false}
+                          showGuide={false}
                         />
                       </div>
                       <div className="ds-cluster">

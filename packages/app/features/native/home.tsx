@@ -1,5 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { StyleSheet, Text, View } from 'react-native'
+import { List, LogIn, QrCode, UserPlus } from 'lucide-react-native'
 import type { RootStackParamList } from 'app/navigation/native'
 import { useSession } from 'app/provider/session.native'
 import { AppHeader, Button, Card, Screen, spacing, typography, colors } from 'app/ui'
@@ -20,17 +21,19 @@ export function HomeScreen({ navigation }: Props) {
         </Text>
         <Button
           title={user ? 'Voir mes listes' : 'Se connecter'}
+          icon={user ? List : LogIn}
           onPress={() => user ? navigation.reset({ index: 0, routes: [{ name: 'main' }] }) : navigation.navigate('login')}
           fullWidth
         />
         <Button
           title="Ouvrir une liste partagée"
+          icon={QrCode}
           variant="secondary"
           onPress={() => navigation.navigate('public')}
           fullWidth
         />
         {!user ? (
-          <Button title="Créer un compte" variant="secondary" onPress={() => navigation.navigate('register')} fullWidth />
+          <Button title="Créer un compte" icon={UserPlus} variant="secondary" onPress={() => navigation.navigate('register')} fullWidth />
         ) : null}
       </Card>
 

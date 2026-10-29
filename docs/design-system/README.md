@@ -155,6 +155,14 @@ See [Phase 8 screenshots](screenshots/phase-8/).
 
 See [Phase 9 screenshots](screenshots/phase-9/).
 
+## Phase 14 — Password visibility & icon system
+
+- Eye/EyeOff toggle on every native and web password field.
+- Reusable `Button.icon`, `ShareAction`, `PasswordField` and documented icon charter.
+- Clean mobile share pill with Share2.
+
+See [Phase 14 screenshots](screenshots/phase-14/).
+
 ## Phase 13 — Email change & branded Resend mail
 
 - Secure email change: current password + signed 30-min confirmation + session rotation.

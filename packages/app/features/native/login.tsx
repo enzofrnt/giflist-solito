@@ -1,10 +1,11 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useState } from 'react'
+import { LogIn } from 'lucide-react-native'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
 import { useSession } from 'app/provider/session.native'
-import { AppHeader, Button, Card, Field, Screen, colors, spacing, typography } from 'app/ui'
+import { AppHeader, Button, Card, Field, PasswordField, Screen, colors, spacing, typography } from 'app/ui'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'login'>
 
@@ -36,9 +37,9 @@ export function LoginScreen({ navigation }: Props) {
         <Text style={styles.title}>Connexion</Text>
         <Text style={styles.lead}>Retrouvez vos listes de cadeaux.</Text>
         <Field label="Adresse e-mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="username" textContentType="username" />
-        <Field label="Mot de passe" value={password} onChangeText={setPassword} secureTextEntry autoComplete="current-password" textContentType="password" />
+        <PasswordField label="Mot de passe" value={password} onChangeText={setPassword} autoComplete="current-password" textContentType="password" />
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        <Button title="Se connecter" onPress={submit} loading={loading} disabled={!email.trim() || !password} fullWidth />
+        <Button title="Se connecter" icon={LogIn} onPress={submit} loading={loading} disabled={!email.trim() || !password} fullWidth />
         <Pressable onPress={() => navigation.navigate('register')} style={styles.link}>
           <Text style={styles.linkText}>Pas de compte ? Créer un compte</Text>
         </Pressable>
