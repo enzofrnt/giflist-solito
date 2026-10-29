@@ -155,6 +155,11 @@ See [Phase 8 screenshots](screenshots/phase-8/).
 
 See [Phase 9 screenshots](screenshots/phase-9/).
 
+## Phase 10 — Stable mobile header
+
+- Brand header fixed outside scroll; back/share appear without moving the centered logo.
+- Detail screens fade instead of sliding horizontally.
+
 ## Shared-list OpenGraph
 
 - `/list/[shareCode]` now owns a dynamic 1200×630 OG card (title, description, owner, gift count, Giftlist logo), independent of the list’s remote image.

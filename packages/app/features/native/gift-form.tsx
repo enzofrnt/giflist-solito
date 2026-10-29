@@ -43,8 +43,7 @@ export function GiftFormScreen({ navigation, route }: Props) {
   }
 
   return (
-    <Screen>
-      <AppHeader onBack={() => navigation.goBack()} />
+    <Screen header={<AppHeader onBack={() => navigation.goBack()} />}>
       <Card>
         <Text style={styles.title}>{gift ? 'Modifier le cadeau' : 'Ajouter un cadeau'}</Text>
         <Text style={styles.lead}>{gift ? 'Ajustez les informations puis enregistrez.' : 'Ajoutez une envie à votre liste.'}</Text>

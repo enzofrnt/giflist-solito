@@ -31,8 +31,7 @@ export function LoginScreen({ navigation }: Props) {
   }
 
   return (
-    <Screen>
-      <AppHeader onBack={() => navigation.goBack()} />
+    <Screen header={<AppHeader onBack={() => navigation.goBack()} />}>
       <Card>
         <Text style={styles.title}>Connexion</Text>
         <Text style={styles.lead}>Retrouvez vos listes de cadeaux.</Text>
