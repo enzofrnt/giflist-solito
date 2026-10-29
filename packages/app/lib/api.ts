@@ -87,10 +87,28 @@ export const api = {
       body: data,
     }),
 
+  updateGift: (
+    listId: string | number,
+    giftId: number,
+    data: { title: string; url?: string; image?: string; price?: number; description?: string },
+  ) =>
+    request<{ gift: Gift }>(`/api/gift-lists/${listId}/gifts/${giftId}`, {
+      method: 'PUT',
+      auth: true,
+      body: data,
+    }),
+
   deleteGift: (listId: string | number, giftId: number) =>
     request<{ ok: boolean }>(`/api/gift-lists/${listId}/gifts/${giftId}`, {
       method: 'DELETE',
       auth: true,
+    }),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request<{ token: string; message: string }>('/api/auth/change-password', {
+      method: 'PUT',
+      auth: true,
+      body: { currentPassword, newPassword },
     }),
 
   publicGiftList: (shareCode: string) =>
