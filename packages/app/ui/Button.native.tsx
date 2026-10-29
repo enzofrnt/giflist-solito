@@ -1,4 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native'
+import type { LucideIcon } from 'lucide-react-native'
+import { useTheme } from 'app/theme/ThemeProvider.native'
 import { colors, radius, spacing, typography } from './tokens'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
@@ -12,6 +14,7 @@ interface ButtonProps {
   fullWidth?: boolean
   style?: StyleProp<ViewStyle>
   accessibilityLabel?: string
+  icon?: LucideIcon
 }
 
 export function Button({
@@ -23,8 +26,11 @@ export function Button({
   fullWidth = false,
   style,
   accessibilityLabel,
+  icon: Icon,
 }: ButtonProps) {
+  const { colors: palette } = useTheme()
   const isDisabled = disabled || loading
+  const iconColor = variant === 'primary' || variant === 'danger' ? palette.surface : palette.primary
   return (
     <Pressable
       accessibilityRole="button"
@@ -42,7 +48,8 @@ export function Button({
       ]}
     >
       <View style={styles.content}>
-        {loading ? <ActivityIndicator size="small" color={variant === 'primary' || variant === 'danger' ? colors.surface : colors.primary} /> : null}
+        {loading ? <ActivityIndicator size="small" color={variant === 'primary' || variant === 'danger' ? palette.surface : palette.primary} /> : null}
+        {!loading && Icon ? <Icon size={18} strokeWidth={1.9} color={iconColor} /> : null}
         <Text style={[styles.label, variant === 'primary' || variant === 'danger' ? styles.labelOnColor : styles.labelDark]}>{title}</Text>
       </View>
     </Pressable>

@@ -1,5 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useState } from 'react'
+import { Check, X } from 'lucide-react-native'
 import { StyleSheet, Text, View } from 'react-native'
 import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
@@ -54,8 +55,8 @@ export function GiftFormScreen({ navigation, route }: Props) {
         <Field label="Description" value={description} onChangeText={setDescription} multiline placeholder="Optionnel" />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <View style={styles.actions}>
-          <Button title="Annuler" variant="ghost" onPress={() => navigation.goBack()} style={styles.flex} />
-          <Button title={gift ? 'Enregistrer' : 'Ajouter'} onPress={save} loading={saving} disabled={!title.trim()} style={styles.flex} />
+          <Button title="Annuler" icon={X} variant="ghost" onPress={() => navigation.goBack()} style={styles.flex} />
+          <Button title={gift ? 'Enregistrer' : 'Ajouter'} icon={Check} onPress={save} loading={saving} disabled={!title.trim()} style={styles.flex} />
         </View>
       </Card>
     </Screen>

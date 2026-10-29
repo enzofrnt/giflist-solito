@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import AlertModal from '@/components/AlertModal';
+import PasswordInput from '@/components/PasswordInput';
 import ScrapingTest from '@/components/ScrapingTest';
 import AmazonDebug from '@/components/AmazonDebug';
 import { useAlert } from '@/hooks/useAlert';
@@ -111,11 +112,12 @@ export default function AdminPage() {
     setIsLoading(false);
   }, []);
 
+  const [adminPassword, setAdminPassword] = useState('');
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const username = formData.get('username') as string;
-    const password = formData.get('password') as string;
+    const password = adminPassword;
 
     if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
       localStorage.setItem('admin_authenticated', 'true');
@@ -320,13 +322,13 @@ export default function AdminPage() {
               <label htmlFor="password" className="ds-label">
                 Mot de passe <span className="ds-label__required">*</span>
               </label>
-              <input
-                type="password"
+              <PasswordInput
                 id="password"
                 name="password"
                 required
+                value={adminPassword}
+                onChange={(event) => setAdminPassword(event.target.value)}
                 autoComplete="current-password"
-                className="ds-input"
                 placeholder="Votre mot de passe"
               />
             </div>

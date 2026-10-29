@@ -1,10 +1,11 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useState } from 'react'
+import { UserPlus } from 'lucide-react-native'
 import { Pressable, StyleSheet, Text } from 'react-native'
 import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
 import { useSession } from 'app/provider/session.native'
-import { AppHeader, Button, Card, Field, PasswordStrength, Screen, colors, spacing, typography } from 'app/ui'
+import { AppHeader, Button, Card, Field, PasswordField, PasswordStrength, Screen, colors, spacing, typography } from 'app/ui'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'register'>
 
@@ -39,28 +40,26 @@ export function RegisterScreen({ navigation }: Props) {
         <Text style={styles.lead}>Votre première liste prend quelques secondes.</Text>
         <Field label="Nom" value={name} onChangeText={setName} autoComplete="name" textContentType="name" />
         <Field label="Adresse e-mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="username" textContentType="username" />
-        <Field
+        <PasswordField
           label="Mot de passe"
           value={password}
           onChangeText={setPassword}
-          secureTextEntry
           autoComplete="new-password"
           textContentType="newPassword"
           passwordRules="minlength: 8; required: lower; required: upper; required: digit; required: special;"
           hint="8 caractères minimum."
         />
         <PasswordStrength password={password} />
-        <Field
+        <PasswordField
           label="Confirmer le mot de passe"
           value={passwordConfirm}
           onChangeText={setPasswordConfirm}
-          secureTextEntry
           autoComplete="new-password"
           textContentType="newPassword"
           error={passwordConfirm && password !== passwordConfirm ? 'Les mots de passe ne correspondent pas.' : undefined}
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        <Button title="Créer mon compte" onPress={submit} loading={loading} disabled={!name.trim() || !email.trim() || password.length < 8 || password !== passwordConfirm} fullWidth />
+        <Button title="Créer mon compte" icon={UserPlus} onPress={submit} loading={loading} disabled={!name.trim() || !email.trim() || password.length < 8 || password !== passwordConfirm} fullWidth />
         <Pressable onPress={() => navigation.navigate('login')} style={styles.link}>
           <Text style={styles.linkText}>Déjà un compte ? Se connecter</Text>
         </Pressable>

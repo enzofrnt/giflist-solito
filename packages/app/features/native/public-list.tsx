@@ -1,10 +1,11 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useState } from 'react'
 import { Modal, Pressable, Share, StyleSheet, Text, View } from 'react-native'
+import { Gift as GiftIcon } from 'lucide-react-native'
 import type { Gift, GiftList } from 'app/types'
 import type { RootStackParamList } from 'app/navigation/native'
 import { API_URL, api } from 'app/lib/api'
-import { AppHeader, Badge, Button, Card, Field, Screen, colors, spacing, typography } from 'app/ui'
+import { AppHeader, Badge, Button, Card, Field, Screen, ShareAction, colors, spacing, typography } from 'app/ui'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'public'>
 
@@ -66,7 +67,7 @@ export function PublicListScreen({ navigation, route }: Props) {
       header={(
         <AppHeader
           onBack={() => navigation.goBack()}
-          right={list ? <Pressable onPress={shareList} style={styles.link}><Text style={styles.linkText}>Partager</Text></Pressable> : null}
+          right={list ? <ShareAction onPress={shareList} /> : null}
         />
       )}
     >
@@ -96,7 +97,7 @@ export function PublicListScreen({ navigation, route }: Props) {
                 </View>
                 {gift.price != null ? <Text style={styles.meta}>{gift.price} €</Text> : null}
                 {gift.description ? <Text style={styles.muted}>{gift.description}</Text> : null}
-                {!reserved ? <Button title="Réserver ce cadeau" onPress={() => setSelected(gift)} fullWidth /> : null}
+                {!reserved ? <Button title="Réserver ce cadeau" icon={GiftIcon} onPress={() => setSelected(gift)} fullWidth /> : null}
               </Card>
             )
           })}
