@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import * as ImagePicker from 'expo-image-picker'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { ImagePlus } from 'lucide-react-native'
 import { useTheme } from 'app/theme/ThemeProvider.native'
 import { api } from 'app/lib/api'
 import { colors, spacing, typography } from './tokens'
 
-export function ImageUploadButton({ onChange, label = 'Téléverser une image' }: { onChange: (url: string) => void; label?: string }) {
+export function ImageUploadButton({ onChange, value, label = 'Téléverser une image' }: { onChange: (url: string) => void; value?: string; label?: string }) {
   const { colors: palette } = useTheme()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -35,6 +35,7 @@ export function ImageUploadButton({ onChange, label = 'Téléverser une image' }
         <ImagePlus size={17} color={palette.primary} />
         <Text style={[styles.label, { color: palette.primary }]}>{busy ? 'Envoi…' : label}</Text>
       </Pressable>
+      {value ? <Image source={{ uri: value }} style={styles.preview} resizeMode="cover" accessibilityLabel="Aperçu de l’image sélectionnée" /> : null}
       <Text style={[styles.hint, { color: palette.textSubtle }]}>JPG, PNG, WebP ou GIF · 5 Mo max.</Text>
       {error ? <Text style={[styles.hint, { color: palette.danger }]}>{error}</Text> : null}
     </View>
@@ -46,4 +47,5 @@ const styles = StyleSheet.create({
   button: { minHeight: 44, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: spacing.xs, paddingHorizontal: spacing.md },
   label: { fontSize: typography.small, fontWeight: '700' },
   hint: { fontSize: typography.caption, lineHeight: 17 },
+  preview: { width: 96, height: 96, borderRadius: 10, backgroundColor: colors.surfaceMuted },
 })

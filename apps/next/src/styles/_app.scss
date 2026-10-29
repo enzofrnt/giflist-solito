@@ -1205,3 +1205,11 @@
     min-width: 17rem;
   }
 }
+
+@layer components {
+  .ds-search-separator {
+    border: 0;
+    border-top: var(--ds-border-hairline) solid var(--ds-color-border);
+    margin: var(--ds-space-2) 0;
+  }
+}

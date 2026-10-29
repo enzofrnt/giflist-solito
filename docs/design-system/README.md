@@ -155,6 +155,14 @@ See [Phase 8 screenshots](screenshots/phase-8/).
 
 See [Phase 9 screenshots](screenshots/phase-9/).
 
+## Phase 19 — Standard list cards & search continuity
+
+- Fixed-width list cards with 16/10 media/placeholder; public and owner grids align.
+- Search query preserved in URL; public profile back action.
+- Favorites/search separator; mobile upload preview.
+- QR center logo theme-aware and enlarged.
+- UI skill: `.agents/skills/giftlist-ui/SKILL.md`.
+
 ## Phase 18 — Favorite controls, media & settings parity
 
 - `FavoriteButton` icon-only / with-label, light-red favorite token, `aria-pressed`.

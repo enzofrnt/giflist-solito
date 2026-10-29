@@ -34,8 +34,8 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
     if (shareCode && qrRef.current) {
       setIsGenerating(true);
 
-      // Le centre du QR reste toujours le logo de l'application.
-      const getCenterImage = () => '/logo.webp';
+      // Le centre du QR reste toujours le logo de l'application, dans sa version lisible selon le thème.
+      const getCenterImage = () => document.documentElement.dataset.theme === 'dark' ? '/logo-white.webp' : '/logo.webp';
 
       // Couleurs issues des tokens du design system (aucune valeur brute ici)
       const ink = readToken('--ds-color-text');
@@ -72,7 +72,7 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
         },
         imageOptions: {
           hideBackgroundDots: true, // Cache les points derrière l'image
-          imageSize: 0.32, // Logo compact, ~25 % du QR, avec correction H
+          imageSize: 0.46, // Logo lisible au centre, avec correction H
           saveAsBlob: true
         }
       });
@@ -108,7 +108,7 @@ export default function QRCodeDisplay({ shareCode, title = "Scanner avec un appa
         },
         imageOptions: {
           hideBackgroundDots: true,
-          imageSize: 0.32,
+          imageSize: 0.46,
           saveAsBlob: true
         }
       });

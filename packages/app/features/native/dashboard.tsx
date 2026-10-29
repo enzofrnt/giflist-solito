@@ -77,7 +77,7 @@ export function DashboardScreen({ navigation }: Props) {
         <Card>
           <Field label="Titre de la liste" value={title} onChangeText={setTitle} placeholder="Anniversaire, Noël…" />
           <Field label="Image (URL)" value={listImage} onChangeText={setListImage} autoCapitalize="none" keyboardType="url" placeholder="https://…/photo.jpg" />
-          <ImageUploadButton onChange={setListImage} />
+          <ImageUploadButton value={listImage} onChange={setListImage} />
           <Pressable onPress={() => setSecret((value) => !value)} style={styles.switchRow} accessibilityRole="switch" accessibilityState={{ checked: secret }}>
             <View style={[styles.checkbox, secret && styles.checkboxOn]}>{secret ? <Text style={styles.check}>✓</Text> : null}</View>
             <Text style={styles.switchText}>Mode secret</Text>

@@ -51,7 +51,7 @@ export function GiftFormScreen({ navigation, route }: Props) {
         <Field label="Titre" value={title} onChangeText={setTitle} placeholder="Casque audio…" />
         <Field label="Lien produit" value={url} onChangeText={setUrl} autoCapitalize="none" keyboardType="url" placeholder="https://…" />
         <Field label="Image (URL)" value={image} onChangeText={setImage} autoCapitalize="none" keyboardType="url" placeholder="https://…/photo.jpg" />
-        <ImageUploadButton onChange={setImage} />
+        <ImageUploadButton value={image} onChange={setImage} />
         <Field label="Prix (€)" value={price} onChangeText={setPrice} keyboardType="decimal-pad" placeholder="29,90" />
         <Field label="Description" value={description} onChangeText={setDescription} multiline placeholder="Optionnel" />
         {error ? <Text style={styles.error}>{error}</Text> : null}
