@@ -26,7 +26,8 @@
   {"webcredentials":{"apps":["35697BAZW4.com.enzofournet.giflist"]}}
   ```
   with `application/json`.
-- Requires a signed build with the Associated Domains capability and the same team; Apple may not associate a free-provisioning build.
+- The capability is opt-in via `EXPO_PUBLIC_ENABLE_WEB_CREDENTIALS=1` because Apple Personal Teams reject Associated Domains (`Cannot create a iOS App Development provisioning profile... Personal development teams ... do not support the Associated Domains capability`).
+- Requires a paid/EAS build with the capability and the same team; the AASA is already live.
 
 ## Gates
 
