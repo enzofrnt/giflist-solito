@@ -60,20 +60,6 @@ export function DashboardScreen({ navigation }: Props) {
     }
   }
 
-  async function toggleListPublic(list: GiftListWithCount) {
-    try {
-      const data = await api.updateGiftList(list.id, {
-        title: list.title,
-        description: list.description,
-        secret: list.secret,
-        isPublic: list.isPublic === false,
-      })
-      setLists((current) => current.map((item) => item.id === list.id ? { ...item, ...data.giftList } : item))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Mise à jour impossible')
-    }
-  }
-
   return (
     <Screen header={<AppHeader />}>
 
@@ -125,7 +111,6 @@ export function DashboardScreen({ navigation }: Props) {
           context="owner"
           onOpen={() => navigation.navigate('manage', { id: String(list.id) })}
           onManage={() => navigation.navigate('manage', { id: String(list.id) })}
-          onTogglePublic={() => toggleListPublic(list)}
         />
       ))}
 

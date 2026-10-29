@@ -104,13 +104,12 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
     <Screen header={<AppHeader />}>
       <Card>
         <Text style={styles.name}>{user?.username ? `@${user.username}` : 'Mon compte'}</Text>
-        {user?.username ? <Text style={styles.username}>@{user.username}</Text> : null}
         {user?.email ? <Text style={styles.muted}>{user.email}</Text> : null}
       </Card>
 
       <Card>
-        <Text style={styles.sectionTitle}>Profil public</Text>
-        <Text style={styles.muted}>Votre pseudo unique permet aux autres de trouver votre compte.</Text>
+        <Text style={styles.sectionTitle}>Mon compte</Text>
+        <Text style={styles.muted}>Pseudo unique et visibilité de votre profil.</Text>
         <View style={styles.form}>
           <Field label="Pseudo" value={username} onChangeText={(value) => setUsername(value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30))} autoCapitalize="none" autoComplete="username" textContentType="username" hint="3–30 caractères : a-z, chiffres et _." />
           <View style={styles.rowBetween}>

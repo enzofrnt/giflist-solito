@@ -2,6 +2,7 @@
 
 import AlertModal from '@/components/AlertModal';
 import GiftStatusBadge from '@/components/GiftStatusBadge';
+import { GiftCard } from '@/components/GiftCard';
 import { Modal } from '@/components/Modal';
 import QRCodeDisplay from '@/components/QRCodeDisplay';
 import ReserveDialog, { type ReservePayload } from '@/components/ReserveDialog';
@@ -11,6 +12,8 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { Heart } from 'lucide-react';
+import { getAuthToken } from 'app/lib/authStorage';
 
 import type { Gift, GiftList } from 'app/types'
 
@@ -44,7 +47,9 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
   const [cancellingId, setCancellingId] = useState<number | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareFeedback, setShareFeedback] = useState<{ tone: 'success' | 'danger'; message: string } | null>(null);
-  const [hasRevealed, setHasRevealed] = useState(false); // Par défaut, masquer les réservations sur liste secrète
+  const [hasRevealed, setHasRevealed] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteBusy, setFavoriteBusy] = useState(false); // Par défaut, masquer les réservations sur liste secrète
   const router = useRouter();
   const { alert, showSuccess, showError, showConfirm, hideAlert } = useAlert();
 
@@ -72,6 +77,37 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
   useEffect(() => {
     loadGiftList();
   }, [loadGiftList]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const token = getAuthToken();
+    if (!user || token instanceof Promise) { setIsFavorite(false); return; }
+    if (!token) { setIsFavorite(false); return; }
+    fetch('/api/favorites', { headers: { Authorization: `Bearer ${token}` } })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => { if (!cancelled) setIsFavorite(Boolean(data?.favorites?.some((favorite: { list: { shareCode: string } }) => favorite.list.shareCode === shareCode))); })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [user, shareCode]);
+
+  async function toggleFavorite() {
+    const token = getAuthToken();
+    if (!user || !token || token instanceof Promise) return;
+    setFavoriteBusy(true);
+    try {
+      const response = await fetch(isFavorite ? `/api/favorites/${encodeURIComponent(shareCode)}` : '/api/favorites', {
+        method: isFavorite ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: isFavorite ? undefined : JSON.stringify({ shareCode }),
+      });
+      if (response.ok) setIsFavorite((current) => !current);
+      else showError('Favoris', 'Impossible de mettre à jour ce favori.');
+    } catch {
+      showError('Favoris', 'Impossible de mettre à jour ce favori.');
+    } finally {
+      setFavoriteBusy(false);
+    }
+  }
 
   // Pour les listes secrètes, les réservations sont toujours masquées par défaut
   // Le propriétaire peut les révéler en cliquant sur le bouton
@@ -257,6 +293,21 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
               ) : null}
             </div>
 
+            {user ? (
+              <div className="ds-home__actions">
+                <button
+                  type="button"
+                  onClick={toggleFavorite}
+                  disabled={favoriteBusy}
+                  className={`ds-btn ds-btn--sm ${isFavorite ? 'ds-btn--danger' : 'ds-btn--secondary'}`}
+                  aria-pressed={isFavorite}
+                >
+                  <Heart size={16} className="ds-btn__icon" fill={isFavorite ? 'currentColor' : 'none'} aria-hidden="true" />
+                  {favoriteBusy ? 'Mise à jour…' : isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                </button>
+              </div>
+            ) : null}
+
             {isOwner ? (
               <div className="ds-home__actions">
                 <button type="button" onClick={handleShareClick} className="ds-btn ds-btn--primary ds-btn--md">
@@ -337,63 +388,19 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
 
                 return (
                   <li key={g.id}>
-                    <article className="ds-card h-full">
-                      <div className="ds-card__body flex-1">
-                        {g.image ? (
-                          <Image
-                            src={g.image}
-                            alt={g.title}
-                            width={480}
-                            height={320}
-                            className="h-36 w-full rounded-md bg-[var(--ds-color-surface-muted)] object-contain p-2"
-                            unoptimized
-                          />
-                        ) : (
-                          <div className="flex h-24 items-center justify-center rounded-md bg-[var(--ds-color-surface-muted)]" aria-hidden="true">
-                            <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                            </svg>
-                          </div>
-                        )}
-
-                        <h3 className="ds-card__title">{g.title}</h3>
-
-                        <div className="ds-cluster">
-                          {g.price != null ? (
-                            <span className="ds-badge ds-badge--neutral">{g.price} €</span>
-                          ) : null}
-                          <GiftStatusBadge
-                            status={g.status}
-                            reservedByName={g.reservedByName}
-                            isSecret={giftList?.secret || false}
-                            hasRevealed={hasRevealed}
-                            variant="public"
-                          />
-                        </div>
-
-                        {g.description ? (
-                          <p className="ds-body-sm line-clamp-3">{g.description}</p>
-                        ) : null}
-
-                        {g.url ? (
-                          <div>
-                            <a
-                              href={g.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ds-btn ds-btn--secondary ds-btn--md"
-                            >
-                              <svg className="ds-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                              </svg>
-                              Voir le produit
-                            </a>
-                          </div>
-                        ) : null}
-                      </div>
-
-                      {showReserve || showCancel ? (
-                        <div className="ds-card__footer">
+                    <GiftCard
+                      gift={g}
+                      badge={
+                        <GiftStatusBadge
+                          status={g.status}
+                          reservedByName={g.reservedByName}
+                          isSecret={giftList?.secret || false}
+                          hasRevealed={hasRevealed}
+                          variant="public"
+                        />
+                      }
+                      footer={showReserve || showCancel ? (
+                        <>
                           {showReserve ? (
                             <button
                               type="button"
@@ -408,9 +415,7 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
                                   <span className="ds-spinner" aria-hidden="true" />
                                   Réservation…
                                 </>
-                              ) : (
-                                'Réserver ce cadeau'
-                              )}
+                              ) : 'Réserver ce cadeau'}
                             </button>
                           ) : (
                             <button
@@ -426,14 +431,12 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
                                   <span className="ds-spinner" aria-hidden="true" />
                                   Annulation…
                                 </>
-                              ) : (
-                                'Annuler la réservation'
-                              )}
+                              ) : 'Annuler la réservation'}
                             </button>
                           )}
-                        </div>
-                      ) : null}
-                    </article>
+                        </>
+                      ) : undefined}
+                    />
                   </li>
                 );
               })}

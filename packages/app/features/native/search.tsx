@@ -1,12 +1,14 @@
 import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack'
-import { Search as SearchIcon, ArrowRight } from 'lucide-react-native'
-import { useEffect, useState } from 'react'
+import { Search as SearchIcon, ArrowRight, Heart } from 'lucide-react-native'
+import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { SearchPayload } from 'app/lib/api'
 import { api } from 'app/lib/api'
-import type { PublicListSummary } from 'app/lib/api'
+import type { FavoriteSummary, PublicListSummary } from 'app/lib/api'
 import type { RootStackParamList } from 'app/navigation/native'
+import { useFocusEffect } from '@react-navigation/native'
 import { AppHeader, Button, Card, ListCard, Screen, colors, spacing, typography } from 'app/ui'
+import { useSession } from 'app/provider/session.native'
 
 type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'main'> }
 
@@ -15,6 +17,15 @@ export function SearchScreen({ navigation }: Props) {
   const [result, setResult] = useState<SearchPayload | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [favorites, setFavorites] = useState<FavoriteSummary[]>([])
+  const { user } = useSession()
+
+  useFocusEffect(useCallback(() => {
+    if (!user) { setFavorites([]); return }
+    let cancelled = false
+    api.favorites().then((data) => { if (!cancelled) setFavorites(data.favorites) }).catch(() => undefined)
+    return () => { cancelled = true }
+  }, [user]))
 
   useEffect(() => {
     const trimmed = query.trim()
@@ -66,6 +77,34 @@ export function SearchScreen({ navigation }: Props) {
         </View>
         <Text style={styles.hint}>Le code complet ouvre la liste directement, même si elle est privée.</Text>
       </Card>
+
+      {favorites.length > 0 ? (
+        <View style={styles.results}>
+          <View style={styles.favoriteHeading}>
+            <Heart size={16} color={colors.accent} fill={colors.accent} />
+            <Text style={styles.sectionTitle}>Favoris</Text>
+          </View>
+          {favorites.map((favorite) => (
+            <Pressable
+              key={favorite.list.shareCode}
+              onPress={() => navigation.navigate('public', { shareCode: favorite.list.shareCode })}
+              accessibilityRole="button"
+              accessibilityLabel={`Ouvrir ${favorite.list.title}`}
+            >
+              <Card>
+                <View style={styles.userRow}>
+                  <Heart size={18} color={colors.accent} fill={colors.accent} />
+                  <View style={styles.flex}>
+                    <Text style={styles.cardTitle}>{favorite.list.title}</Text>
+                    <Text style={styles.meta}>@{favorite.list.owner.username}</Text>
+                  </View>
+                  <Text style={styles.count}>{favorite.list.giftsCount} cadeau{favorite.list.giftsCount > 1 ? 'x' : ''}</Text>
+                </View>
+              </Card>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -163,6 +202,7 @@ const styles = StyleSheet.create({
   muted: { color: colors.textMuted, fontSize: typography.small, lineHeight: 19 },
   meta: { color: colors.textSubtle, fontSize: typography.caption, marginTop: 2 },
   sectionTitle: { color: colors.text, fontSize: typography.heading, fontWeight: '700' },
+  favoriteHeading: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   results: { gap: spacing.sm },
   userRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   avatar: { width: 42, height: 42, borderRadius: 999, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },

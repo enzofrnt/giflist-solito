@@ -21,6 +21,7 @@ model User {
   authVersion Int @default(0)
   passwordResetToken PasswordResetToken?
   passkeys Passkey[]
+  favorites FavoriteList[]
 
   giftLists GiftList[]
 
@@ -42,6 +43,7 @@ model GiftList {
   userId Int
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   gifts  Gift[]
+  favorites FavoriteList[]
 
   @@index([userId])
   @@index([shareCode])
@@ -118,4 +120,18 @@ model PasskeyChallenge {
   expiresAt DateTime
 
   @@index([expiresAt])
+}
+
+model FavoriteList {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  giftListId Int
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  giftList GiftList @relation(fields: [giftListId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, giftListId])
+  @@index([userId])
+  @@index([giftListId])
 }
