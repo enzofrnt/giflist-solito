@@ -49,6 +49,9 @@ export function LoginScreen({ navigation }: Props) {
           </Pressable>
         ) : null}
         <Button title="Se connecter" icon={LogIn} onPress={submit} loading={loading} disabled={!email.trim() || !password} fullWidth />
+        <Pressable onPress={() => navigation.navigate('forgotPassword')} style={styles.link}>
+          <Text style={styles.linkText}>Mot de passe oublié ?</Text>
+        </Pressable>
         <Pressable onPress={() => navigation.navigate('register')} style={styles.link}>
           <Text style={styles.linkText}>Pas de compte ? Créer un compte</Text>
         </Pressable>

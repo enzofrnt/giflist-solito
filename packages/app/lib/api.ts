@@ -166,11 +166,41 @@ export const api = {
       body: data,
     }),
 
-  updateGiftList: (id: string | number, data: { title: string; description?: string; secret?: boolean; isPublic?: boolean }) =>
+  updateGiftList: (id: string | number, data: { title: string; description?: string; image?: string; secret?: boolean; isPublic?: boolean }) =>
     request<{ giftList: GiftListWithCount }>(`/api/gift-lists/${id}`, {
       method: 'PUT',
       auth: true,
       body: data,
+    }),
+
+  deleteGiftList: (id: string | number) =>
+    request<{ ok: boolean }>(`/api/gift-lists/${id}`, {
+      method: 'DELETE',
+      auth: true,
+    }),
+
+  revealGiftList: (id: string | number) =>
+    request<{ ok: boolean }>(`/api/gift-lists/${id}/reveal`, {
+      method: 'POST',
+      auth: true,
+    }),
+
+  cancelGiftReservation: (listId: string | number, giftId: number) =>
+    request<{ ok: boolean }>(`/api/gift-lists/${listId}/gifts/${giftId}/cancel`, {
+      method: 'POST',
+      auth: true,
+    }),
+
+  scrapeProduct: (url: string) =>
+    request<{ success: boolean; product?: { title?: string; url?: string; image?: string; price?: string; description?: string } }>('/api/scrape-product', {
+      method: 'POST',
+      body: { url },
+    }),
+
+  requestPasswordReset: (email: string) =>
+    request<{ ok: boolean; message?: string }>('/api/auth/forgot-password', {
+      method: 'POST',
+      body: { email },
     }),
 
   createGift: (listId: string | number, data: { title: string; url?: string; image?: string; price?: number; description?: string }) =>
@@ -213,6 +243,11 @@ export const api = {
 
   publicGiftList: (shareCode: string) =>
     request<{ giftList: GiftList; gifts: Gift[] }>(`/api/public/gift-lists/${encodeURIComponent(shareCode)}`),
+
+  cancelPublicReservation: (shareCode: string, giftId: number) =>
+    request<{ ok: boolean }>(`/api/public/gift-lists/${encodeURIComponent(shareCode)}/gifts/${giftId}/cancel`, {
+      method: 'POST',
+    }),
 
   reserveGift: (
     shareCode: string,

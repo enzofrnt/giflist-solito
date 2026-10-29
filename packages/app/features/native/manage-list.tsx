@@ -1,12 +1,12 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useCallback, useState } from 'react'
-import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Alert, Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
-import { Plus } from 'lucide-react-native'
+import { Eye, Pencil, Plus, Trash2 } from 'lucide-react-native'
 import type { Gift, GiftList } from 'app/types'
 import type { RootStackParamList } from 'app/navigation/native'
 import { WEB_URL, api } from 'app/lib/api'
-import { AppHeader, Button, Card, GiftCard, InfoHint, Screen, ShareAction, ShareSheet, colors, spacing, typography } from 'app/ui'
+import { AppHeader, Button, Card, Field, GiftCard, ImageUploadButton, InfoHint, Screen, ShareAction, ShareSheet, colors, spacing, typography } from 'app/ui'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'manage'>
 
@@ -17,6 +17,14 @@ export function ManageListScreen({ navigation, route }: Props) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [shareOpen, setShareOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
+  const [editTitle, setEditTitle] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editImage, setEditImage] = useState('')
+  const [editPublic, setEditPublic] = useState(true)
+  const [editSecret, setEditSecret] = useState(false)
+  const [editSaving, setEditSaving] = useState(false)
+  const [hasRevealed, setHasRevealed] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -49,6 +57,73 @@ export function ManageListScreen({ navigation, route }: Props) {
   }
 
 
+
+  async function revealReservations() {
+    try {
+      await api.revealGiftList(id)
+      setHasRevealed(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Révélation impossible')
+    }
+  }
+
+  function openEditList() {
+    if (!list) return
+    setEditTitle(list.title)
+    setEditDescription(list.description || '')
+    setEditImage(list.image || '')
+    setEditPublic(list.isPublic !== false)
+    setEditSecret(Boolean(list.secret))
+    setEditOpen(true)
+  }
+
+  async function saveList() {
+    if (!list || !editTitle.trim()) return
+    setEditSaving(true)
+    try {
+      const data = await api.updateGiftList(id, {
+        title: editTitle.trim(),
+        description: editDescription.trim() || undefined,
+        image: editImage.trim() || undefined,
+        secret: editSecret,
+        isPublic: editPublic,
+      })
+      setList({ ...list, ...data.giftList })
+      setEditOpen(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Modification impossible')
+    } finally {
+      setEditSaving(false)
+    }
+  }
+
+  function deleteList() {
+    Alert.alert('Supprimer la liste', 'Cette action est irréversible et supprimera tous les cadeaux associés.', [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Supprimer', style: 'destructive', onPress: async () => {
+        try {
+          await api.deleteGiftList(id)
+          navigation.goBack()
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Suppression impossible')
+        }
+      } },
+    ])
+  }
+
+  function cancelReservation(gift: Gift) {
+    Alert.alert('Annuler la réservation', `Libérer « ${gift.title} » pour les autres ?`, [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Libérer', style: 'destructive', onPress: async () => {
+        try {
+          await api.cancelGiftReservation(id, gift.id)
+          setGifts((current) => current.map((item) => item.id === gift.id ? { ...item, status: 'available', reservedByName: undefined, reservedByEmail: undefined, reservedAt: undefined } : item))
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Annulation impossible')
+        }
+      } },
+    ])
+  }
 
   function confirmDelete(gift: Gift) {
     Alert.alert('Supprimer le cadeau', `Supprimer « ${gift.title} » ?`, [
@@ -89,6 +164,10 @@ export function ManageListScreen({ navigation, route }: Props) {
               <Text style={styles.title}>{list.title}</Text>
               {list.description ? <Text style={styles.muted}>{list.description}</Text> : null}
               <Text style={styles.meta}>{gifts.length} cadeau{gifts.length > 1 ? 'x' : ''} · {list.isPublic === false ? 'Privée' : 'Publique'}{list.secret ? ' · Mode secret' : ''}</Text>
+              <View style={styles.heroActions}>
+                <Button title="Modifier" icon={Pencil} variant="secondary" onPress={openEditList} style={styles.flex} />
+                <Button title="Supprimer" icon={Trash2} variant="ghost" onPress={deleteList} style={styles.flex} />
+              </View>
             </View>
           </View>
 
@@ -105,6 +184,10 @@ export function ManageListScreen({ navigation, route }: Props) {
             <Text style={styles.muted}>Publique : visible sur votre profil. Privée : uniquement par code.</Text>
           </Card>
 
+          {list.secret && !hasRevealed ? (
+            <Button title="Révéler les réservations" icon={Eye} variant="secondary" onPress={revealReservations} fullWidth />
+          ) : null}
+
           <Button title="Ajouter un cadeau" icon={Plus} onPress={() => navigation.navigate('giftForm', { listId: id })} fullWidth />
 
           <Text style={styles.sectionTitle}>Les cadeaux <Text style={styles.count}>{gifts.length}</Text></Text>
@@ -116,6 +199,7 @@ export function ManageListScreen({ navigation, route }: Props) {
               context="owner"
               onEdit={() => navigation.navigate('giftForm', { listId: id, gift })}
               onDelete={() => confirmDelete(gift)}
+              onCancelReservation={gift.status === 'reserved' && (!list.secret || hasRevealed) ? () => cancelReservation(gift) : undefined}
             />
           ))}
         </>
@@ -128,6 +212,30 @@ export function ManageListScreen({ navigation, route }: Props) {
           onClose={() => setShareOpen(false)}
         />
       ) : null}
+
+      <Modal visible={editOpen} transparent animationType="slide" onRequestClose={() => setEditOpen(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Modifier la liste</Text>
+            <Field label="Titre" value={editTitle} onChangeText={setEditTitle} placeholder="Anniversaire, Noël…" />
+            <Field label="Description" value={editDescription} onChangeText={setEditDescription} multiline placeholder="Description de votre liste…" />
+            <Field label="Image (URL)" value={editImage} onChangeText={setEditImage} autoCapitalize="none" keyboardType="url" placeholder="https://…/photo.jpg" />
+            <ImageUploadButton value={editImage} onChange={setEditImage} />
+            <Pressable onPress={() => setEditPublic((v) => !v)} style={styles.switchRow} accessibilityRole="switch" accessibilityState={{ checked: editPublic }}>
+              <View style={[styles.checkbox, editPublic && styles.checkboxOn]}>{editPublic ? <Text style={styles.check}>✓</Text> : null}</View>
+              <Text style={styles.switchText}>Liste publique</Text>
+            </Pressable>
+            <Pressable onPress={() => setEditSecret((v) => !v)} style={styles.switchRow} accessibilityRole="switch" accessibilityState={{ checked: editSecret }}>
+              <View style={[styles.checkbox, editSecret && styles.checkboxOn]}>{editSecret ? <Text style={styles.check}>✓</Text> : null}</View>
+              <Text style={styles.switchText}>Mode secret</Text>
+            </Pressable>
+            <View style={styles.modalActions}>
+              <Button title="Annuler" variant="ghost" onPress={() => setEditOpen(false)} style={styles.flex} />
+              <Button title="Enregistrer" onPress={saveList} loading={editSaving} disabled={!editTitle.trim()} style={styles.flex} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </Screen>
   )
 }
@@ -143,6 +251,11 @@ const styles = StyleSheet.create({
   muted: { color: colors.textMuted, fontSize: typography.small, lineHeight: 19 },
   meta: { color: colors.textSubtle, fontSize: typography.caption },
   error: { color: colors.danger, fontSize: typography.small },
+  heroActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(17,16,15,0.5)', justifyContent: 'flex-end' },
+  modalCard: { backgroundColor: colors.surface, borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: spacing.xl, gap: spacing.md },
+  modalTitle: { color: colors.text, fontSize: typography.heading, fontWeight: '800' },
+  modalActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
   giftRow: { flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' },
   giftInfo: { flex: 1, gap: spacing.xs },

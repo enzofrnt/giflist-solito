@@ -1,5 +1,5 @@
 import { Image, StyleSheet, Text, View } from 'react-native'
-import { Gift, Pencil, Trash2 } from 'lucide-react-native'
+import { Gift, Pencil, RotateCcw, Trash2 } from 'lucide-react-native'
 import type { Gift as GiftType } from 'app/types'
 import { Button } from './Button.native'
 import { Card } from './Card.native'
@@ -12,12 +12,14 @@ export function GiftCard({
   onEdit,
   onDelete,
   onReserve,
+  onCancelReservation,
 }: {
   gift: GiftType
   context: 'owner' | 'public'
   onEdit?: () => void
   onDelete?: () => void
   onReserve?: () => void
+  onCancelReservation?: () => void
 }) {
   const reserved = gift.status === 'reserved'
   return (
@@ -42,6 +44,9 @@ export function GiftCard({
       {context === 'owner' ? (
         <View style={styles.actions}>
           <Button title="Modifier" icon={Pencil} variant="secondary" onPress={onEdit!} style={styles.flex} />
+          {reserved && onCancelReservation ? (
+            <Button title="Annuler la réservation" icon={RotateCcw} variant="secondary" onPress={onCancelReservation} style={styles.flex} />
+          ) : null}
           <Button title="Supprimer" icon={Trash2} variant="danger" onPress={onDelete!} style={styles.flex} />
         </View>
       ) : !reserved ? (
@@ -61,6 +66,6 @@ const styles = StyleSheet.create({
   title: { color: colors.text, fontSize: typography.body, fontWeight: '700', flex: 1 },
   meta: { color: colors.textSubtle, fontSize: typography.caption },
   description: { color: colors.textMuted, fontSize: typography.small, lineHeight: 19 },
-  actions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
   flex: { flex: 1 },
 })

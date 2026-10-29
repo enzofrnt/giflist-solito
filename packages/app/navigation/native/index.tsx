@@ -11,6 +11,7 @@ import { useSession } from 'app/provider/session.native'
 import { useTheme } from 'app/theme/ThemeProvider.native'
 import { HomeScreen } from 'app/features/native/home'
 import { LoginScreen } from 'app/features/native/login'
+import { ForgotPasswordScreen } from 'app/features/native/forgot-password'
 import { RegisterScreen } from 'app/features/native/register'
 import { VerifyEmailScreen } from 'app/features/native/verify-email'
 import { DashboardScreen } from 'app/features/native/dashboard'
@@ -23,6 +24,7 @@ import { SearchScreen, PublicUserScreen } from 'app/features/native/search'
 export type RootStackParamList = {
   home: undefined
   login: undefined
+  forgotPassword: undefined
   register: undefined
   verifyEmail: { email?: string }
   main: undefined
@@ -105,6 +107,7 @@ export function NativeNavigation() {
     <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={user ? 'main' : 'home'}>
       <Stack.Screen name="home" component={HomeScreen} />
       <Stack.Screen name="login" component={LoginScreen} />
+      <Stack.Screen name="forgotPassword" component={ForgotPasswordScreen} />
       <Stack.Screen name="register" component={RegisterScreen} />
       <Stack.Screen name="verifyEmail" component={VerifyEmailScreen} />
       <Stack.Screen name="main" component={MainScreen} />

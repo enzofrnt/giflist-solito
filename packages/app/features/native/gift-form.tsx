@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useState } from 'react'
-import { Check, X } from 'lucide-react-native'
+import { Check, Sparkles, X } from 'lucide-react-native'
 import { StyleSheet, Text, View } from 'react-native'
 import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
@@ -17,6 +17,8 @@ export function GiftFormScreen({ navigation, route }: Props) {
   const [description, setDescription] = useState(gift?.description ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [scraping, setScraping] = useState(false)
+  const [scrapeError, setScrapeError] = useState('')
 
   async function save() {
     if (!title.trim()) return
@@ -43,6 +45,24 @@ export function GiftFormScreen({ navigation, route }: Props) {
     }
   }
 
+  async function scrape() {
+    if (!url.trim() || scraping) return
+    setScraping(true)
+    setScrapeError('')
+    try {
+      const data = await api.scrapeProduct(url.trim())
+      const product = data.product
+      if (product?.title) setTitle(product.title)
+      if (product?.image) setImage(product.image)
+      if (product?.price) setPrice(String(product.price).replace('.', ','))
+      if (product?.description) setDescription(product.description)
+    } catch (err) {
+      setScrapeError(err instanceof Error ? err.message : 'Impossible de lire cette page produit.')
+    } finally {
+      setScraping(false)
+    }
+  }
+
   return (
     <Screen header={<AppHeader onBack={() => navigation.goBack()} />}>
       <Card>
@@ -50,6 +70,8 @@ export function GiftFormScreen({ navigation, route }: Props) {
         <Text style={styles.lead}>{gift ? 'Ajustez les informations puis enregistrez.' : 'Ajoutez une envie à votre liste.'}</Text>
         <Field label="Titre" value={title} onChangeText={setTitle} placeholder="Casque audio…" />
         <Field label="Lien produit" value={url} onChangeText={setUrl} autoCapitalize="none" keyboardType="url" placeholder="https://…" />
+        <Button title="Récupérer les infos du produit" icon={Sparkles} variant="secondary" onPress={scrape} loading={scraping} disabled={!url.trim()} fullWidth />
+        {scrapeError ? <Text style={styles.error}>{scrapeError}</Text> : null}
         <Field label="Image (URL)" value={image} onChangeText={setImage} autoCapitalize="none" keyboardType="url" placeholder="https://…/photo.jpg" />
         <ImageUploadButton value={image} onChange={setImage} />
         <Field label="Prix (€)" value={price} onChangeText={setPrice} keyboardType="decimal-pad" placeholder="29,90" />

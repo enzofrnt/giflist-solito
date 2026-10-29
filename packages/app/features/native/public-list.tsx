@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useEffect, useState } from 'react'
-import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Alert, Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 import type { Gift, GiftList } from 'app/types'
 import type { RootStackParamList } from 'app/navigation/native'
 import { WEB_URL, api } from 'app/lib/api'
@@ -91,6 +91,20 @@ export function PublicListScreen({ navigation, route }: Props) {
     }
   }
 
+  function cancelReservation(gift: Gift) {
+    Alert.alert('Annuler la réservation', 'Libérer ce cadeau pour les autres ?', [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Libérer', style: 'destructive', onPress: async () => {
+        try {
+          await api.cancelPublicReservation(list!.shareCode, gift.id)
+          setGifts((current) => current.map((item) => item.id === gift.id ? { ...item, status: 'available', reservedByName: undefined } : item))
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Annulation impossible')
+        }
+      } },
+    ])
+  }
+
   return (
     <Screen
       header={(
@@ -133,6 +147,7 @@ export function PublicListScreen({ navigation, route }: Props) {
               gift={gift}
               context="public"
               onReserve={() => setSelected(gift)}
+              onCancelReservation={gift.status === 'reserved' ? () => cancelReservation(gift) : undefined}
             />
           ))}
         </>
