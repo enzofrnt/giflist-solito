@@ -1,5 +1,6 @@
 import { AppChrome } from "@/components/AppChrome";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -104,6 +105,7 @@ export default function RootLayout({
           <AuthProvider>
             <AppChrome>{children}</AppChrome>
             <SpeedInsights />
+            <Analytics />
           </AuthProvider>
         </ThemeProvider>
       </body>
