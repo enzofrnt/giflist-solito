@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useCallback, useState } from 'react'
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 import { Plus } from 'lucide-react-native'
 import type { Gift, GiftList } from 'app/types'
@@ -82,9 +82,14 @@ export function ManageListScreen({ navigation, route }: Props) {
 
       {list ? (
         <>
-          <View>
-            <Text style={styles.title}>{list.title}</Text>
-            {list.description ? <Text style={styles.muted}>{list.description}</Text> : null}
+          <View style={styles.listHero}>
+            {list.image ? <Image source={{ uri: list.image }} style={styles.listCover} resizeMode="cover" accessibilityLabel={list.title} /> : null}
+            <View style={styles.heroCopy}>
+              <Text style={styles.kicker}>GESTION DE LISTE</Text>
+              <Text style={styles.title}>{list.title}</Text>
+              {list.description ? <Text style={styles.muted}>{list.description}</Text> : null}
+              <Text style={styles.meta}>{gifts.length} cadeau{gifts.length > 1 ? 'x' : ''} · {list.isPublic === false ? 'Privée' : 'Publique'}{list.secret ? ' · Mode secret' : ''}</Text>
+            </View>
           </View>
 
           <Card>
@@ -128,6 +133,10 @@ export function ManageListScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
+  listHero: { gap: spacing.md },
+  listCover: { width: '100%', aspectRatio: 16 / 9, borderRadius: 14, backgroundColor: colors.surfaceMuted },
+  heroCopy: { gap: 5 },
+  kicker: { color: colors.accent, fontSize: typography.caption, fontWeight: '700', letterSpacing: 1.2 },
   title: { color: colors.text, fontSize: typography.title, fontWeight: '800' },
   sectionTitle: { color: colors.text, fontSize: typography.heading, fontWeight: '700' },
   count: { color: colors.textMuted, fontSize: typography.small, fontWeight: '500' },

@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, Text } from 'react-native'
 import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
 import { ApiError } from 'app/lib/api'
-import { AppHeader, Button, Card, Field, PasswordField, PasswordStrength, Screen, colors, spacing, typography } from 'app/ui'
+import { AppHeader, AuthBrand, Button, Card, Field, PasswordField, PasswordStrength, Screen, colors, spacing, typography } from 'app/ui'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'register'>
 
@@ -58,6 +58,7 @@ export function RegisterScreen({ navigation }: Props) {
   return (
     <Screen header={<AppHeader onBack={() => navigation.goBack()} />}>
       <Card>
+        <AuthBrand />
         <Text style={styles.title}>Créer un compte</Text>
         <Text style={styles.lead}>Votre première liste prend quelques secondes.</Text>
         <Field label="Pseudo" value={username} onChangeText={(value) => setUsername(value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30))} autoCapitalize="none" autoComplete="username" textContentType="username" hint="3–30 caractères : a-z, chiffres et _." />

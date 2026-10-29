@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import type { RootStackParamList } from 'app/navigation/native'
 import { ApiError, api } from 'app/lib/api'
 import { useSession } from 'app/provider/session.native'
-import { AppHeader, Button, Card, Field, PasswordField, Screen, colors, spacing, typography } from 'app/ui'
+import { AppHeader, AuthBrand, Button, Card, Field, PasswordField, Screen, colors, spacing, typography } from 'app/ui'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'login'>
 
@@ -37,6 +37,7 @@ export function LoginScreen({ navigation }: Props) {
   return (
     <Screen header={<AppHeader onBack={() => navigation.goBack()} />}>
       <Card>
+        <AuthBrand />
         <Text style={styles.title}>Connexion</Text>
         <Text style={styles.lead}>Retrouvez vos listes de cadeaux.</Text>
         <Field label="Adresse e-mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="username" textContentType="username" />

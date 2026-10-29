@@ -67,7 +67,8 @@ export function DashboardScreen({ navigation }: Props) {
 
       <View style={styles.heading}>
         <View style={styles.flex}>
-          <Text style={styles.title}>{user ? `Bonjour ${user.username ? `@${user.username}` : user.email}` : 'Mes listes'}</Text>
+          <Text style={styles.kicker}>{user?.username ? `BONJOUR @${user.username.toUpperCase()}` : 'VOTRE ESPACE'}</Text>
+          <Text style={styles.title}>Mes listes</Text>
           <Text style={styles.lead}>Créez, partagez et gérez vos listes.</Text>
         </View>
         <Button title={showCreate ? 'Fermer' : 'Nouvelle liste'} icon={showCreate ? undefined : Plus} variant={showCreate ? 'ghost' : 'primary'} onPress={() => setShowCreate((value) => !value)} />
@@ -125,7 +126,8 @@ export function DashboardScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   heading: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
   flex: { flex: 1 },
-  title: { color: colors.text, fontSize: typography.title, fontWeight: '800' },
+  kicker: { color: colors.accent, fontSize: typography.caption, fontWeight: '700', letterSpacing: 1.2 },
+  title: { color: colors.text, fontSize: 32, lineHeight: 36, fontWeight: '800', letterSpacing: -0.7 },
   lead: { color: colors.textMuted, fontSize: typography.small, marginTop: spacing.xs },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
   cardTitle: { color: colors.text, fontSize: typography.heading, fontWeight: '700', flex: 1 },

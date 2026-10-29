@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Pressable, StyleSheet, Text } from 'react-native'
 import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
-import { AppHeader, Button, Card, Screen, colors, spacing, typography } from 'app/ui'
+import { AppHeader, AuthBrand, Button, Card, Screen, colors, spacing, typography } from 'app/ui'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'verifyEmail'>
 
@@ -29,6 +29,7 @@ export function VerifyEmailScreen({ navigation, route }: Props) {
   return (
     <Screen header={<AppHeader onBack={() => navigation.goBack()} />}>
       <Card>
+        <AuthBrand />
         <Text style={styles.title}>Vérifiez votre boîte mail</Text>
         <Text style={styles.lead}>
           Un e-mail de confirmation vient d’être envoyé{email ? ` à ${email}` : ''}. Cliquez sur le lien qu’il contient pour activer votre compte.

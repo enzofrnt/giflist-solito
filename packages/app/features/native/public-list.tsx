@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useEffect, useState } from 'react'
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 import type { Gift, GiftList } from 'app/types'
 import type { RootStackParamList } from 'app/navigation/native'
 import { WEB_URL, api } from 'app/lib/api'
@@ -112,14 +112,18 @@ export function PublicListScreen({ navigation, route }: Props) {
 
       {list ? (
         <>
-          <View>
-            <Text style={styles.title}>{list.title}</Text>
-            {list.description ? <Text style={styles.muted}>{list.description}</Text> : null}
-            <View style={styles.titleRow}>
-              <Text style={styles.meta}>Par {list.user?.username ? `@${list.user.username}` : 'un proche'} · {gifts.length} cadeau{gifts.length > 1 ? 'x' : ''}</Text>
-              {user ? (
-                <FavoriteButton active={isFavorite} onPress={toggleFavorite} busy={favoriteBusy} withLabel />
-              ) : null}
+          <View style={styles.listHero}>
+            {list.image ? <Image source={{ uri: list.image }} style={styles.listCover} resizeMode="cover" accessibilityLabel={list.title} /> : null}
+            <View style={styles.heroCopy}>
+              <Text style={styles.kicker}>LISTE DE CADEAUX</Text>
+              <Text style={styles.title}>{list.title}</Text>
+              {list.description ? <Text style={styles.muted}>{list.description}</Text> : null}
+              <View style={styles.titleRow}>
+                <Text style={styles.meta}>Par {list.user?.username ? `@${list.user.username}` : 'un proche'} · {gifts.length} cadeau{gifts.length > 1 ? 'x' : ''}</Text>
+                {user ? (
+                  <FavoriteButton active={isFavorite} onPress={toggleFavorite} busy={favoriteBusy} withLabel />
+                ) : null}
+              </View>
             </View>
           </View>
 
@@ -159,6 +163,10 @@ export function PublicListScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
+  listHero: { gap: spacing.md },
+  listCover: { width: '100%', aspectRatio: 16 / 9, borderRadius: 14, backgroundColor: colors.surfaceMuted },
+  heroCopy: { gap: 5 },
+  kicker: { color: colors.accent, fontSize: typography.caption, fontWeight: '700', letterSpacing: 1.2 },
   title: { color: colors.text, fontSize: typography.title, fontWeight: '800' },
   muted: { color: colors.textMuted, fontSize: typography.small, lineHeight: 19 },
   meta: { color: colors.textSubtle, fontSize: typography.caption },
