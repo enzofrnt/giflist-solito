@@ -36,6 +36,9 @@ export default function ProfileClient() {
   const [updating, setUpdating] = useState(false)
   const [changingPassword, setChangingPassword] = useState(false)
   const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [showEmailForm, setShowEmailForm] = useState(false)
+  const [changingEmail, setChangingEmail] = useState(false)
+  const [emailData, setEmailData] = useState({ email: '', currentPassword: '' })
   const [feedback, setFeedback] = useState<Feedback | null>(null)
 
   const [formData, setFormData] = useState({
@@ -100,6 +103,38 @@ export default function ProfileClient() {
       setFeedback({ tone: 'danger', title: 'Erreur', message: 'Erreur lors de la mise à jour du profil' })
     } finally {
       setUpdating(false)
+    }
+  }
+
+  async function requestEmailChange() {
+    if (!emailData.email.trim() || !emailData.currentPassword) {
+      setFeedback({ tone: 'danger', title: 'Erreur', message: 'La nouvelle adresse et le mot de passe actuel sont requis.' })
+      return
+    }
+    setChangingEmail(true)
+    try {
+      const token = getAuthToken()
+      if (!token) {
+        setFeedback({ tone: 'danger', title: 'Erreur', message: 'Non authentifié' })
+        return
+      }
+      const response = await fetch('/api/auth/email-change/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(emailData),
+      })
+      const data = await response.json().catch(() => null)
+      if (!response.ok) {
+        setFeedback({ tone: 'danger', title: 'Changement impossible', message: data?.error || 'Erreur lors de la demande.' })
+        return
+      }
+      setFeedback({ tone: 'success', title: 'Vérifiez votre boîte mail', message: data.message })
+      setShowEmailForm(false)
+      setEmailData({ email: '', currentPassword: '' })
+    } catch {
+      setFeedback({ tone: 'danger', title: 'Erreur', message: 'Erreur lors de la demande de changement.' })
+    } finally {
+      setChangingEmail(false)
     }
   }
 
@@ -248,7 +283,61 @@ export default function ProfileClient() {
                     className="ds-input"
                     aria-describedby="profile-email-hint"
                   />
-                  <p className="ds-hint" id="profile-email-hint">L’adresse e-mail ne peut pas être modifiée.</p>
+                  <p className="ds-hint" id="profile-email-hint">Une confirmation est envoyée à la nouvelle adresse avant le changement.</p>
+                  <div className="ds-cluster">
+                    <button
+                      type="button"
+                      onClick={() => setShowEmailForm((current) => !current)}
+                      className="ds-btn ds-btn--secondary ds-btn--sm"
+                      aria-expanded={showEmailForm}
+                      aria-controls="email-change-panel"
+                    >
+                      {showEmailForm ? 'Fermer' : 'Modifier mon adresse e-mail'}
+                    </button>
+                  </div>
+                  {showEmailForm ? (
+                    <form
+                      id="email-change-panel"
+                      className="ds-stack ds-stack--gap-3"
+                      onSubmit={(event) => {
+                        event.preventDefault()
+                        requestEmailChange()
+                      }}
+                    >
+                      <div className="ds-field">
+                        <label htmlFor="email-change-new" className="ds-label">Nouvelle adresse e-mail</label>
+                        <input
+                          id="email-change-new"
+                          type="email"
+                          required
+                          value={emailData.email}
+                          onChange={(event) => setEmailData((current) => ({ ...current, email: event.target.value }))}
+                          className="ds-input"
+                          placeholder="nouvelle@adresse.fr"
+                          autoComplete="email"
+                        />
+                      </div>
+                      <div className="ds-field">
+                        <label htmlFor="email-change-password" className="ds-label">Mot de passe actuel</label>
+                        <input
+                          id="email-change-password"
+                          type="password"
+                          required
+                          value={emailData.currentPassword}
+                          onChange={(event) => setEmailData((current) => ({ ...current, currentPassword: event.target.value }))}
+                          className="ds-input"
+                          placeholder="Votre mot de passe actuel"
+                          autoComplete="current-password"
+                        />
+                      </div>
+                      <div className="ds-cluster">
+                        <button type="submit" className="ds-btn ds-btn--primary ds-btn--sm" disabled={changingEmail}>
+                          {changingEmail ? 'Envoi…' : 'Envoyer la confirmation'}
+                        </button>
+                        <button type="button" className="ds-btn ds-btn--secondary ds-btn--sm" onClick={() => setShowEmailForm(false)}>Annuler</button>
+                      </div>
+                    </form>
+                  ) : null}
                 </div>
               </div>
 

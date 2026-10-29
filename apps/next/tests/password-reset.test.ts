@@ -279,3 +279,40 @@ test('a virtual authenticator can register, log in, and cannot replay its assert
     server.stop(true)
   }
 })
+
+test('email change requires the current password, confirms once and rotates the session', async () => {
+  const account = await user('change@example.com')
+  const emailChange = await import('../src/lib/email-change')
+  const oldSession = auth.generateToken(account)
+
+  await assert.rejects(
+    emailChange.requestEmailChange(account.id, 'WrongPassword!1', 'new@example.com'),
+    /mot de passe actuel est incorrect/,
+  )
+  assert.equal(emails.length, 0)
+
+  await emailChange.requestEmailChange(account.id, 'OldPassword!1', 'NEW@example.com')
+  assert.equal(emails.length, 1)
+  assert.deepEqual(emails[0].to, ['new@example.com'])
+  const token = emails[0].text.match(/#token=([A-Za-z0-9._-]+)/)?.[1]
+  assert.ok(token)
+
+  const result = await emailChange.confirmEmailChange(token!)
+  assert.equal(result.user.email, 'new@example.com')
+  assert.equal(await auth.getCurrentUser(oldSession), null)
+  assert.ok(await auth.getCurrentUser(result.token))
+  await assert.rejects(emailChange.confirmEmailChange(token!), /plus valide/)
+  assert.equal(emails.at(-1)?.to[0], 'change@example.com')
+  assert.equal((await prisma.user.findUniqueOrThrow({ where: { id: account.id } })).email, 'new@example.com')
+})
+
+test('email change rejects an address already used by another account', async () => {
+  const account = await user('owner@example.com')
+  await user('taken@example.com')
+  const emailChange = await import('../src/lib/email-change')
+  await assert.rejects(
+    emailChange.requestEmailChange(account.id, 'OldPassword!1', 'TAKEN@example.com'),
+    /déjà utilisée/,
+  )
+  assert.equal(emails.length, 0)
+})

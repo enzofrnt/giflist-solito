@@ -14,6 +14,12 @@ type Props = {
 
 export function ProfileScreen({ navigation, onShowLists }: Props) {
   const { user, loading, signIn, signOut } = useSession()
+  const [showEmailForm, setShowEmailForm] = useState(false)
+  const [newEmail, setNewEmail] = useState('')
+  const [emailPassword, setEmailPassword] = useState('')
+  const [emailSaving, setEmailSaving] = useState(false)
+  const [emailError, setEmailError] = useState('')
+  const [emailSuccess, setEmailSuccess] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -29,6 +35,24 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
   async function logout() {
     await signOut()
     navigation.reset({ index: 0, routes: [{ name: 'home' }] })
+  }
+
+  async function requestEmailChange() {
+    if (!newEmail.trim() || !emailPassword) return
+    setEmailSaving(true)
+    setEmailError('')
+    setEmailSuccess('')
+    try {
+      const result = await api.requestEmailChange(newEmail.trim(), emailPassword)
+      setEmailSuccess(result.message)
+      setNewEmail('')
+      setEmailPassword('')
+      setShowEmailForm(false)
+    } catch (err) {
+      setEmailError(err instanceof Error ? err.message : 'Demande impossible')
+    } finally {
+      setEmailSaving(false)
+    }
   }
 
   async function changePassword() {
@@ -56,6 +80,34 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
       <Card>
         <Text style={styles.name}>{user?.name ?? 'Mon compte'}</Text>
         {user?.email ? <Text style={styles.muted}>{user.email}</Text> : null}
+      </Card>
+
+      <Card>
+        <View style={styles.rowBetween}>
+          <View style={styles.flex}>
+            <Text style={styles.sectionTitle}>Adresse e-mail</Text>
+            <Text style={styles.muted}>{user?.email}</Text>
+          </View>
+          <Button
+            title={showEmailForm ? 'Fermer' : 'Modifier'}
+            variant={showEmailForm ? 'ghost' : 'secondary'}
+            onPress={() => {
+              setShowEmailForm((value) => !value)
+              setEmailError('')
+              setEmailSuccess('')
+            }}
+          />
+        </View>
+        {emailSuccess ? <Text style={styles.success}>{emailSuccess}</Text> : null}
+        {showEmailForm ? (
+          <View style={styles.form}>
+            <Field label="Nouvelle adresse e-mail" value={newEmail} onChangeText={setNewEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" />
+            <Field label="Mot de passe actuel" value={emailPassword} onChangeText={setEmailPassword} secureTextEntry autoComplete="current-password" textContentType="password" />
+            {emailError ? <Text style={styles.error}>{emailError}</Text> : null}
+            <Button title="Envoyer la confirmation" onPress={requestEmailChange} loading={emailSaving} disabled={!newEmail.trim() || !emailPassword} fullWidth />
+            <Text style={styles.muted}>Un lien de confirmation sera envoyé à la nouvelle adresse. L’ancienne reste active jusqu’à validation.</Text>
+          </View>
+        ) : null}
       </Card>
 
       <ThemeSettings />

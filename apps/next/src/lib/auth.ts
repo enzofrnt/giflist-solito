@@ -188,3 +188,48 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
     };
   }
 }
+
+export interface EmailChangeClaims {
+  userId: number
+  currentEmail: string
+  newEmail: string
+  authVersion: number
+}
+
+interface EmailChangePayload extends EmailChangeClaims {
+  purpose?: string
+  iat?: number
+  exp?: number
+}
+
+export function signEmailChangeToken(claims: EmailChangeClaims): string {
+  return jwt.sign(
+    { ...claims, purpose: 'email-change' },
+    getJwtSecret(),
+    { algorithm: 'HS256', expiresIn: '30m', issuer: 'giftlist' },
+  )
+}
+
+export function verifyEmailChangeToken(token: string): EmailChangeClaims | null {
+  try {
+    const decoded = jwt.verify(token, getJwtSecret(), {
+      algorithms: ['HS256'],
+      issuer: 'giftlist',
+    }) as EmailChangePayload
+    if (
+      decoded.purpose !== 'email-change' ||
+      !Number.isInteger(decoded.userId) ||
+      typeof decoded.currentEmail !== 'string' ||
+      typeof decoded.newEmail !== 'string' ||
+      !Number.isInteger(decoded.authVersion)
+    ) return null
+    return {
+      userId: decoded.userId,
+      currentEmail: decoded.currentEmail,
+      newEmail: decoded.newEmail,
+      authVersion: decoded.authVersion,
+    }
+  } catch {
+    return null
+  }
+}

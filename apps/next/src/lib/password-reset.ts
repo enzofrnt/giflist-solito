@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
 import { getEmailConfig, sendEmail } from './email'
+import { renderBrandedEmail } from './email-template'
 
 const RESET_LIFETIME_MS = 30 * 60 * 1000
 export const RESET_MESSAGE = 'Si un compte correspond à cette adresse, un e-mail de réinitialisation a été envoyé.'
@@ -56,12 +57,23 @@ export async function requestPasswordReset(email: string) {
 
   // A fragment keeps the bearer secret out of server/access logs and referrers.
   const link = `${origin}/reset-password#token=${token}`
+  const mail = renderBrandedEmail({
+    origin,
+    preheader: 'Choisissez un nouveau mot de passe pour votre compte Giftlist.',
+    title: 'Un nouveau mot de passe pour Giftlist',
+    bodyHtml: `<p style="margin:0 0 14px">Vous avez demandé à réinitialiser votre mot de passe.</p>
+      <p style="margin:0 0 14px">Ce lien est valable <strong>30 minutes</strong> et utilisable une seule fois. Un nouveau lien remplace le précédent.</p>`,
+    bodyText: `Bonjour,\n\nVous avez demandé à réinitialiser votre mot de passe Giftlist.\n\nCe lien est valable 30 minutes et utilisable une seule fois. Un nouveau lien remplace le précédent.`,
+    cta: { label: 'Choisir mon nouveau mot de passe', href: link },
+    footnoteHtml: 'Si vous n’êtes pas à l’origine de cette demande, ignorez cet e-mail. Votre mot de passe reste inchangé.',
+    footnoteText: 'Si vous n’êtes pas à l’origine de cette demande, ignorez cet e-mail. Votre mot de passe reste inchangé.',
+  })
   try {
     await sendEmail({
       to: user.email,
       subject: 'Réinitialisez votre mot de passe Giftlist',
-      html: `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Réinitialisez votre mot de passe Giftlist</title></head><body style="margin:0;background:#f9fafb;font-family:Arial,sans-serif;color:#111827"><div style="max-width:520px;margin:32px auto;padding:32px;background:white;border-radius:12px"><h1 style="font-size:24px">Un nouveau mot de passe pour Giftlist</h1><p style="font-size:16px;line-height:1.6">Vous avez demandé à réinitialiser votre mot de passe. Ce lien est valable <strong>30 minutes</strong> et utilisable une seule fois.</p><p style="margin:28px 0"><a href="${link}" style="display:inline-block;padding:16px 24px;border-radius:8px;background:#2563eb;color:white;text-decoration:none;font-size:16px;font-weight:bold">Choisir mon nouveau mot de passe</a></p><p style="font-size:16px;line-height:1.6">Si vous n’êtes pas à l’origine de cette demande, ignorez cet e-mail. Votre mot de passe reste inchangé.</p><p style="font-size:14px;color:#4b5563">Le bouton ne fonctionne pas ? Copiez ce lien dans votre navigateur :</p><p style="font-size:14px;word-break:break-all"><a href="${link}">${link}</a></p><p style="font-size:14px;color:#4b5563">L’équipe Giftlist</p></div></body></html>`,
-      text: `Bonjour,\n\nPour choisir un nouveau mot de passe Giftlist, ouvrez ce lien :\n${link}\n\nCe lien est valable 30 minutes et utilisable une seule fois. Un nouveau lien remplace le précédent.\n\nSi vous n’êtes pas à l’origine de cette demande, ignorez cet e-mail : votre mot de passe reste inchangé.\n\nL’équipe Giftlist`,
+      html: mail.html,
+      text: mail.text,
     }, `password-reset-${tokenHash}`)
   } catch {
     // Don't remove a newer request's token when an earlier send fails.
@@ -105,9 +117,19 @@ export async function resetPassword(token: string, password: string) {
 }
 
 export async function notifyPasswordReset(email: string, tokenHash: string) {
+  const { origin } = getEmailConfig()
+  const mail = renderBrandedEmail({
+    origin,
+    preheader: 'Votre mot de passe Giftlist a été modifié.',
+    title: 'Votre mot de passe a été modifié',
+    bodyHtml: `<p style="margin:0 0 14px">Votre mot de passe Giftlist vient d’être réinitialisé. Vos anciennes sessions ont été déconnectées et vos clés d’accès supprimées.</p>
+      <p style="margin:0 0 14px">Si vous n’êtes pas à l’origine de ce changement, demandez immédiatement une nouvelle réinitialisation depuis Giftlist.</p>`,
+    bodyText: 'Votre mot de passe Giftlist vient d’être réinitialisé. Vos anciennes sessions ont été déconnectées et vos clés d’accès supprimées.\n\nSi vous n’êtes pas à l’origine de ce changement, demandez immédiatement une nouvelle réinitialisation depuis Giftlist.',
+  })
   await sendEmail({
     to: email,
     subject: 'Votre mot de passe Giftlist a été modifié',
-    text: 'Bonjour,\n\nVotre mot de passe Giftlist vient d’être réinitialisé. Vos anciennes sessions ont été déconnectées et vos clés d’accès supprimées.\n\nSi vous n’êtes pas à l’origine de ce changement, demandez immédiatement une nouvelle réinitialisation depuis Giftlist.\n\nL’équipe Giftlist',
+    html: mail.html,
+    text: mail.text,
   }, `password-reset-confirmation-${tokenHash}`)
 }
