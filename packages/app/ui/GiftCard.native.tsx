@@ -49,6 +49,8 @@ export function GiftCard({
           ) : null}
           <Button title="Supprimer" icon={Trash2} variant="danger" onPress={onDelete!} style={styles.flex} />
         </View>
+      ) : reserved && onCancelReservation ? (
+        <Button title="Annuler la réservation" icon={RotateCcw} variant="secondary" onPress={onCancelReservation} fullWidth />
       ) : !reserved ? (
         <Button title="Réserver ce cadeau" icon={Gift} onPress={onReserve!} fullWidth />
       ) : null}

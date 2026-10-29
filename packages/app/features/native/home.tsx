@@ -30,7 +30,7 @@ export function HomeScreen({ navigation }: Props) {
             accessibilityLabel="Giftlist"
           />
           <Text style={styles.overline}>Listes de cadeaux</Text>
-          <Text style={styles.title}>Des cadeaux qui font{'\n'}<Text style={styles.titleAccent}>plaisir.</Text></Text>
+          <Text style={styles.title}>Des cadeaux qui{'\n'}font <Text style={styles.titleAccent}>plaisir.</Text></Text>
           <Text style={styles.lead}>
             Créez et partagez vos listes. Vos proches réservent via un lien ou un QR code, sans créer de compte.
           </Text>
