@@ -13,7 +13,10 @@
     ],
     "ios": {
       "bundleIdentifier": "com.enzofournet.giflist",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "associatedDomains": [
+        "webcredentials:giftlist.fr"
+      ]
     },
     "android": {
       "package": "com.enzofournet.giflist",

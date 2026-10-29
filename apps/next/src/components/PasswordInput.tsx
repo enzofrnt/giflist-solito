@@ -76,11 +76,11 @@ export default function PasswordInput({
         </button>
       </div>
 
-      {showStrength && value ? (
-        <div className="ds-strength" data-level={strength.level}>
+      {showStrength ? (
+        <div className="ds-strength" data-level={strength.isEmpty ? 'empty' : strength.level}>
           <div className="ds-strength__header">
             <span className="ds-strength__label" aria-live="polite">
-              Robustesse : {strength.label}
+              Robustesse : {strength.isEmpty ? '—' : strength.label}
             </span>
             <span className="ds-strength__hint">{strength.rulesPassed}/5 règles</span>
           </div>
@@ -90,7 +90,7 @@ export default function PasswordInput({
             aria-valuemin={0}
             aria-valuemax={4}
             aria-valuenow={strength.level}
-            aria-valuetext={strength.label}
+            aria-valuetext={strength.isEmpty ? 'Mot de passe vide' : strength.label}
             aria-label="Robustesse du mot de passe"
           >
             <div className="ds-strength__fill" style={{ width: `${strength.percent}%` }} />
