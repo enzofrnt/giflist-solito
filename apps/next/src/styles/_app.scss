@@ -1425,3 +1425,17 @@
     object-fit: contain;
   }
 }
+
+@layer components {
+  .ds-auth__logo--dark {
+    display: none;
+  }
+
+  [data-theme='dark'] .ds-auth__logo--light {
+    display: none;
+  }
+
+  [data-theme='dark'] .ds-auth__logo--dark {
+    display: block;
+  }
+}

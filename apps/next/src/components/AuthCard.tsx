@@ -20,10 +20,18 @@ export function AuthCard({
           <Link href="/" aria-label="Giftlist — accueil">
             <Image
               src="/logo.webp"
-              alt="Giftlist"
+              alt=""
               width={320}
               height={214}
-              className="ds-auth__logo"
+              className="ds-auth__logo ds-auth__logo--light"
+              priority
+            />
+            <Image
+              src="/logo-white.webp"
+              alt=""
+              width={320}
+              height={214}
+              className="ds-auth__logo ds-auth__logo--dark"
               priority
             />
           </Link>
