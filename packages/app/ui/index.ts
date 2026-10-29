@@ -1,4 +1,5 @@
-export { colors, spacing, radius, typography, shadow } from './tokens'
+export { colors, lightColors, darkColors, spacing, radius, typography, shadow } from './tokens'
+export type { ThemeColors } from './tokens'
 export { Button } from './Button.native'
 export { Card } from './Card.native'
 export { Badge } from './Badge.native'

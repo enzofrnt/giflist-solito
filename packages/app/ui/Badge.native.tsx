@@ -20,9 +20,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   neutral: { backgroundColor: colors.surfaceMuted, borderColor: colors.border },
-  success: { backgroundColor: colors.successSoft, borderColor: '#c5e5d4' },
-  warning: { backgroundColor: colors.warningSoft, borderColor: '#f2d3a4' },
-  danger: { backgroundColor: colors.dangerSoft, borderColor: '#f0c4c4' },
+  success: { backgroundColor: colors.successSoft, borderColor: colors.success },
+  warning: { backgroundColor: colors.warningSoft, borderColor: colors.warning },
+  danger: { backgroundColor: colors.dangerSoft, borderColor: colors.danger },
   text: { color: colors.textMuted, fontSize: typography.caption, fontWeight: '600' },
   textColored: { color: colors.text },
 })

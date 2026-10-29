@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { DropdownMenu } from '@/components/DropdownMenu'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { useAuthContext } from '@/contexts/AuthContext'
 
 function ChevronDownIcon() {
@@ -48,6 +49,7 @@ export function Header() {
         </div>
 
         <div className="ds-header__actions">
+          <ThemeToggle />
           {loading ? (
             <span className="ds-spinner" aria-label="Chargement du compte" role="status" />
           ) : user ? (
