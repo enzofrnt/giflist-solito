@@ -1,7 +1,6 @@
 'use client';
 
 import AlertModal from '@/components/AlertModal';
-import { DropdownMenu } from '@/components/DropdownMenu';
 import EditListModal from '@/components/EditListModal';
 import GiftFormModal from '@/components/GiftFormModal';
 import GiftStatusBadge from '@/components/GiftStatusBadge';
@@ -16,6 +15,19 @@ import type { Gift, GiftList } from 'app/types'
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from 'react';
+
+const PENCIL_ICON = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+  </svg>
+)
+
+const TRASH_ICON = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5" />
+  </svg>
+)
 
 export default function ManageListPage({ params }: { params: Promise<{ id: string }> }) {
   const [giftList, setGiftList] = useState<GiftList | null>(null);
@@ -427,6 +439,11 @@ export default function ManageListPage({ params }: { params: Promise<{ id: strin
   return (
     <div className="ds-page">
       <main className="ds-page__main">
+        <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm ds-back-link" onClick={() => router.push('/dashboard')}>
+          <span aria-hidden="true">←</span>
+          Mes listes
+        </button>
+
         <header className="ds-page-header">
           <div className="flex min-w-0 items-start gap-4">
             {giftList?.image && (
@@ -478,30 +495,25 @@ export default function ManageListPage({ params }: { params: Promise<{ id: strin
               {gifts.length} {gifts.length === 1 ? 'cadeau' : 'cadeaux'}
             </span>
           </div>
-          <div className="ds-toolbar__group">
-            <button className="ds-btn ds-btn--ghost" onClick={() => router.push('/dashboard')}>
-              <span className="ds-btn__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-              </span>
-              Mes listes
+          <div className="ds-toolbar__group ds-manage-actions">
+            <button
+              type="button"
+              className="ds-btn ds-btn--secondary ds-btn--icon"
+              onClick={openEditListModal}
+              aria-label="Modifier la liste"
+              data-tooltip="Modifier la liste"
+            >
+              {PENCIL_ICON}
             </button>
-            <DropdownMenu
-              label="Actions de la liste"
-              triggerClassName="ds-icon-btn"
-              trigger={
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
-                  <circle cx="5" cy="12" r="1" fill="currentColor" />
-                  <circle cx="12" cy="12" r="1" fill="currentColor" />
-                  <circle cx="19" cy="12" r="1" fill="currentColor" />
-                </svg>
-              }
-              items={[
-                { label: 'Modifier la liste', onSelect: openEditListModal },
-                { label: 'Supprimer la liste', danger: true, onSelect: deleteList },
-              ]}
-            />
+            <button
+              type="button"
+              className="ds-btn ds-btn--danger ds-btn--icon"
+              onClick={deleteList}
+              aria-label="Supprimer la liste"
+              data-tooltip="Supprimer la liste"
+            >
+              {TRASH_ICON}
+            </button>
           </div>
         </div>
 
@@ -737,48 +749,6 @@ export default function ManageListPage({ params }: { params: Promise<{ id: strin
             <p className="ds-hint">Toute personne disposant de ce lien peut consulter la liste.</p>
           </div>
 
-          <div className="ds-card ds-card--flat">
-            <div className="ds-card__header">
-              <h3 className="ds-card__title">Informations de la liste</h3>
-              <button
-                className="ds-btn ds-btn--ghost"
-                onClick={() => {
-                  setShowShareModal(false);
-                  openEditListModal();
-                }}
-              >
-                Modifier
-              </button>
-            </div>
-            <div className="ds-card__body">
-              <p className="ds-card__subtitle break-words">
-                <strong>Titre :</strong> {giftList.title}
-              </p>
-              {giftList.description && (
-                <p className="ds-card__subtitle break-words">
-                  <strong>Description :</strong> {giftList.description}
-                </p>
-              )}
-              <p className="ds-card__subtitle">
-                <strong>Code de partage :</strong> {giftList.shareCode}
-              </p>
-              {giftList.image && (
-                <div className="flex items-center gap-3">
-                  <div className="ds-avatar ds-avatar--lg">
-                    <Image
-                      src={giftList.image}
-                      alt="Image de la liste"
-                      width={56}
-                      height={56}
-                      className="h-full w-full object-cover"
-                      unoptimized
-                    />
-                  </div>
-                  <p className="ds-hint">Image de la liste</p>
-                </div>
-              )}
-            </div>
-          </div>
         </Modal>
       )}
 

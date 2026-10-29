@@ -1,7 +1,6 @@
 'use client'
 
 import AlertModal from '@/components/AlertModal'
-import { DropdownMenu } from '@/components/DropdownMenu'
 import EditListModal from '@/components/EditListModal'
 import { ImageUploadButton } from '@/components/ImageUploadButton'
 import { ListCard } from '@/components/ListCard'
@@ -35,6 +34,19 @@ const GEAR_ICON = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
     <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+)
+
+const PENCIL_ICON = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+  </svg>
+)
+
+const TRASH_ICON = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5" />
   </svg>
 )
 
@@ -260,7 +272,6 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
     )
   }
 
-  const totalGifts = giftLists.reduce((total, list) => total + list.giftsCount, 0)
   const showCreateTitleError = createTitleTouched && !newListTitle.trim()
 
   return (
@@ -294,19 +305,7 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
         </header>
 
         <div className="ds-toolbar">
-          <div className="ds-toolbar__group">
-            <h2 className="ds-card__title">Mes listes de cadeaux</h2>
-            <span className="ds-badge ds-badge--neutral">
-              {giftLists.length} liste{giftLists.length > 1 ? 's' : ''}
-            </span>
-          </div>
-          {giftLists.length > 0 ? (
-            <div className="ds-toolbar__group">
-              <span className="ds-badge ds-badge--info">
-                {totalGifts} cadeau{totalGifts > 1 ? 'x' : ''}
-              </span>
-            </div>
-          ) : null}
+          <h2 className="ds-card__title">Mes listes de cadeaux</h2>
         </div>
 
         <div className="ds-stack ds-stack--gap-6">
@@ -495,32 +494,31 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
                   context="owner"
                   footer={
                     <div className="ds-card__footer--split">
-                    <Link href={`/manage/${list.id}`} className="ds-btn ds-btn--primary">
+                    <Link href={`/manage/${list.id}`} className="ds-btn ds-btn--primary ds-btn--md" data-tooltip="Gérer les cadeaux">
                       <span className="ds-btn__icon" aria-hidden="true">
                         {GEAR_ICON}
                       </span>
-                      Gérer
+                      Gérer les cadeaux
                     </Link>
-                    <DropdownMenu
-                      label={`Actions pour ${list.title}`}
-                      triggerClassName="ds-icon-btn"
-                      trigger={
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
-                          <circle cx="5" cy="12" r="1" fill="currentColor" />
-                          <circle cx="12" cy="12" r="1" fill="currentColor" />
-                          <circle cx="19" cy="12" r="1" fill="currentColor" />
-                        </svg>
-                      }
-                      items={[
-                        { label: 'Modifier la liste', onSelect: () => openEditModal(list) },
-                        {
-                          label: deleting === list.id ? 'Suppression…' : 'Supprimer la liste',
-                          danger: true,
-                          disabled: deleting === list.id,
-                          onSelect: () => confirmDelete(list),
-                        },
-                      ]}
-                    />
+                    <button
+                      type="button"
+                      className="ds-btn ds-btn--secondary ds-btn--icon ds-btn--md"
+                      onClick={() => openEditModal(list)}
+                      aria-label={`Modifier ${list.title}`}
+                      data-tooltip="Modifier la liste"
+                    >
+                      {PENCIL_ICON}
+                    </button>
+                    <button
+                      type="button"
+                      className="ds-btn ds-btn--danger ds-btn--icon ds-btn--md"
+                      onClick={() => confirmDelete(list)}
+                      disabled={deleting === list.id}
+                      aria-label={`Supprimer ${list.title}`}
+                      data-tooltip="Supprimer la liste"
+                    >
+                      {deleting === list.id ? <span className="ds-spinner" aria-hidden="true" /> : TRASH_ICON}
+                    </button>
                     </div>
                   }
                 />

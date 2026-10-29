@@ -111,7 +111,7 @@ export function SearchScreen({ navigation }: Props) {
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="enzo ou A1B2C3D4"
+            placeholder="Pseudo ou code de liste"
             placeholderTextColor={colors.textSubtle}
             autoCapitalize="none"
             autoCorrect={false}

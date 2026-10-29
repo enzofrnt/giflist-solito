@@ -166,7 +166,7 @@ export default function GiftFormModal({
                 Récupération automatique des informations{' '}
                 <span className="ds-badge ds-badge--warning">BETA</span>
               </p>
-              <p className="ds-alert__message">*Cette fonctionnalité peut ne pas fonctionner.</p>
+              <p className="ds-alert__message">Nous lisons les données publiques du produit. Tu peux corriger les champs avant d’enregistrer.</p>
 
               <div className="ds-field">
                 <label className="ds-label" htmlFor={scrapeUrlId}>

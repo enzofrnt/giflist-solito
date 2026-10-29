@@ -139,11 +139,46 @@
     }
   }
 
-  .ds-input-wrap__action {
+  .ds-icon-btn.ds-input-wrap__action {
     position: absolute;
     top: 50%;
-    right: var(--ds-space-1);
+    right: 0;
+    width: 2.75rem;
+    height: 2.75rem;
     transform: translateY(-50%);
+    border-radius: var(--ds-radius-sm);
+    background: transparent;
+
+    // 44 px hit target, compact 36 px hover surface inside the field.
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0.25rem;
+      border-radius: var(--ds-radius-sm);
+      background: transparent;
+      pointer-events: none;
+      z-index: 0;
+      @include ds-transition(background-color);
+    }
+
+    svg {
+      position: relative;
+      z-index: 1;
+    }
+
+    &:hover,
+    &:hover::before {
+      background: transparent;
+    }
+
+    &:hover::before,
+    &:focus-visible::before {
+      background: var(--ds-color-surface-muted);
+    }
+
+    &:focus-visible {
+      outline-offset: -2px;
+    }
   }
 
   .ds-input--sm {
@@ -302,5 +337,35 @@
 
   .ds-search-field__input {
     padding-left: 2.75rem;
+  }
+}
+
+@layer components {
+  .ds-search-hero {
+    display: grid;
+    gap: var(--ds-space-2);
+    width: 100%;
+    max-width: 42rem;
+    margin-bottom: var(--ds-space-8);
+  }
+
+  .ds-search-field--hero .ds-input {
+    min-height: 3rem;
+    padding-left: 2.75rem;
+    border-color: var(--ds-color-border-strong);
+    background: var(--ds-color-surface);
+    font-size: var(--ds-text-base);
+    box-shadow: var(--ds-shadow-sm);
+  }
+
+  .ds-search-field--hero svg {
+    left: var(--ds-space-3);
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .ds-search-results {
+    display: grid;
+    gap: var(--ds-space-5);
   }
 }

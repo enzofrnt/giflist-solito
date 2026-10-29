@@ -23,7 +23,8 @@
     "native:export": "bun run --cwd apps/expo export",
     "web:lint": "bun run --cwd apps/next lint .",
     "native:typecheck": "bun run --cwd apps/expo typecheck",
-    "native:doctor": "bun run --cwd apps/expo doctor"
+    "native:doctor": "bun run --cwd apps/expo doctor",
+    "db:seed:demo": "bun run --cwd apps/next db:seed:demo"
   },
   "eslintConfig": {
     "extends": "next",

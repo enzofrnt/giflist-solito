@@ -127,6 +127,12 @@
   .ds-btn--icon {
     width: 2.75rem;
     padding: 0;
+
+    > svg {
+      width: 1.15rem;
+      height: 1.15rem;
+      flex: 0 0 auto;
+    }
   }
 
   .ds-btn--icon.ds-btn--sm {
@@ -205,5 +211,12 @@
     &:focus-visible { @include ds-focus-ring; outline: none; }
     &[aria-pressed='true'] { background: var(--ds-color-favorite-soft); border-color: var(--ds-color-favorite-border); }
     &--label { padding-inline: var(--ds-space-3); min-height: 2.75rem; }
+  }
+}
+
+@layer components {
+  .ds-btn--md {
+    font-size: var(--ds-text-base);
+    padding-inline: var(--ds-space-4);
   }
 }
