@@ -1,6 +1,8 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { colors, spacing, typography } from './tokens'
 
+const HEADER_HEIGHT = 60
+
 export function AppHeader({
   onBack,
   right,
@@ -28,16 +30,17 @@ export function AppHeader({
 
 const styles = StyleSheet.create({
   header: {
-    minHeight: 56,
+    height: HEADER_HEIGHT,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: spacing.sm,
   },
-  side: { width: 92, flexDirection: 'row', alignItems: 'center' },
+  side: { width: 92, height: HEADER_HEIGHT, flexDirection: 'row', alignItems: 'center' },
   right: { justifyContent: 'flex-end' },
   center: {
     position: 'absolute',
+    top: 0,
+    bottom: 0,
     left: 0,
     right: 0,
     flexDirection: 'row',
