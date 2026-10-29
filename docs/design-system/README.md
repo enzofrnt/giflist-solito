@@ -155,6 +155,10 @@ See [Phase 8 screenshots](screenshots/phase-8/).
 
 See [Phase 9 screenshots](screenshots/phase-9/).
 
+## Phase 12 — Fixed mobile header height
+
+- Header fixed at 60 px; logo stays at the same Y when back/share controls appear.
+
 ## Phase 11 — Light / dark / system theme
 
 - Web + mobile: Clair / Sombre / Système, persisted.
