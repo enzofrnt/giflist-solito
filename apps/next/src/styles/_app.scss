@@ -1046,3 +1046,126 @@
     }
   }
 }
+
+@layer components {
+  .ds-header__theme {
+    flex: 0 0 auto;
+  }
+
+  .ds-theme-menu-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ds-dropdown__copy {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+  }
+
+  .ds-dropdown__description {
+    color: var(--ds-color-text-subtle);
+    font-size: var(--ds-text-xs);
+    line-height: var(--ds-leading-snug);
+  }
+
+  .ds-dropdown__check {
+    margin-left: auto;
+    color: var(--ds-color-primary);
+    flex: 0 0 auto;
+  }
+
+  .ds-dropdown__item--selected {
+    background: var(--ds-color-primary-soft);
+    color: var(--ds-color-primary-strong);
+  }
+
+  .ds-theme-options {
+    display: grid;
+    gap: var(--ds-space-2);
+  }
+
+  .ds-theme-option {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-3);
+    width: 100%;
+    padding: var(--ds-space-3);
+    border: var(--ds-border-hairline) solid var(--ds-color-border);
+    border-radius: var(--ds-radius-md);
+    background: var(--ds-color-surface);
+    color: var(--ds-color-text);
+    text-align: left;
+    cursor: pointer;
+    @include ds-transition(background-color, border-color, color);
+
+    &:hover {
+      border-color: var(--ds-color-border-strong);
+      background: var(--ds-color-surface-muted);
+    }
+
+    &:focus-visible {
+      @include ds-focus-ring;
+      outline: none;
+    }
+
+    &--selected {
+      border-color: var(--ds-color-primary);
+      background: var(--ds-color-primary-soft);
+    }
+  }
+
+  .ds-theme-option__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--ds-radius-sm);
+    background: var(--ds-color-surface-muted);
+    color: var(--ds-color-text-muted);
+    flex: 0 0 auto;
+  }
+
+  .ds-theme-option--selected .ds-theme-option__icon {
+    background: var(--ds-color-primary);
+    color: var(--ds-color-text-inverse);
+  }
+
+  .ds-theme-option__copy {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .ds-theme-option__label {
+    font-size: var(--ds-text-sm);
+    font-weight: var(--ds-weight-semibold);
+  }
+
+  .ds-theme-option__description {
+    color: var(--ds-color-text-subtle);
+    font-size: var(--ds-text-xs);
+  }
+
+  .ds-theme-option__check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--ds-color-primary);
+    flex: 0 0 auto;
+  }
+}
+
+/* Dark-mode raw palette bridges for art/logo surfaces. */
+[data-theme='dark'] {
+  .ds-header__logo,
+  .ds-footer__logo,
+  .ds-home__logo {
+    filter: brightness(0) invert(1);
+  }
+}

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { Check } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -11,6 +12,8 @@ export interface DropdownItem {
   danger?: boolean
   disabled?: boolean
   mobileOnly?: boolean
+  selected?: boolean
+  description?: string
   icon?: ReactNode
 }
 
@@ -128,11 +131,15 @@ export function DropdownMenu({
           onKeyDown={handleMenuKeyDown}
         >
           {items.map((item, index) => {
-            const itemClass = `ds-dropdown__item${item.danger ? ' ds-dropdown__item--danger' : ''}${item.mobileOnly ? ' ds-dropdown__item--mobile-only' : ''}`
+            const itemClass = `ds-dropdown__item${item.danger ? ' ds-dropdown__item--danger' : ''}${item.mobileOnly ? ' ds-dropdown__item--mobile-only' : ''}${item.selected ? ' ds-dropdown__item--selected' : ''}`
             const content = (
               <>
                 {item.icon ? <span className="ds-dropdown__icon" aria-hidden="true">{item.icon}</span> : null}
-                <span>{item.label}</span>
+                <span className="ds-dropdown__copy">
+                  <span>{item.label}</span>
+                  {item.description ? <span className="ds-dropdown__description">{item.description}</span> : null}
+                </span>
+                {item.selected ? <Check className="ds-dropdown__check" size={14} strokeWidth={2} aria-hidden="true" /> : null}
               </>
             )
 
@@ -143,6 +150,7 @@ export function DropdownMenu({
                   href={item.href}
                   role="menuitem"
                   className={itemClass}
+                  aria-current={item.selected ? 'true' : undefined}
                   ref={(element) => { itemRefs.current[index] = element }}
                   onClick={() => setOpen(false)}
                 >
@@ -157,6 +165,7 @@ export function DropdownMenu({
                 type="button"
                 role="menuitem"
                 className={itemClass}
+                aria-checked={item.selected ?? undefined}
                 ref={(element) => { itemRefs.current[index] = element }}
                 disabled={item.disabled}
                 onClick={() => select(item)}

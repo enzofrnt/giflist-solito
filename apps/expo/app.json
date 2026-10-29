@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "scheme": "giftlist",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "icon": "./assets/icon.png",
     "platforms": [
       "ios",
@@ -29,7 +29,11 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#faf9f7"
+          "backgroundColor": "#faf9f7",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#11100f"
+          }
         }
       ],
       "./plugins/withSceneLifecycle"

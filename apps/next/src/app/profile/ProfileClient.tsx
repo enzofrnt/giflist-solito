@@ -3,6 +3,7 @@
 import AlertModal from '@/components/AlertModal'
 import PasswordInput from '@/components/PasswordInput'
 import PasskeyManager from '@/components/PasskeyManager'
+import { ThemeSettings } from '@/components/ThemeSettings'
 import { useAlert } from '@/hooks/useAlert'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { getAuthToken, setAuthToken } from 'app/lib/authStorage'
@@ -387,6 +388,8 @@ export default function ProfileClient() {
           </div>
 
           <div className="ds-stack ds-stack--gap-6">
+            <ThemeSettings />
+
             <section className="ds-card" aria-labelledby="status-heading">
               <div className="ds-card__header">
                 <h2 className="ds-card__title" id="status-heading">Statistiques</h2>

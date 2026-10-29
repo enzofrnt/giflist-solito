@@ -155,6 +155,15 @@ See [Phase 8 screenshots](screenshots/phase-8/).
 
 See [Phase 9 screenshots](screenshots/phase-9/).
 
+## Phase 11 — Light / dark / system theme
+
+- Web + mobile: Clair / Sombre / Système, persisted.
+- Web header toggle (desktop) + Apparence settings on web/mobile.
+- iOS uses SF Symbols; web/Android use Lucide (same icon language as MyOwnNotion).
+- Rounded splash/header marks; dark splash; iOS app icon remains system-masked.
+
+See [Phase 11 screenshots](screenshots/phase-11/).
+
 ## Phase 10 — Stable mobile header
 
 - Brand header fixed outside scroll; back/share appear without moving the centered logo.

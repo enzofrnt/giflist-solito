@@ -7,6 +7,7 @@ import { Svg, Path, Circle } from 'react-native-svg'
 import type { Gift } from 'app/types'
 import { colors, spacing, typography } from 'app/ui'
 import { useSession } from 'app/provider/session.native'
+import { useTheme } from 'app/theme/ThemeProvider.native'
 import { HomeScreen } from 'app/features/native/home'
 import { LoginScreen } from 'app/features/native/login'
 import { RegisterScreen } from 'app/features/native/register'
@@ -50,6 +51,7 @@ function TabIcon({ name, color, focused }: { name: Tab; color: string; focused: 
 function MainScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'main'>) {
   const [tab, setTab] = useState<Tab>('lists')
   const insets = useSafeAreaInsets()
+  const { colors: palette } = useTheme()
 
   return (
     <View style={styles.shell}>
@@ -72,8 +74,8 @@ function MainScreen({ navigation }: NativeStackScreenProps<RootStackParamList, '
               accessibilityLabel={value === 'lists' ? 'Mes listes' : 'Profil'}
               style={styles.tab}
             >
-              <TabIcon name={value} color={active ? colors.primary : colors.textMuted} focused={active} />
-              <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>
+              <TabIcon name={value} color={active ? palette.primary : palette.textMuted} focused={active} />
+              <Text style={[styles.tabLabel, active && styles.tabLabelActive, { color: active ? palette.primary : palette.textMuted }]}>
                 {value === 'lists' ? 'Mes listes' : 'Profil'}
               </Text>
             </Pressable>

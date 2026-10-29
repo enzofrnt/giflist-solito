@@ -18,7 +18,7 @@ export function AppHeader({
         ) : null}
       </View>
       <View style={styles.center} pointerEvents="none">
-        <Image source={require('app/assets/icon.png')} style={styles.mark} accessibilityLabel="Giftlist" />
+        <Image source={require('app/assets/mark.png')} style={styles.mark} accessibilityLabel="Giftlist" />
         <Text style={styles.brand}>Giftlist</Text>
       </View>
       <View style={[styles.side, styles.right]}>{right}</View>

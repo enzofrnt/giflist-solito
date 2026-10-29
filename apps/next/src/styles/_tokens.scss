@@ -123,6 +123,52 @@ $semantic: (
   'strength-excellent': map.get($palette, 'success-800'),
 );
 
+
+// --- Dark semantic roles -----------------------------------------------------
+$semantic-dark: (
+  'canvas': #11100f,
+  'surface': #1b1917,
+  'surface-muted': #25221f,
+  'surface-sunken': #0e0d0c,
+  'text': #f7f3ed,
+  'text-muted': #c9c1b7,
+  'text-subtle': #9a9187,
+  'text-inverse': #1b1917,
+  'border': #34302a,
+  'border-strong': #4b453d,
+  'primary': #7da4ff,
+  'primary-hover': #a2bbff,
+  'primary-strong': #c7d6ff,
+  'primary-soft': #1c2740,
+  'primary-soft-border': #31456e,
+  'accent': #ff9b7b,
+  'accent-hover': #ffb09a,
+  'accent-active': #ffc4b3,
+  'accent-soft': #3a211b,
+  'accent-border': #653528,
+  'success': #5fd39a,
+  'success-soft': #152a20,
+  'success-border': #2c5a42,
+  'warning': #ffc46b,
+  'warning-soft': #332614,
+  'warning-border': #6a4a1c,
+  'danger': #ff8980,
+  'danger-hover': #ffaaa3,
+  'danger-soft': #331b1b,
+  'danger-border': #6b2e2e,
+  'info': #7db7ff,
+  'info-soft': #16263c,
+  'info-border': #2d4d76,
+  'strength-weak': #ff8980,
+  'strength-fair': #ffc46b,
+  'strength-medium': #ffd58a,
+  'strength-strong': #5fd39a,
+  'strength-excellent': #8be9bd,
+  'focus': #7da4ff,
+  'focus-ring': rgba(125, 164, 255, 0.38),
+  'overlay': rgba(0, 0, 0, 0.66),
+);
+
 // --- Typography scale --------------------------------------------------------
 $font-size: (
   'xs': 0.75rem,
@@ -301,4 +347,27 @@ $z: (
   @each $name, $value in $z {
     --ds-z-#{$name}: #{$value};
   }
+}
+
+// Dark theme values. The boot script sets data-theme before paint.
+[data-theme='dark'] {
+  color-scheme: dark;
+  @each $name, $value in $semantic-dark {
+    --ds-color-#{$name}: #{$value};
+  }
+  --ds-color-focus-ring: rgba(125, 164, 255, 0.38);
+  --ds-color-overlay: rgba(0, 0, 0, 0.66);
+  --ds-color-primary-50: #1b2438;
+  --ds-color-primary-100: #24334f;
+  --ds-color-accent-100: #3a211b;
+  --ds-color-accent-200: #5a2d23;
+  --ds-color-accent-700: #ffb09a;
+  --ds-color-danger-800: #ffb4ae;
+  --ds-color-info-700: #a9ccff;
+  --ds-color-success-700: #8be9bd;
+  --ds-color-warning-800: #ffd58a;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
 }

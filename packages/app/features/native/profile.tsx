@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
+import { ThemeSettings } from 'app/features/native/theme-settings'
 import { useSession } from 'app/provider/session.native'
 import { AppHeader, Button, Card, Field, PasswordStrength, Screen, colors, spacing, typography } from 'app/ui'
 
@@ -56,6 +57,8 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
         <Text style={styles.name}>{user?.name ?? 'Mon compte'}</Text>
         {user?.email ? <Text style={styles.muted}>{user.email}</Text> : null}
       </Card>
+
+      <ThemeSettings />
 
       <Card>
         <View style={styles.rowBetween}>

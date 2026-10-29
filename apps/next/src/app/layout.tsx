@@ -6,6 +6,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "@/styles/index.scss";
 import { DEFAULT_DESCRIPTION, OG_IMAGE, SITE_NAME, SITE_URL } from "@/lib/seo";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { themeBootScript } from "@/lib/theme-script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -73,7 +75,10 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#faf9f7",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf9f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#11100f" },
+  ],
 };
 
 export default function RootLayout({
@@ -83,6 +88,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -90,10 +98,12 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <AuthProvider>
-          <AppChrome>{children}</AppChrome>
-          <SpeedInsights />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <AppChrome>{children}</AppChrome>
+            <SpeedInsights />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
