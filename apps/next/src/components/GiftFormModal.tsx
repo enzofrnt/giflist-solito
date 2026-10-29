@@ -2,6 +2,7 @@
 
 import { Modal } from '@/components/Modal'
 import Image from 'next/image'
+import { ImageUploadButton } from './ImageUploadButton'
 import { useEffect, useId, useRef, useState } from 'react'
 
 interface GiftFormData {
@@ -317,6 +318,7 @@ export default function GiftFormModal({
             ) : (
               <p className="ds-hint">Laissez vide pour utiliser l’icône cadeau par défaut.</p>
             )}
+            <ImageUploadButton onChange={(url) => handleInputChange('image', url)} />
           </div>
         </div>
 

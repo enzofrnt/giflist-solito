@@ -1,7 +1,8 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
-import { ListChecks, Settings } from 'lucide-react-native'
+import { Gift as GiftIcon, ListChecks, Settings } from 'lucide-react-native'
 import { useTheme } from 'app/theme/ThemeProvider.native'
 import { Button } from './Button.native'
+import { FavoriteButton } from './FavoriteButton.native'
 import { Card } from './Card.native'
 import { colors, spacing, typography } from './tokens'
 
@@ -20,18 +21,28 @@ export function ListCard({
   context,
   onOpen,
   onManage,
+  isFavorite,
+  onToggleFavorite,
+  favoriteBusy,
 }: {
   list: ListCardData
   context: 'owner' | 'public'
   onOpen: () => void
   onManage?: () => void
+  isFavorite?: boolean
+  onToggleFavorite?: () => void
+  favoriteBusy?: boolean
 }) {
   const { colors: palette } = useTheme()
   return (
     <Card>
       {list.image ? (
         <Image source={{ uri: list.image }} style={styles.cover} resizeMode="cover" accessibilityLabel={list.title} />
-      ) : null}
+      ) : (
+        <View style={[styles.cover, styles.coverEmpty]}>
+          <GiftIcon size={28} color={colors.textSubtle} strokeWidth={1.8} />
+        </View>
+      )}
       <View style={styles.body}>
         <View style={styles.titleRow}>
           <Text style={styles.title}>{list.title}</Text>
@@ -50,7 +61,10 @@ export function ListCard({
             <Button title="Gérer" icon={Settings} onPress={onManage ?? onOpen} fullWidth />
           </View>
         ) : (
-          <Button title="Voir la liste" icon={ListChecks} onPress={onOpen} fullWidth />
+          <View style={styles.publicActions}>
+            <Button title="Voir la liste" icon={ListChecks} onPress={onOpen} style={styles.flex} />
+            {onToggleFavorite ? <FavoriteButton active={Boolean(isFavorite)} onPress={onToggleFavorite} busy={favoriteBusy} /> : null}
+          </View>
         )}
       </View>
     </Card>
@@ -59,6 +73,7 @@ export function ListCard({
 
 const styles = StyleSheet.create({
   cover: { width: '100%', height: 128, borderRadius: 10, marginBottom: spacing.sm, backgroundColor: colors.surfaceMuted },
+  coverEmpty: { alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
   body: { gap: spacing.xs },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   title: { color: colors.text, fontSize: typography.body, fontWeight: '800', flex: 1 },
@@ -67,5 +82,6 @@ const styles = StyleSheet.create({
   description: { color: colors.textMuted, fontSize: typography.small, lineHeight: 19 },
   meta: { color: colors.textSubtle, fontSize: typography.caption },
   ownerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.xs },
+  publicActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   flex: { flex: 1 },
 })

@@ -156,6 +156,12 @@ Approved by the owner on 2026-10-28; the showcase in `docs/design-system/` is th
 - Icon colours follow the action: white on primary/danger fills, cobalt on neutral primary icons, danger red on destructive text/icons.
 - One primary action per view; secondary/destructive actions do not compete with it.
 
+### Favorite semantics
+- Favoriting is a **personal, non-destructive** action. Use the dedicated **favorite** token: light red `#e05a4f` on light and `#ffb0a8` on dark; soft background `#fdeceb` / `#3a1e1c`. It must never drift toward pink or reuse danger red.
+- Canonical control: `FavoriteButton` (`Heart`, 16–18 px). Two variants: icon-only for cards (44 px target + label) and icon + label for detail/search. `aria-pressed` / `accessibilityState.selected` is mandatory.
+- Favoriting never uses cobalt, never replaces the primary action and never adds a destructive confirmation. Removing a favorite from the favorites list is immediate.
+- Favorites are shown above search results, never below them.
+
 ### UX non-negotiables
 - Start from the user job and success moment; ONE primary action per view.
 - Primary navigation is grouped with the logo on the left; never centred in the viewport.

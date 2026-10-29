@@ -155,6 +155,14 @@ See [Phase 8 screenshots](screenshots/phase-8/).
 
 See [Phase 9 screenshots](screenshots/phase-9/).
 
+## Phase 18 — Favorite controls, media & settings parity
+
+- `FavoriteButton` icon-only / with-label, light-red favorite token, `aria-pressed`.
+- Favorites above search; add/remove directly on public list cards and favorites rows.
+- Standard list card with media placeholder; public lists in a responsive grid.
+- Mobile personal information form mirrors web.
+- Uploaded images via Vercel Blob (5 MB, JPG/PNG/WebP/GIF).
+
 ## Phase 17 — Unified identity, shared list cards & favorites
 
 - Owner/public gift cards share one visual contract; owner/public list cards too.

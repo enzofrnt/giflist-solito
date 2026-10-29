@@ -3,6 +3,7 @@
 import AlertModal from '@/components/AlertModal';
 import GiftStatusBadge from '@/components/GiftStatusBadge';
 import { GiftCard } from '@/components/GiftCard';
+import { FavoriteButton } from '@/components/FavoriteButton';
 import { Modal } from '@/components/Modal';
 import QRCodeDisplay from '@/components/QRCodeDisplay';
 import ReserveDialog, { type ReservePayload } from '@/components/ReserveDialog';
@@ -12,8 +13,6 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { Heart } from 'lucide-react';
-import { getAuthToken } from 'app/lib/authStorage';
 
 import type { Gift, GiftList } from 'app/types'
 
@@ -77,41 +76,6 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
   useEffect(() => {
     loadGiftList();
   }, [loadGiftList]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const token = getAuthToken();
-    if (!user || token instanceof Promise) { setIsFavorite(false); return; }
-    if (!token) { setIsFavorite(false); return; }
-    fetch('/api/favorites', { headers: { Authorization: `Bearer ${token}` } })
-      .then((response) => response.ok ? response.json() : null)
-      .then((data) => { if (!cancelled) setIsFavorite(Boolean(data?.favorites?.some((favorite: { list: { shareCode: string } }) => favorite.list.shareCode === shareCode))); })
-      .catch(() => undefined);
-    return () => { cancelled = true; };
-  }, [user, shareCode]);
-
-  async function toggleFavorite() {
-    const token = getAuthToken();
-    if (!user || !token || token instanceof Promise) return;
-    setFavoriteBusy(true);
-    try {
-      const response = await fetch(isFavorite ? `/api/favorites/${encodeURIComponent(shareCode)}` : '/api/favorites', {
-        method: isFavorite ? 'DELETE' : 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: isFavorite ? undefined : JSON.stringify({ shareCode }),
-      });
-      if (response.ok) setIsFavorite((current) => !current);
-      else showError('Favoris', 'Impossible de mettre à jour ce favori.');
-    } catch {
-      showError('Favoris', 'Impossible de mettre à jour ce favori.');
-    } finally {
-      setFavoriteBusy(false);
-    }
-  }
-
-  // Pour les listes secrètes, les réservations sont toujours masquées par défaut
-  // Le propriétaire peut les révéler en cliquant sur le bouton
-  // Si la liste n'est pas secrète, hasRevealed n'a pas d'impact (on affiche toujours tout)
 
   async function submitReservation(giftId: number, payload: ReservePayload) {
     setLoadingId(giftId);
@@ -295,16 +259,7 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
 
             {user ? (
               <div className="ds-home__actions">
-                <button
-                  type="button"
-                  onClick={toggleFavorite}
-                  disabled={favoriteBusy}
-                  className={`ds-btn ds-btn--sm ${isFavorite ? 'ds-btn--danger' : 'ds-btn--secondary'}`}
-                  aria-pressed={isFavorite}
-                >
-                  <Heart size={16} className="ds-btn__icon" fill={isFavorite ? 'currentColor' : 'none'} aria-hidden="true" />
-                  {favoriteBusy ? 'Mise à jour…' : isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-                </button>
+                <FavoriteButton shareCode={shareCode} withLabel />
               </div>
             ) : null}
 

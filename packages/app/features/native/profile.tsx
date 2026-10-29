@@ -105,11 +105,9 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
       <Card>
         <Text style={styles.name}>{user?.username ? `@${user.username}` : 'Mon compte'}</Text>
         {user?.email ? <Text style={styles.muted}>{user.email}</Text> : null}
-      </Card>
-
-      <Card>
-        <Text style={styles.sectionTitle}>Mon compte</Text>
-        <Text style={styles.muted}>Pseudo unique et visibilité de votre profil.</Text>
+        <View style={styles.divider} />
+        <Text style={styles.sectionTitle}>Informations personnelles</Text>
+        <Text style={styles.muted}>Pseudo unique, email et visibilité de votre compte.</Text>
         <View style={styles.form}>
           <Field label="Pseudo" value={username} onChangeText={(value) => setUsername(value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30))} autoCapitalize="none" autoComplete="username" textContentType="username" hint="3–30 caractères : a-z, chiffres et _." />
           <View style={styles.rowBetween}>
@@ -129,37 +127,37 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
           </View>
           {profileError ? <Text style={styles.error}>{profileError}</Text> : null}
           {profileSuccess ? <Text style={styles.success}>{profileSuccess}</Text> : null}
-          <Button title="Enregistrer le profil public" onPress={savePublicProfile} loading={profileSaving} disabled={!username} fullWidth />
-        </View>
-      </Card>
+          <Button title="Enregistrer les informations" onPress={savePublicProfile} loading={profileSaving} disabled={!username} fullWidth />
 
-      <Card>
-        <View style={styles.rowBetween}>
-          <View style={styles.flex}>
-            <Text style={styles.sectionTitle}>Adresse e-mail</Text>
-            <Text style={styles.muted}>{user?.email}</Text>
+          <View style={styles.divider} />
+
+          <View style={styles.rowBetween}>
+            <View style={styles.flex}>
+              <Text style={styles.switchLabel}>Adresse e-mail</Text>
+              <Text style={styles.muted}>{user?.email}</Text>
+            </View>
+            <Button
+              title={showEmailForm ? 'Fermer' : 'Modifier'}
+              icon={Mail}
+              variant={showEmailForm ? 'ghost' : 'secondary'}
+              onPress={() => {
+                setShowEmailForm((value) => !value)
+                setEmailError('')
+                setEmailSuccess('')
+              }}
+            />
           </View>
-          <Button
-            title={showEmailForm ? 'Fermer' : 'Modifier'}
-            icon={Mail}
-            variant={showEmailForm ? 'ghost' : 'secondary'}
-            onPress={() => {
-              setShowEmailForm((value) => !value)
-              setEmailError('')
-              setEmailSuccess('')
-            }}
-          />
+          {emailSuccess ? <Text style={styles.success}>{emailSuccess}</Text> : null}
+          {showEmailForm ? (
+            <View style={styles.form}>
+              <Field label="Nouvelle adresse e-mail" value={newEmail} onChangeText={setNewEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" />
+              <PasswordField label="Mot de passe actuel" value={emailPassword} onChangeText={setEmailPassword} autoComplete="current-password" textContentType="password" />
+              {emailError ? <Text style={styles.error}>{emailError}</Text> : null}
+              <Button title="Envoyer la confirmation" onPress={requestEmailChange} loading={emailSaving} disabled={!newEmail.trim() || !emailPassword} fullWidth />
+              <Text style={styles.muted}>Un lien de confirmation sera envoyé à la nouvelle adresse. L’ancienne reste active jusqu’à validation.</Text>
+            </View>
+          ) : null}
         </View>
-        {emailSuccess ? <Text style={styles.success}>{emailSuccess}</Text> : null}
-        {showEmailForm ? (
-          <View style={styles.form}>
-            <Field label="Nouvelle adresse e-mail" value={newEmail} onChangeText={setNewEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" />
-            <PasswordField label="Mot de passe actuel" value={emailPassword} onChangeText={setEmailPassword} autoComplete="current-password" textContentType="password" />
-            {emailError ? <Text style={styles.error}>{emailError}</Text> : null}
-            <Button title="Envoyer la confirmation" onPress={requestEmailChange} loading={emailSaving} disabled={!newEmail.trim() || !emailPassword} fullWidth />
-            <Text style={styles.muted}>Un lien de confirmation sera envoyé à la nouvelle adresse. L’ancienne reste active jusqu’à validation.</Text>
-          </View>
-        ) : null}
       </Card>
 
       <ThemeSettings />
@@ -233,6 +231,7 @@ const styles = StyleSheet.create({
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
   flex: { flex: 1 },
   form: { gap: spacing.md, marginTop: spacing.sm },
+  divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.xs },
   error: { color: colors.danger, fontSize: typography.small },
   success: { color: colors.success, fontSize: typography.small, marginTop: spacing.sm },
   inline: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },

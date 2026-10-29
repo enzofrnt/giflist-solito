@@ -1190,3 +1190,18 @@
   .ds-info-hint__bubble[data-open='true'] { opacity: 1; visibility: visible; }
   .ds-info-hint:focus-within .ds-info-hint__bubble { opacity: 1; visibility: visible; }
 }
+
+@layer components {
+  .ds-favorites-row {
+    display: flex;
+    gap: var(--ds-space-3);
+    overflow-x: auto;
+    padding-bottom: var(--ds-space-2);
+    scrollbar-width: thin;
+  }
+
+  .ds-favorite-shortcut {
+    flex: 0 0 17rem;
+    min-width: 17rem;
+  }
+}

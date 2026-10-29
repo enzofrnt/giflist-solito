@@ -89,6 +89,21 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 }
 
 export const api = {
+  uploadImage: async (uri: string, type = 'image/jpeg', name = 'image.jpg') => {
+    const token = await getAuthToken()
+    if (!token) throw new ApiError('Session expirée, reconnectez-vous.', 401)
+    const form = new FormData()
+    form.append('file', { uri, type, name } as unknown as Blob)
+    const response = await fetch(`${API_URL}/api/uploads`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: form,
+    })
+    const payload = await response.json().catch(() => null)
+    if (!response.ok) throw new ApiError(payload?.error || 'Envoi de l’image impossible.', response.status)
+    return payload as { ok: boolean; url: string }
+  },
+
   login: (email: string, password: string) =>
     request<{ token: string; user: User }>('/api/auth/login', {
       method: 'POST',
@@ -133,7 +148,7 @@ export const api = {
   giftList: (id: string | number) =>
     request<{ giftList: GiftList; gifts: Gift[] }>(`/api/gift-lists/${id}`, { auth: true }),
 
-  createGiftList: (data: { title: string; description?: string; secret?: boolean; isPublic?: boolean }) =>
+  createGiftList: (data: { title: string; description?: string; image?: string; secret?: boolean; isPublic?: boolean }) =>
     request<{ giftList: GiftListWithCount }>('/api/gift-lists', {
       method: 'POST',
       auth: true,
