@@ -8,7 +8,8 @@ const UpdateGiftListSchema = z.object({
   title: z.string().min(1, 'Le titre est requis'),
   description: z.string().optional(),
   image: z.string().url().optional().or(z.literal('')),
-  secret: z.boolean().optional()
+  secret: z.boolean().optional(),
+  isPublic: z.boolean().optional(),
 });
 
 // GET - Récupérer une liste spécifique
@@ -69,6 +70,7 @@ async function handleGet(request: NextRequest, user: User, { params }: { params:
         image: giftList.image,
         shareCode: giftList.shareCode,
         secret: giftList.secret,
+        isPublic: giftList.isPublic,
         createdAt: giftList.createdAt.toISOString(),
         updatedAt: giftList.updatedAt.toISOString()
       },
@@ -97,7 +99,7 @@ async function handlePut(request: NextRequest, user: User, { params }: { params:
     }
 
     const body = await request.json();
-    const { title, description, image, secret } = UpdateGiftListSchema.parse(body);
+    const { title, description, image, secret, isPublic } = UpdateGiftListSchema.parse(body);
 
     // Vérifier que la liste appartient à l'utilisateur
     const existingList = await prisma.giftList.findFirst({
@@ -120,6 +122,7 @@ async function handlePut(request: NextRequest, user: User, { params }: { params:
       description: string | null;
       image: string | null;
       secret?: boolean;
+      isPublic?: boolean;
     } = {
       title,
       description: description || null,
@@ -128,6 +131,9 @@ async function handlePut(request: NextRequest, user: User, { params }: { params:
     
     if (secret !== undefined) {
       updateData.secret = secret;
+    }
+    if (isPublic !== undefined) {
+      updateData.isPublic = isPublic;
     }
 
     const updatedList = await prisma.giftList.update({
@@ -144,6 +150,7 @@ async function handlePut(request: NextRequest, user: User, { params }: { params:
         image: updatedList.image,
         shareCode: updatedList.shareCode,
         secret: updatedList.secret,
+        isPublic: updatedList.isPublic,
         createdAt: updatedList.createdAt.toISOString(),
         updatedAt: updatedList.updatedAt.toISOString()
       }

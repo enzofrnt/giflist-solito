@@ -12,6 +12,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'register'>
 export function RegisterScreen({ navigation }: Props) {
   const { signIn } = useSession()
   const [name, setName] = useState('')
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
@@ -19,11 +20,11 @@ export function RegisterScreen({ navigation }: Props) {
   const [error, setError] = useState('')
 
   async function submit() {
-    if (!name.trim() || !email.trim() || password.length < 8 || password !== passwordConfirm) return
+    if (!name.trim() || !/^[a-z0-9_]{3,30}$/.test(username) || !email.trim() || password.length < 8 || password !== passwordConfirm) return
     setLoading(true)
     setError('')
     try {
-      const result = await api.register(name.trim(), email.trim(), password)
+      const result = await api.register(name.trim(), email.trim(), password, username)
       await signIn(result.token, result.user)
       navigation.reset({ index: 0, routes: [{ name: 'main' }] })
     } catch (err) {
@@ -39,6 +40,7 @@ export function RegisterScreen({ navigation }: Props) {
         <Text style={styles.title}>Créer un compte</Text>
         <Text style={styles.lead}>Votre première liste prend quelques secondes.</Text>
         <Field label="Nom" value={name} onChangeText={setName} autoComplete="name" textContentType="name" />
+        <Field label="Pseudo" value={username} onChangeText={(value) => setUsername(value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30))} autoCapitalize="none" autoComplete="username" textContentType="username" hint="3–30 caractères : a-z, chiffres et _." />
         <Field label="Adresse e-mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="username" textContentType="username" />
         <PasswordField
           label="Mot de passe"
@@ -59,7 +61,7 @@ export function RegisterScreen({ navigation }: Props) {
           error={passwordConfirm && password !== passwordConfirm ? 'Les mots de passe ne correspondent pas.' : undefined}
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        <Button title="Créer mon compte" icon={UserPlus} onPress={submit} loading={loading} disabled={!name.trim() || !email.trim() || password.length < 8 || password !== passwordConfirm} fullWidth />
+        <Button title="Créer mon compte" icon={UserPlus} onPress={submit} loading={loading} disabled={!name.trim() || !/^[a-z0-9_]{3,30}$/.test(username) || !email.trim() || password.length < 8 || password !== passwordConfirm} fullWidth />
         <Pressable onPress={() => navigation.navigate('login')} style={styles.link}>
           <Text style={styles.linkText}>Déjà un compte ? Se connecter</Text>
         </Pressable>

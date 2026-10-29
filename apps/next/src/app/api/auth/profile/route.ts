@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
+import { isValidUsername, normalizeUsername } from '@/lib/usernames';
 
 export async function PUT(request: NextRequest) {
   try {
@@ -13,7 +14,7 @@ export async function PUT(request: NextRequest) {
     const currentUser = await getCurrentUser(token);
     if (!currentUser) return NextResponse.json({ error: 'Token invalide' }, { status: 401 });
     
-    const { name } = await request.json();
+    const { name, username, isPublic } = await request.json();
 
     if (!name || name.trim().length === 0) {
       return NextResponse.json({ error: 'Le nom est requis' }, { status: 400 });
@@ -23,15 +24,27 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Le nom ne peut pas dépasser 100 caractères' }, { status: 400 });
     }
 
+    const data: { name: string; username?: string; isPublic?: boolean } = { name: name.trim() }
+    if (username !== undefined) {
+      const normalized = normalizeUsername(String(username))
+      if (!isValidUsername(normalized)) {
+        return NextResponse.json({ error: 'Le pseudo doit contenir 3 à 30 caractères (a-z, chiffres, _).' }, { status: 400 })
+      }
+      const taken = await prisma.user.findFirst({ where: { username: normalized, id: { not: currentUser.id } }, select: { id: true } })
+      if (taken) return NextResponse.json({ error: 'Ce pseudo est déjà utilisé.' }, { status: 409 })
+      data.username = normalized
+    }
+    if (typeof isPublic === 'boolean') data.isPublic = isPublic
+
     const updatedUser = await prisma.user.update({
       where: { id: currentUser.id },
-      data: {
-        name: name.trim()
-      },
+      data,
       select: {
         id: true,
         email: true,
         name: true,
+        username: true,
+        isPublic: true,
         createdAt: true
       }
     });

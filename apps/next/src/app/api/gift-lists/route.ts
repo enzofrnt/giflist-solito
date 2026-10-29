@@ -9,7 +9,8 @@ const CreateGiftListSchema = z.object({
   title: z.string().min(1, 'Le titre est requis'),
   description: z.string().optional(),
   image: z.string().url().optional().or(z.literal('')),
-  secret: z.boolean().optional().default(false)
+  secret: z.boolean().optional().default(false),
+  isPublic: z.boolean().optional().default(true),
 });
 
 // GET - Récupérer les listes de l'utilisateur
@@ -32,6 +33,7 @@ async function handleGet(request: NextRequest, user: User) {
       image: list.image,
       shareCode: list.shareCode,
       secret: list.secret,
+      isPublic: list.isPublic,
       createdAt: list.createdAt.toISOString(),
       giftsCount: list._count.gifts
     }));
@@ -53,7 +55,7 @@ async function handleGet(request: NextRequest, user: User) {
 async function handlePost(request: NextRequest, user: User) {
   try {
     const body = await request.json();
-    const { title, description, image, secret } = CreateGiftListSchema.parse(body);
+    const { title, description, image, secret, isPublic } = CreateGiftListSchema.parse(body);
 
     // Générer un code de partage unique
     let shareCode: string;
@@ -73,6 +75,7 @@ async function handlePost(request: NextRequest, user: User) {
         description,
         image: image || null,
         secret: secret ?? false,
+        isPublic: isPublic ?? true,
         shareCode: shareCode!,
         userId: user.id
       },
@@ -90,6 +93,7 @@ async function handlePost(request: NextRequest, user: User) {
       image: giftList.image,
       shareCode: giftList.shareCode,
       secret: giftList.secret,
+      isPublic: giftList.isPublic,
       createdAt: giftList.createdAt.toISOString(),
       giftsCount: giftList._count.gifts
     };

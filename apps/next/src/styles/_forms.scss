@@ -276,3 +276,31 @@
     color: var(--ds-color-danger);
   }
 }
+
+@layer components {
+  .ds-switch-row {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-2);
+    flex-wrap: wrap;
+  }
+}
+
+@layer components {
+  .ds-search-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    color: var(--ds-color-text-subtle);
+
+    svg {
+      position: absolute;
+      left: var(--ds-space-4);
+      pointer-events: none;
+    }
+  }
+
+  .ds-search-field__input {
+    padding-left: 2.75rem;
+  }
+}

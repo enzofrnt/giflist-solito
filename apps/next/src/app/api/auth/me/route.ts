@@ -8,7 +8,9 @@ async function handleGet(request: NextRequest, user: User) {
     user: {
       id: user.id,
       email: user.email,
-      name: user.name
+      name: user.name,
+      username: user.username,
+      isPublic: user.isPublic,
     }
   });
 }

@@ -3,6 +3,7 @@
 import AlertModal from '@/components/AlertModal'
 import { DropdownMenu } from '@/components/DropdownMenu'
 import EditListModal from '@/components/EditListModal'
+import { InfoHint } from '@/components/InfoHint'
 import { useAlert } from '@/hooks/useAlert'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { getAuthToken } from 'app/lib/authStorage'
@@ -49,6 +50,7 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
   const [newListDescription, setNewListDescription] = useState('')
   const [newListImage, setNewListImage] = useState('')
   const [newListSecret, setNewListSecret] = useState(false)
+  const [newListPublic, setNewListPublic] = useState(true)
   const [creating, setCreating] = useState(false)
   const [createTitleTouched, setCreateTitleTouched] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -117,7 +119,8 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
           title: newListTitle.trim(),
           description: newListDescription.trim() || undefined,
           image: newListImage.trim() || undefined,
-          secret: newListSecret
+          secret: newListSecret,
+          isPublic: newListPublic
         })
       })
 
@@ -128,6 +131,7 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
         setNewListDescription('')
         setNewListImage('')
         setNewListSecret(false)
+        setNewListPublic(true)
         setShowCreateForm(false)
         showSuccess('Succès', 'Liste créée avec succès !')
       } else {
@@ -161,7 +165,7 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
     setShowEditModal(false)
   }
 
-  async function handleUpdateGiftList(data: { title: string; description?: string; image?: string; secret?: boolean }) {
+  async function handleUpdateGiftList(data: { title: string; description?: string; image?: string; secret?: boolean; isPublic?: boolean }) {
     if (!editingList) return
 
     setUpdating(true)
@@ -181,7 +185,8 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
           title: data.title.trim(),
           description: data.description?.trim() || undefined,
           image: data.image?.trim() || undefined,
-          secret: data.secret
+          secret: data.secret,
+          isPublic: data.isPublic
         })
       })
 
@@ -384,6 +389,29 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
                       />
                     </div>
                   )}
+                </div>
+
+                <div className="ds-field">
+                  <div className="ds-switch-row">
+                    <label className="ds-switch min-h-11">
+                      <input
+                        type="checkbox"
+                        checked={newListPublic}
+                        onChange={(e) => setNewListPublic(e.target.checked)}
+                        role="switch"
+                        aria-checked={newListPublic}
+                        aria-describedby="create-list-public-hint"
+                      />
+                      <span className="ds-switch__track" aria-hidden="true" />
+                      <span className="ds-switch__text">Liste publique</span>
+                    </label>
+                    <InfoHint label="Liste publique">
+                      Une liste publique apparaît sur votre profil public et peut être trouvée dans la recherche. Une liste privée n’est accessible qu’avec son code complet.
+                    </InfoHint>
+                  </div>
+                  <p className="ds-hint" id="create-list-public-hint">
+                    Publique : visible sur votre profil. Privée : uniquement accessible via son code complet.
+                  </p>
                 </div>
 
                 <div className="ds-field">

@@ -1,6 +1,7 @@
 'use client'
 
 import { Modal } from '@/components/Modal'
+import { InfoHint } from '@/components/InfoHint'
 import Image from 'next/image'
 import { useEffect, useId, useRef, useState } from 'react'
 
@@ -12,8 +13,9 @@ interface EditListModalProps {
     description?: string
     image?: string
     secret?: boolean
+    isPublic?: boolean
   }
-  onSubmit: (data: { title: string; description?: string; image?: string; secret?: boolean }) => Promise<void>
+  onSubmit: (data: { title: string; description?: string; image?: string; secret?: boolean; isPublic?: boolean }) => Promise<void>
   isSubmitting?: boolean
 }
 
@@ -28,7 +30,8 @@ export default function EditListModal({
     title: initialData.title,
     description: initialData.description || '',
     image: initialData.image || '',
-    secret: initialData.secret || false
+    secret: initialData.secret || false,
+    isPublic: initialData.isPublic !== false
   })
   const [titleTouched, setTitleTouched] = useState(false)
 
@@ -50,7 +53,8 @@ export default function EditListModal({
         title: initialData.title,
         description: initialData.description || '',
         image: initialData.image || '',
-        secret: initialData.secret || false
+        secret: initialData.secret || false,
+        isPublic: initialData.isPublic !== false
       })
       setTitleTouched(false)
     }
@@ -168,6 +172,27 @@ export default function EditListModal({
               />
             </div>
           )}
+        </div>
+
+        <div className="ds-field">
+          <div className="ds-switch-row">
+            <label className="ds-switch min-h-11">
+              <input
+                type="checkbox"
+                checked={formData.isPublic}
+                onChange={(e) => setFormData(prev => ({ ...prev, isPublic: e.target.checked }))}
+                role="switch"
+                aria-checked={formData.isPublic}
+                aria-describedby="edit-list-public-hint"
+              />
+              <span className="ds-switch__track" aria-hidden="true" />
+              <span className="ds-switch__text">Liste publique</span>
+            </label>
+            <InfoHint label="Liste publique">
+              Une liste publique apparaît sur votre profil public et peut être trouvée dans la recherche. Une liste privée n’est accessible qu’avec son code complet.
+            </InfoHint>
+          </div>
+          <p className="ds-hint" id="edit-list-public-hint">Publique : visible sur votre profil. Privée : uniquement accessible via son code complet.</p>
         </div>
 
         <div className="ds-field">

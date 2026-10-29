@@ -65,7 +65,7 @@ after(async () => {
 })
 
 async function user(email = 'someone@example.com') {
-  return prisma.user.create({ data: { email, name: 'Test', password: await bcrypt.hash('OldPassword!1', 4) } })
+  return prisma.user.create({ data: { email, username: email.replace(/[^a-z0-9_]/gi, '_').slice(0, 28), name: 'Test', password: await bcrypt.hash('OldPassword!1', 4) } })
 }
 
 function lastToken() {
@@ -315,4 +315,60 @@ test('email change rejects an address already used by another account', async ()
     /déjà utilisée/,
   )
   assert.equal(emails.length, 0)
+})
+
+test('search resolves a private list code but only lists public accounts', async () => {
+  const publicUser = await user('public-search@example.com')
+  const privateUser = await user('private-search@example.com')
+  await prisma.user.update({ where: { id: privateUser.id }, data: { isPublic: false } })
+  await prisma.giftList.create({
+    data: { title: 'Liste publique', shareCode: 'PUBC0DE', userId: publicUser.id, isPublic: true },
+  })
+  await prisma.giftList.create({
+    data: { title: 'Liste privée', shareCode: 'PRIVC0DE', userId: privateUser.id, isPublic: false },
+  })
+
+  const { GET } = await import('../src/app/api/search/route')
+  const search = (q: string) => GET(new NextRequest(`https://giftlist.fr/api/search?q=${encodeURIComponent(q)}`))
+
+  const codeResult = await (await search('privc0de')).json()
+  assert.equal(codeResult.list?.title, 'Liste privée')
+  assert.equal(codeResult.users.length, 0)
+
+  const privateResult = await (await search('private-search')).json()
+  assert.equal(privateResult.list, null)
+  assert.equal(privateResult.users.length, 0)
+
+  const publicResult = await (await search('public_search')).json()
+  assert.equal(publicResult.users.length, 1)
+  assert.equal(publicResult.users[0].username, 'public_search_example_com')
+  assert.equal(publicResult.users[0].publicListsCount, 1)
+})
+
+test('public profile exposes only public lists and rejects private accounts', async () => {
+  const account = await user('profile-public@example.com')
+  const privateAccount = await user('profile-private@example.com')
+  await prisma.user.update({ where: { id: privateAccount.id }, data: { isPublic: false } })
+  await prisma.giftList.create({ data: { title: 'Visible', shareCode: 'V1S1BLE', userId: account.id, isPublic: true } })
+  await prisma.giftList.create({ data: { title: 'Cachée', shareCode: 'CACH3E', userId: account.id, isPublic: false } })
+  await prisma.giftList.create({ data: { title: 'Privée', shareCode: 'PR1VEE', userId: privateAccount.id, isPublic: true } })
+
+  const { GET } = await import('../src/app/api/users/[username]/route')
+  const request = new NextRequest('https://giftlist.fr/api/users/profile-public')
+  const response = await GET(request, { params: Promise.resolve({ username: account.username! }) })
+  const data = await response.json()
+  assert.equal(response.status, 200)
+  assert.equal(data.giftLists.length, 1)
+  assert.equal(data.giftLists[0].title, 'Visible')
+  assert.equal(data.user.email, undefined)
+
+  const privateResponse = await GET(request, { params: Promise.resolve({ username: privateAccount.username! }) })
+  assert.equal(privateResponse.status, 404)
+})
+
+test('registration refuses a duplicate username', async () => {
+  await user('taken-name@example.com')
+  const result = await auth.registerUser('new-name@example.com', 'Password!123', 'New', 'taken_name_example_com')
+  assert.equal(result.success, false)
+  assert.match(result.error || '', /pseudo/)
 })

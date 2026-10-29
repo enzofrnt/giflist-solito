@@ -6,7 +6,7 @@ import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
 import { ThemeSettings } from 'app/features/native/theme-settings'
 import { useSession } from 'app/provider/session.native'
-import { AppHeader, Button, Card, Field, PasswordField, PasswordStrength, Screen, colors, spacing, typography } from 'app/ui'
+import { AppHeader, Button, Card, Field, InfoHint, PasswordField, PasswordStrength, Screen, colors, spacing, typography } from 'app/ui'
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'main'>
@@ -14,7 +14,12 @@ type Props = {
 }
 
 export function ProfileScreen({ navigation, onShowLists }: Props) {
-  const { user, loading, signIn, signOut } = useSession()
+  const { user, loading, signIn, signOut, refresh } = useSession()
+  const [username, setUsername] = useState('')
+  const [accountPublic, setAccountPublic] = useState(true)
+  const [profileSaving, setProfileSaving] = useState(false)
+  const [profileError, setProfileError] = useState('')
+  const [profileSuccess, setProfileSuccess] = useState('')
   const [showEmailForm, setShowEmailForm] = useState(false)
   const [newEmail, setNewEmail] = useState('')
   const [emailPassword, setEmailPassword] = useState('')
@@ -32,6 +37,25 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
   useEffect(() => {
     if (!loading && !user) navigation.reset({ index: 0, routes: [{ name: 'login' }] })
   }, [user, loading, navigation])
+
+  async function savePublicProfile() {
+    if (!user || !/^[a-z0-9_]{3,30}$/.test(username)) {
+      setProfileError('Le pseudo doit contenir 3 à 30 caractères (a-z, chiffres, _).')
+      return
+    }
+    setProfileSaving(true)
+    setProfileError('')
+    setProfileSuccess('')
+    try {
+      await api.updateProfile({ name: user.name, username, isPublic: accountPublic })
+      await refresh()
+      setProfileSuccess('Profil public mis à jour.')
+    } catch (err) {
+      setProfileError(err instanceof Error ? err.message : 'Mise à jour impossible')
+    } finally {
+      setProfileSaving(false)
+    }
+  }
 
   async function logout() {
     await signOut()
@@ -80,7 +104,34 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
     <Screen header={<AppHeader />}>
       <Card>
         <Text style={styles.name}>{user?.name ?? 'Mon compte'}</Text>
+        {user?.username ? <Text style={styles.username}>@{user.username}</Text> : null}
         {user?.email ? <Text style={styles.muted}>{user.email}</Text> : null}
+      </Card>
+
+      <Card>
+        <Text style={styles.sectionTitle}>Profil public</Text>
+        <Text style={styles.muted}>Votre pseudo unique permet aux autres de trouver votre compte.</Text>
+        <View style={styles.form}>
+          <Field label="Pseudo" value={username} onChangeText={(value) => setUsername(value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30))} autoCapitalize="none" autoComplete="username" textContentType="username" hint="3–30 caractères : a-z, chiffres et _." />
+          <View style={styles.rowBetween}>
+            <View style={styles.inline}>
+              <Text style={styles.switchLabel}>Compte public</Text>
+              <InfoHint title="Compte public" message="Un compte public peut être trouvé par pseudo dans la recherche. Seules vos listes publiques y apparaissent. Votre email reste privé." />
+            </View>
+            <Pressable
+              onPress={() => setAccountPublic((value) => !value)}
+              accessibilityRole="switch"
+              accessibilityState={{ checked: accountPublic }}
+              accessibilityLabel="Compte public"
+              style={[styles.switch, accountPublic && styles.switchOn]}
+            >
+              <View style={[styles.switchKnob, accountPublic && styles.switchKnobOn]} />
+            </Pressable>
+          </View>
+          {profileError ? <Text style={styles.error}>{profileError}</Text> : null}
+          {profileSuccess ? <Text style={styles.success}>{profileSuccess}</Text> : null}
+          <Button title="Enregistrer le profil public" onPress={savePublicProfile} loading={profileSaving} disabled={!username} fullWidth />
+        </View>
       </Card>
 
       <Card>
@@ -177,6 +228,7 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
 
 const styles = StyleSheet.create({
   name: { color: colors.text, fontSize: typography.heading, fontWeight: '800' },
+  username: { color: colors.primary, fontSize: typography.small, fontWeight: '600', marginTop: 2 },
   sectionTitle: { color: colors.text, fontSize: typography.body, fontWeight: '700' },
   muted: { color: colors.textMuted, fontSize: typography.small, lineHeight: 19 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
@@ -184,5 +236,11 @@ const styles = StyleSheet.create({
   form: { gap: spacing.md, marginTop: spacing.sm },
   error: { color: colors.danger, fontSize: typography.small },
   success: { color: colors.success, fontSize: typography.small, marginTop: spacing.sm },
+  inline: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  switchLabel: { color: colors.text, fontSize: typography.small, fontWeight: '600' },
+  switch: { width: 46, height: 28, borderRadius: 999, backgroundColor: colors.borderStrong, justifyContent: 'center', paddingHorizontal: 3 },
+  switchOn: { backgroundColor: colors.primary },
+  switchKnob: { width: 22, height: 22, borderRadius: 999, backgroundColor: colors.surface },
+  switchKnobOn: { alignSelf: 'flex-end' },
   footer: { alignItems: 'center', paddingTop: spacing.lg },
 })

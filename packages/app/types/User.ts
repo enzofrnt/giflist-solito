@@ -9,6 +9,8 @@ export interface User {
   id: number
   email: string
   name: string
+  username?: string
+  isPublic?: boolean
 }
 
 /**
@@ -18,5 +20,7 @@ export interface UserPublic {
   id: number
   email: string
   name?: string
+  username?: string
+  isPublic?: boolean
 }
 

@@ -3,6 +3,7 @@
 import AlertModal from '@/components/AlertModal'
 import PasswordInput from '@/components/PasswordInput'
 import PasskeyManager from '@/components/PasskeyManager'
+import { InfoHint } from '@/components/InfoHint'
 import { ThemeSettings } from '@/components/ThemeSettings'
 import { useAlert } from '@/hooks/useAlert'
 import { useAuthContext } from '@/contexts/AuthContext'
@@ -43,8 +44,10 @@ export default function ProfileClient() {
 
   const [formData, setFormData] = useState({
     name: '',
+    username: '',
     email: ''
   })
+  const [accountPublic, setAccountPublic] = useState(true)
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -61,8 +64,10 @@ export default function ProfileClient() {
     if (user) {
       setFormData({
         name: user.name || '',
+        username: user.username || '',
         email: user.email
       })
+      setAccountPublic(user.isPublic !== false)
     }
   }, [user])
 
@@ -86,7 +91,9 @@ export default function ProfileClient() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          name: formData.name.trim()
+          name: formData.name.trim(),
+          username: formData.username.trim().toLowerCase(),
+          isPublic: accountPublic,
         })
       })
 
@@ -271,6 +278,46 @@ export default function ProfileClient() {
                     aria-describedby="profile-name-hint"
                   />
                   <p className="ds-hint" id="profile-name-hint">Obligatoire, 100 caractères maximum.</p>
+                </div>
+
+                <div className="ds-field">
+                  <label htmlFor="profile-username" className="ds-label">
+                    Pseudo public <span className="ds-label__required">*</span>
+                  </label>
+                  <input
+                    id="profile-username"
+                    type="text"
+                    required
+                    value={formData.username}
+                    onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30) }))}
+                    className="ds-input"
+                    placeholder="enzo"
+                    minLength={3}
+                    maxLength={30}
+                    pattern="[a-z0-9_]{3,30}"
+                    autoComplete="username"
+                    aria-describedby="profile-username-hint"
+                  />
+                  <p className="ds-hint" id="profile-username-hint">Unique, 3–30 caractères : a-z, chiffres et _. Sert à la recherche publique.</p>
+                </div>
+
+                <div className="ds-field">
+                  <div className="ds-switch-row">
+                    <label className="ds-switch" htmlFor="profile-public">
+                      <input
+                        id="profile-public"
+                        type="checkbox"
+                        checked={accountPublic}
+                        onChange={(e) => setAccountPublic(e.target.checked)}
+                      />
+                      <span className="ds-switch__track" aria-hidden="true" />
+                      <span className="ds-switch__text">Compte public</span>
+                    </label>
+                    <InfoHint label="Compte public">
+                      Un compte public est visible dans la recherche par pseudo. Seules vos listes publiques apparaissent. Votre email reste privé.
+                    </InfoHint>
+                  </div>
+                  <p className="ds-hint">Compte public : on peut vous trouver par pseudo. Les listes privées restent accessibles uniquement par leur code complet.</p>
                 </div>
 
                 <div className="ds-field">
