@@ -149,6 +149,13 @@ Approved by the owner on 2026-10-28; the showcase in `docs/design-system/` is th
 - Never mix two icon families in one control; never use emoji as a functional icon.
 - Implementations: native `Button.icon`, `PasswordField`, `ShareAction`; web `.ds-btn__icon`, `.ds-icon-btn`, `PasswordInput`.
 
+### Action colour semantics
+- Colour is meaning, not decoration. **Cobalt = the single primary action** of a view; neutral = supporting actions (share, edit, cancel, navigate); **red = destructive only** (delete/remove), always confirmed, always with an explicit label such as “Supprimer”.
+- Never style delete/remove as primary, secondary or ghost neutral. A destructive action must be red whether it is a card action, a menu item or a confirmation.
+- Accent coral is reserved for gift/celebration moments; it must not signal errors or destruction.
+- Icon colours follow the action: white on primary/danger fills, cobalt on neutral primary icons, danger red on destructive text/icons.
+- One primary action per view; secondary/destructive actions do not compete with it.
+
 ### UX non-negotiables
 - Start from the user job and success moment; ONE primary action per view.
 - Primary navigation is grouped with the logo on the left; never centred in the viewport.

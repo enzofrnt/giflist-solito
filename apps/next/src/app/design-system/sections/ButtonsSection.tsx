@@ -1,5 +1,5 @@
 import { Section, Specimen } from './Section'
-import { ArrowRightIcon, GiftIcon } from './icons'
+import { ArrowRightIcon, EyeIcon, GiftIcon, PencilIcon, PlusIcon, ShareIcon, TrashIcon } from './icons'
 import { buttonSizes, buttonVariants } from '../showcase-data'
 
 export function ButtonsSection() {
@@ -8,7 +8,7 @@ export function ButtonsSection() {
       id="buttons"
       kicker="04 · Actions"
       title="Un seul langage de bouton"
-      lead="Fin des 19 variantes de bleu copiées à la main. Cinq intentions, trois tailles, des états cohérents et un focus toujours visible."
+      lead="Six intentions, trois tailles, des états cohérents. La couleur porte le sens : cobalt = action principale, rouge = destruction, neutre = soutien."
     >
       <div className="ds-spec">
         <span className="ds-spec__label">Intentions</span>
@@ -23,6 +23,59 @@ export function ButtonsSection() {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="ds-spec ds-showcase__spaced">
+        <span className="ds-spec__label">Couleur = conséquence</span>
+        <div className="ds-state-table">
+          <div className="ds-state-row">
+            <span>Intention</span><span>Exemple</span><span>Règle</span>
+          </div>
+          <div className="ds-state-row">
+            <span className="ds-label">Principal</span>
+            <span><button type="button" className="ds-btn ds-btn--primary ds-btn--sm"><PlusIcon className="ds-btn__icon" /><span className="ds-btn__label">Créer</span></button></span>
+            <span className="ds-body-sm">Cobalt. Une seule action principale par vue.</span>
+          </div>
+          <div className="ds-state-row">
+            <span className="ds-label">Secondaire</span>
+            <span><button type="button" className="ds-btn ds-btn--secondary ds-btn--sm"><ShareIcon className="ds-btn__icon" /><span className="ds-btn__label">Partager</span></button></span>
+            <span className="ds-body-sm">Neutre. Partage, modification, action de soutien.</span>
+          </div>
+          <div className="ds-state-row">
+            <span className="ds-label">Fantôme</span>
+            <span><button type="button" className="ds-btn ds-btn--ghost ds-btn--sm">Annuler</button></span>
+            <span className="ds-body-sm">Faible priorité, jamais pour une action destructive.</span>
+          </div>
+          <div className="ds-state-row">
+            <span className="ds-label">Danger</span>
+            <span><button type="button" className="ds-btn ds-btn--danger ds-btn--sm"><TrashIcon className="ds-btn__icon" /><span className="ds-btn__label">Supprimer</span></button></span>
+            <span className="ds-body-sm"><strong>Rouge uniquement pour détruire.</strong> Confirmation requise ; jamais bleu.</span>
+          </div>
+          <div className="ds-state-row">
+            <span className="ds-label">Accent</span>
+            <span><button type="button" className="ds-btn ds-btn--accent ds-btn--sm"><GiftIcon className="ds-btn__icon" /><span className="ds-btn__label">Cadeau</span></button></span>
+            <span className="ds-body-sm">Corail réservé aux moments de cadeau, jamais aux erreurs.</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="ds-spec-grid ds-showcase__spaced">
+        <Specimen label="Icônes d’action" note="L’icône complète le label ; elle ne le remplace pas. Icône seule = sens universel + label accessible.">
+          <div className="ds-showcase__cluster">
+            <button type="button" className="ds-btn ds-btn--primary ds-btn--sm"><PlusIcon className="ds-btn__icon" /><span className="ds-btn__label">Créer</span></button>
+            <button type="button" className="ds-btn ds-btn--secondary ds-btn--sm"><PencilIcon className="ds-btn__icon" /><span className="ds-btn__label">Modifier</span></button>
+            <button type="button" className="ds-btn ds-btn--secondary ds-btn--sm"><ShareIcon className="ds-btn__icon" /><span className="ds-btn__label">Partager</span></button>
+            <button type="button" className="ds-btn ds-btn--danger ds-btn--sm"><TrashIcon className="ds-btn__icon" /><span className="ds-btn__label">Supprimer</span></button>
+            <button type="button" className="ds-btn ds-btn--secondary ds-btn--sm"><EyeIcon className="ds-btn__icon" /><span className="ds-btn__label">Voir</span></button>
+          </div>
+        </Specimen>
+
+        <Specimen label="Paire dans une carte" note="Modifier reste neutre ; Supprimer est rouge et confirmé. L’utilisateur lit la conséquence avant de cliquer.">
+          <div className="ds-showcase__cluster">
+            <button type="button" className="ds-btn ds-btn--secondary ds-btn--md"><PencilIcon className="ds-btn__icon" /><span className="ds-btn__label">Modifier</span></button>
+            <button type="button" className="ds-btn ds-btn--danger ds-btn--md"><TrashIcon className="ds-btn__icon" /><span className="ds-btn__label">Supprimer</span></button>
+          </div>
+        </Specimen>
       </div>
 
       <div className="ds-spec-grid ds-showcase__spaced">
