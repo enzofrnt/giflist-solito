@@ -155,6 +155,15 @@ See [Phase 8 screenshots](screenshots/phase-8/).
 
 See [Phase 9 screenshots](screenshots/phase-9/).
 
+## Phase 16 — Public search & discoverability
+
+- Third mobile tab **Recherche**; web header link and `/search`.
+- Exact list code opens the list (even private); otherwise searches public accounts by unique username.
+- Public/private account and list flags with info tooltips; only public lists appear on public profiles.
+- Unique lowercase usernames.
+
+See [Phase 16 screenshots](screenshots/phase-16/).
+
 ## Phase 15 — Semantic action colours
 
 - Cobalt = one primary action; neutral = support; red = destructive only; coral = celebration.

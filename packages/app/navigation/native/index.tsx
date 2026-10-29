@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Svg, Path, Circle } from 'react-native-svg'
+import { Search } from 'lucide-react-native'
 import type { Gift } from 'app/types'
 import { colors, spacing, typography } from 'app/ui'
 import { useSession } from 'app/provider/session.native'
@@ -16,12 +17,14 @@ import { ManageListScreen } from 'app/features/native/manage-list'
 import { GiftFormScreen } from 'app/features/native/gift-form'
 import { PublicListScreen } from 'app/features/native/public-list'
 import { ProfileScreen } from 'app/features/native/profile'
+import { SearchScreen, PublicUserScreen } from 'app/features/native/search'
 
 export type RootStackParamList = {
   home: undefined
   login: undefined
   register: undefined
   main: undefined
+  userProfile: { username: string }
   manage: { id: string }
   giftForm: { listId: string; gift?: Gift }
   public: { shareCode?: string } | undefined
@@ -29,7 +32,7 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
-type Tab = 'lists' | 'profile'
+type Tab = 'lists' | 'search' | 'profile'
 
 function TabIcon({ name, color, focused }: { name: Tab; color: string; focused: boolean }) {
   if (name === 'lists') {
@@ -39,6 +42,9 @@ function TabIcon({ name, color, focused }: { name: Tab; color: string; focused: 
         <Circle cx="18.5" cy="17" r="1.4" fill={color} />
       </Svg>
     )
+  }
+  if (name === 'search') {
+    return <Search size={23} color={color} strokeWidth={focused ? 2.4 : 1.9} />
   }
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
@@ -58,12 +64,14 @@ function MainScreen({ navigation }: NativeStackScreenProps<RootStackParamList, '
       <View style={styles.screen}>
         {tab === 'lists' ? (
           <DashboardScreen navigation={navigation} />
+        ) : tab === 'search' ? (
+          <SearchScreen navigation={navigation} />
         ) : (
           <ProfileScreen navigation={navigation} onShowLists={() => setTab('lists')} />
         )}
       </View>
       <View style={[styles.tabBar, { paddingBottom: Math.max(insets.bottom, spacing.sm) }]}>
-        {(['lists', 'profile'] as const).map((value) => {
+        {(['lists', 'search', 'profile'] as const).map((value) => {
           const active = tab === value
           return (
             <Pressable
@@ -71,12 +79,12 @@ function MainScreen({ navigation }: NativeStackScreenProps<RootStackParamList, '
               onPress={() => setTab(value)}
               accessibilityRole="tab"
               accessibilityState={{ selected: active }}
-              accessibilityLabel={value === 'lists' ? 'Mes listes' : 'Profil'}
+              accessibilityLabel={value === 'lists' ? 'Mes listes' : value === 'search' ? 'Recherche' : 'Profil'}
               style={styles.tab}
             >
               <TabIcon name={value} color={active ? palette.primary : palette.textMuted} focused={active} />
               <Text style={[styles.tabLabel, active && styles.tabLabelActive, { color: active ? palette.primary : palette.textMuted }]}>
-                {value === 'lists' ? 'Mes listes' : 'Profil'}
+                {value === 'lists' ? 'Mes listes' : value === 'search' ? 'Recherche' : 'Profil'}
               </Text>
             </Pressable>
           )
@@ -97,6 +105,7 @@ export function NativeNavigation() {
       <Stack.Screen name="login" component={LoginScreen} />
       <Stack.Screen name="register" component={RegisterScreen} />
       <Stack.Screen name="main" component={MainScreen} />
+      <Stack.Screen name="userProfile" component={PublicUserScreen} options={{ animation: 'none' }} />
       <Stack.Screen name="manage" component={ManageListScreen} options={{ animation: 'none' }} />
       <Stack.Screen name="giftForm" component={GiftFormScreen} options={{ animation: 'none' }} />
       <Stack.Screen name="public" component={PublicListScreen} options={{ animation: 'none' }} />

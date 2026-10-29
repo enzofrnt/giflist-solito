@@ -14,6 +14,7 @@ export interface GiftList {
   image?: string
   shareCode: string
   secret: boolean
+  isPublic?: boolean
   createdAt: string
   user: User | UserPublic
 }
@@ -29,6 +30,7 @@ export interface GiftListWithCount {
   image?: string
   shareCode: string
   secret: boolean
+  isPublic?: boolean
   createdAt: string
   giftsCount: number
 }

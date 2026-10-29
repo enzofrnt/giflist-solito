@@ -6,7 +6,7 @@ import type { GiftListWithCount } from 'app/types'
 import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
 import { useSession } from 'app/provider/session.native'
-import { AppHeader, Badge, Button, Card, Field, Screen, colors, spacing, typography } from 'app/ui'
+import { AppHeader, Badge, Button, Card, Field, InfoHint, Screen, colors, spacing, typography } from 'app/ui'
 
 type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'main'> }
 
@@ -19,6 +19,7 @@ export function DashboardScreen({ navigation }: Props) {
   const [showCreate, setShowCreate] = useState(false)
   const [title, setTitle] = useState('')
   const [secret, setSecret] = useState(false)
+  const [listPublic, setListPublic] = useState(true)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -46,15 +47,30 @@ export function DashboardScreen({ navigation }: Props) {
     setCreating(true)
     setError('')
     try {
-      const data = await api.createGiftList({ title: title.trim(), secret })
+      const data = await api.createGiftList({ title: title.trim(), secret, isPublic: listPublic })
       setLists((current) => [data.giftList, ...current])
       setTitle('')
       setSecret(false)
+      setListPublic(true)
       setShowCreate(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Création impossible')
     } finally {
       setCreating(false)
+    }
+  }
+
+  async function toggleListPublic(list: GiftListWithCount) {
+    try {
+      const data = await api.updateGiftList(list.id, {
+        title: list.title,
+        description: list.description,
+        secret: list.secret,
+        isPublic: list.isPublic === false,
+      })
+      setLists((current) => current.map((item) => item.id === list.id ? { ...item, ...data.giftList } : item))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Mise à jour impossible')
     }
   }
 
@@ -76,6 +92,17 @@ export function DashboardScreen({ navigation }: Props) {
             <View style={[styles.checkbox, secret && styles.checkboxOn]}>{secret ? <Text style={styles.check}>✓</Text> : null}</View>
             <Text style={styles.switchText}>Mode secret</Text>
           </Pressable>
+
+          <View style={styles.rowBetween}>
+            <View style={styles.inline}>
+              <Text style={styles.switchText}>Liste publique</Text>
+              <InfoHint title="Liste publique" message="Une liste publique apparaît sur votre profil public et dans la recherche. Une liste privée reste accessible uniquement avec son code complet." />
+            </View>
+            <Pressable onPress={() => setListPublic((value) => !value)} style={styles.switchRow} accessibilityRole="switch" accessibilityState={{ checked: listPublic }} accessibilityLabel="Liste publique">
+              <View style={[styles.checkbox, listPublic && styles.checkboxOn]}>{listPublic ? <Text style={styles.check}>✓</Text> : null}</View>
+            </Pressable>
+          </View>
+          <Text style={styles.muted}>Publique : visible sur votre profil. Privée : uniquement par code.</Text>
           <Button title="Créer la liste" onPress={createList} loading={creating} disabled={!title.trim()} fullWidth />
         </Card>
       ) : null}
@@ -99,6 +126,15 @@ export function DashboardScreen({ navigation }: Props) {
           </View>
           {list.description ? <Text style={styles.muted}>{list.description}</Text> : null}
           <Text style={styles.meta}>{list.giftsCount} cadeau{list.giftsCount > 1 ? 'x' : ''}</Text>
+          <View style={styles.rowBetween}>
+            <View style={styles.inline}>
+              <Text style={styles.switchText}>Liste publique</Text>
+              <InfoHint title="Liste publique" message="Une liste publique apparaît sur votre profil public et dans la recherche. Une liste privée reste accessible uniquement avec son code complet." />
+            </View>
+            <Pressable onPress={() => toggleListPublic(list)} style={styles.switchRow} accessibilityRole="switch" accessibilityState={{ checked: list.isPublic !== false }} accessibilityLabel="Liste publique">
+              <View style={[styles.checkbox, list.isPublic !== false && styles.checkboxOn]}>{list.isPublic !== false ? <Text style={styles.check}>✓</Text> : null}</View>
+            </Pressable>
+          </View>
           <Button title="Gérer la liste" icon={Settings} onPress={() => navigation.navigate('manage', { id: String(list.id) })} fullWidth />
         </Card>
       ))}
@@ -122,4 +158,5 @@ const styles = StyleSheet.create({
   checkboxOn: { backgroundColor: colors.primary, borderColor: colors.primary },
   check: { color: colors.surface, fontWeight: '700' },
   switchText: { color: colors.text, fontSize: typography.small, fontWeight: '600' },
+  inline: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
 })

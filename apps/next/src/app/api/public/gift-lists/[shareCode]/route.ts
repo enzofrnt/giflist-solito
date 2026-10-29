@@ -55,6 +55,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         image: giftList.image,
         shareCode: giftList.shareCode,
         secret: giftList.secret,
+        isPublic: giftList.isPublic,
         createdAt: giftList.createdAt.toISOString(),
         user: giftList.user
       },

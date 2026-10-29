@@ -13,6 +13,7 @@ export default function RegisterPage() {
     password: '',
     passwordConfirm: '',
     name: '',
+    username: '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -36,6 +37,12 @@ export default function RegisterPage() {
       return
     }
 
+    if (!/^[a-z0-9_]{3,30}$/.test(formData.username)) {
+      setError('Le pseudo doit contenir 3 à 30 caractères (a-z, chiffres, _).')
+      setLoading(false)
+      return
+    }
+
     const passwordValidation = validatePassword(formData.password)
     if (!passwordValidation.isValid) {
       setError(passwordValidation.errors[0])
@@ -51,6 +58,7 @@ export default function RegisterPage() {
           email: formData.email,
           password: formData.password,
           name: formData.name,
+          username: formData.username,
         }),
       })
       const data = await response.json()
@@ -103,6 +111,28 @@ export default function RegisterPage() {
             maxLength={100}
             autoComplete="name"
           />
+        </div>
+
+        <div className="ds-field">
+          <label htmlFor="username" className="ds-label">
+            Pseudo <span className="ds-label__required">*</span>
+          </label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            required
+            value={formData.username}
+            onChange={(event) => setFormData((previous) => ({ ...previous, username: event.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30) }))}
+            className="ds-input"
+            placeholder="enzo"
+            minLength={3}
+            maxLength={30}
+            pattern="[a-z0-9_]{3,30}"
+            autoComplete="username"
+            aria-describedby="username-hint"
+          />
+          <p className="ds-hint" id="username-hint">Unique, 3–30 caractères : a-z, chiffres et _. Il sert à vous retrouver dans la recherche.</p>
         </div>
 
         <div className="ds-field">

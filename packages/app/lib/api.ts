@@ -1,6 +1,27 @@
 import type { Gift, GiftList, GiftListWithCount, User } from 'app/types'
 import { getAuthToken } from './authStorage'
 
+export type PublicListSummary = {
+  shareCode: string
+  title: string
+  description?: string | null
+  image?: string | null
+  giftsCount: number
+  createdAt: string
+}
+
+export type SearchPayload = {
+  ok: boolean
+  list: {
+    shareCode: string
+    title: string
+    description?: string | null
+    isPublic: boolean
+    owner: { name: string; username: string | null }
+  } | null
+  users: Array<{ username: string; name: string; publicListsCount: number }>
+}
+
 export const API_URL = (
   process.env.EXPO_PUBLIC_API_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
@@ -60,22 +81,42 @@ export const api = {
       body: { email, password },
     }),
 
-  register: (name: string, email: string, password: string) =>
+  register: (name: string, email: string, password: string, username: string) =>
     request<{ token: string; user: User }>('/api/auth/register', {
       method: 'POST',
-      body: { name, email, password },
+      body: { name, email, password, username },
     }),
 
   me: () => request<{ user: User }>('/api/auth/me', { auth: true }),
+
+  search: (q: string) =>
+    request<SearchPayload>(`/api/search?q=${encodeURIComponent(q)}`, { method: 'GET' }),
+
+  publicUser: (username: string) =>
+    request<{ ok: boolean; user: { username: string; name: string }; giftLists: PublicListSummary[] }>(`/api/users/${encodeURIComponent(username)}`, { method: 'GET' }),
+
+  updateProfile: (data: { name: string; username?: string; isPublic?: boolean }) =>
+    request<{ success: boolean; user: User }>('/api/auth/profile', {
+      method: 'PUT',
+      auth: true,
+      body: data,
+    }),
 
   giftLists: () => request<{ giftLists: GiftListWithCount[] }>('/api/gift-lists', { auth: true }),
 
   giftList: (id: string | number) =>
     request<{ giftList: GiftList; gifts: Gift[] }>(`/api/gift-lists/${id}`, { auth: true }),
 
-  createGiftList: (data: { title: string; description?: string; secret?: boolean }) =>
+  createGiftList: (data: { title: string; description?: string; secret?: boolean; isPublic?: boolean }) =>
     request<{ giftList: GiftListWithCount }>('/api/gift-lists', {
       method: 'POST',
+      auth: true,
+      body: data,
+    }),
+
+  updateGiftList: (id: string | number, data: { title: string; description?: string; secret?: boolean; isPublic?: boolean }) =>
+    request<{ giftList: GiftListWithCount }>(`/api/gift-lists/${id}`, {
+      method: 'PUT',
       auth: true,
       body: data,
     }),

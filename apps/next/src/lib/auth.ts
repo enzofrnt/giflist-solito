@@ -2,6 +2,7 @@ import type { AuthResult, User } from 'app/types'
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from './prisma';
+import { isValidUsername, normalizeUsername, uniqueUsername, usernameFromName } from './usernames';
 
 function getJwtSecret() {
   if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
@@ -70,6 +71,8 @@ export async function getCurrentUser(token: string): Promise<User | null> {
       id: true,
       email: true,
       name: true,
+      username: true,
+      isPublic: true,
       authVersion: true
     }
   });
@@ -79,12 +82,14 @@ export async function getCurrentUser(token: string): Promise<User | null> {
   return {
     id: user.id,
     email: user.email,
-    name: user.name || '' // Fallback temporaire pour les utilisateurs existants
+    name: user.name || '', // Fallback temporaire pour les utilisateurs existants
+    username: user.username,
+    isPublic: user.isPublic,
   };
 }
 
 // Inscription d'un nouvel utilisateur
-export async function registerUser(email: string, password: string, name: string): Promise<AuthResult> {
+export async function registerUser(email: string, password: string, name: string, requestedUsername?: string): Promise<AuthResult> {
   try {
     // Vérifier si l'utilisateur existe déjà
     const existingUser = await prisma.user.findUnique({
@@ -98,6 +103,15 @@ export async function registerUser(email: string, password: string, name: string
       };
     }
 
+    const username = requestedUsername
+      ? normalizeUsername(requestedUsername)
+      : await uniqueUsername(usernameFromName(name))
+    if (!isValidUsername(username)) {
+      return { success: false, error: 'Le pseudo doit contenir 3 à 30 caractères (a-z, chiffres, _).' }
+    }
+    const usernameTaken = await prisma.user.findUnique({ where: { username }, select: { id: true } })
+    if (usernameTaken) return { success: false, error: 'Ce pseudo est déjà utilisé.' }
+
     // Hacher le mot de passe
     const hashedPassword = await hashPassword(password);
 
@@ -105,13 +119,17 @@ export async function registerUser(email: string, password: string, name: string
     const user = await prisma.user.create({
       data: {
         email,
+        username,
         password: hashedPassword,
-        name
+        name,
+        isPublic: true,
       },
       select: {
         id: true,
         email: true,
-        name: true
+        name: true,
+        username: true,
+        isPublic: true,
       }
     });
 
@@ -127,7 +145,9 @@ export async function registerUser(email: string, password: string, name: string
       user: {
         id: user.id,
         email: user.email,
-        name: user.name || ''
+        name: user.name || '',
+        username: user.username,
+        isPublic: user.isPublic,
       },
       token
     };
@@ -176,7 +196,9 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
       user: {
         id: user.id,
         email: user.email,
-        name: user.name || ''
+        name: user.name || '',
+        username: user.username,
+        isPublic: user.isPublic,
       },
       token
     };

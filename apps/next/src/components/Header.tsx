@@ -35,8 +35,8 @@ export function Header() {
             />
           </Link>
 
-          {user ? (
-            <nav className="ds-header__nav" aria-label="Navigation principale">
+          <nav className="ds-header__nav" aria-label="Navigation principale">
+            {user ? (
               <Link
                 href="/dashboard"
                 className="ds-header__link"
@@ -44,8 +44,15 @@ export function Header() {
               >
                 Mes listes
               </Link>
-            </nav>
-          ) : null}
+            ) : null}
+            <Link
+              href="/search"
+              className="ds-header__link"
+              aria-current={pathname?.startsWith('/search') ? 'page' : undefined}
+            >
+              Recherche
+            </Link>
+          </nav>
         </div>
 
         <div className="ds-header__actions">

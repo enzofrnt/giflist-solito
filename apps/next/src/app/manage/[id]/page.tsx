@@ -228,7 +228,7 @@ export default function ManageListPage({ params }: { params: Promise<{ id: strin
     }
   }
 
-  async function handleUpdateList(data: { title: string; description?: string; image?: string; secret?: boolean }) {
+  async function handleUpdateList(data: { title: string; description?: string; image?: string; secret?: boolean; isPublic?: boolean }) {
     if (!giftList) return;
 
     setUpdating(true);
@@ -838,7 +838,8 @@ export default function ManageListPage({ params }: { params: Promise<{ id: strin
             title: giftList.title,
             description: giftList.description,
             image: giftList.image,
-            secret: giftList.secret
+            secret: giftList.secret,
+            isPublic: giftList.isPublic
           }}
           onSubmit={handleUpdateList}
           isSubmitting={updating}
