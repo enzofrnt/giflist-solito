@@ -146,6 +146,15 @@ See [Phase 7 screenshots](screenshots/phase-7/).
 
 See [Phase 8 screenshots](screenshots/phase-8/).
 
+## Phase 9 — Real mobile navigation
+
+- Persistent bottom bar: **Mes listes** / **Profil**.
+- Main shell cannot stack on itself; details have one back target and hide the bar.
+- Centered Giftlist brand header, back on the left, no redundant section title/link.
+- Dedicated add/edit gift screen.
+
+See [Phase 9 screenshots](screenshots/phase-9/).
+
 ## Shared-list OpenGraph
 
 - `/list/[shareCode]` now owns a dynamic 1200×630 OG card (title, description, owner, gift count, Giftlist logo), independent of the list’s remote image.
