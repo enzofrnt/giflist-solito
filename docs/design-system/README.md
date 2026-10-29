@@ -155,6 +155,14 @@ See [Phase 8 screenshots](screenshots/phase-8/).
 
 See [Phase 9 screenshots](screenshots/phase-9/).
 
+## Phase 13 — Email change & branded Resend mail
+
+- Secure email change: current password + signed 30-min confirmation + session rotation.
+- Branded transactional emails with logo, CTA and text fallback.
+- Opaque light/dark splash variants with rounded brand mark.
+
+See [Phase 13 screenshots](screenshots/phase-13/).
+
 ## Phase 12 — Fixed mobile header height
 
 - Header fixed at 60 px; logo stays at the same Y when back/share controls appear.

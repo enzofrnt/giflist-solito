@@ -104,6 +104,13 @@ export const api = {
       auth: true,
     }),
 
+  requestEmailChange: (email: string, currentPassword: string) =>
+    request<{ ok: boolean; message: string }>('/api/auth/email-change/request', {
+      method: 'POST',
+      auth: true,
+      body: { email, currentPassword },
+    }),
+
   changePassword: (currentPassword: string, newPassword: string) =>
     request<{ token: string; message: string }>('/api/auth/change-password', {
       method: 'PUT',
