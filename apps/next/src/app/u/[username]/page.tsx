@@ -1,23 +1,47 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
 import { ListCard } from '@/components/ListCard'
+import { getPublicProfile } from '@/lib/public-profile'
+import { pageMetadata } from '@/lib/seo'
+import { normalizeUsername } from '@/lib/usernames'
 
 export const dynamic = 'force-dynamic'
 
-export default async function PublicUserPage({ params }: { params: Promise<{ username: string }> }) {
+interface PublicUserPageProps {
+  params: Promise<{ username: string }>
+}
+
+export async function generateMetadata({ params }: PublicUserPageProps): Promise<Metadata> {
   const { username } = await params
-  const user = await prisma.user.findFirst({
-    where: { username: username.toLowerCase(), isPublic: true },
-    select: {
-      username: true,
-      giftLists: {
-        where: { isPublic: true },
-        orderBy: { createdAt: 'desc' },
-        select: { shareCode: true, title: true, description: true, image: true, createdAt: true, _count: { select: { gifts: true } } },
-      },
-    },
+  const normalized = normalizeUsername(username)
+  const profile = await getPublicProfile(normalized)
+
+  if (!profile) {
+    return pageMetadata({
+      title: 'Profil introuvable',
+      description: 'Ce profil Giftlist n’existe pas ou n’est pas public.',
+      path: `/u/${normalized}`,
+      private: true,
+    })
+  }
+
+  const count = profile.giftLists.length
+  const description =
+    count === 1
+      ? `Découvrez la liste de cadeaux publique de @${profile.username} sur Giftlist.`
+      : `Découvrez les ${count} listes de cadeaux publiques de @${profile.username} sur Giftlist.`
+
+  return pageMetadata({
+    title: `Listes de cadeaux de @${profile.username}`,
+    description,
+    path: `/u/${profile.username}`,
   })
+}
+
+export default async function PublicUserPage({ params }: PublicUserPageProps) {
+  const { username } = await params
+  const user = await getPublicProfile(normalizeUsername(username))
   if (!user) notFound()
 
   return (
@@ -27,7 +51,11 @@ export default async function PublicUserPage({ params }: { params: Promise<{ use
           <div className="ds-page-header__copy">
             <span className="ds-page-kicker">Profil public</span>
             <h1 className="ds-page-title">@{user.username}</h1>
-            <p className="ds-page-subtitle">@{user.username}</p>
+            <p className="ds-page-subtitle">
+              {user.giftLists.length === 0
+                ? 'Aucune liste publique pour le moment.'
+                : `${user.giftLists.length} liste${user.giftLists.length > 1 ? 's' : ''} de cadeaux à découvrir.`}
+            </p>
           </div>
         </header>
         <section className="ds-stack ds-stack--gap-3">
