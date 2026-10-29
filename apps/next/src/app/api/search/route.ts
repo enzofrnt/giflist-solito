@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
         title: true,
         description: true,
         isPublic: true,
-        user: { select: { name: true, username: true, isPublic: true } },
+        user: { select: { username: true, isPublic: true } },
       },
     })
     if (list) {
@@ -30,7 +30,6 @@ export async function GET(request: NextRequest) {
           description: list.description,
           isPublic: list.isPublic,
           owner: {
-            name: list.user.name,
             username: list.user.isPublic ? list.user.username : null,
           },
         },
@@ -43,14 +42,10 @@ export async function GET(request: NextRequest) {
     const users = await prisma.user.findMany({
       where: {
         isPublic: true,
-        OR: [
-          { username: { contains: normalizeUsername(q), mode: 'insensitive' } },
-          { name: { contains: q, mode: 'insensitive' } },
-        ],
+        username: { contains: normalizeUsername(q), mode: 'insensitive' },
       },
       select: {
         username: true,
-        name: true,
         _count: { select: { giftLists: { where: { isPublic: true } } } },
       },
       orderBy: { username: 'asc' },
@@ -62,7 +57,6 @@ export async function GET(request: NextRequest) {
       list: null,
       users: users.map((user) => ({
         username: user.username,
-        name: user.name,
         publicListsCount: user._count.giftLists,
       })),
     }, { headers: { 'Cache-Control': 'no-store' } })

@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Modal, Pressable, Share, StyleSheet, Text, View } from 'react-native'
 import { Gift as GiftIcon } from 'lucide-react-native'
 import type { Gift, GiftList } from 'app/types'
@@ -10,7 +10,8 @@ import { AppHeader, Badge, Button, Card, Field, Screen, ShareAction, colors, spa
 type Props = NativeStackScreenProps<RootStackParamList, 'public'>
 
 export function PublicListScreen({ navigation, route }: Props) {
-  const [code, setCode] = useState(route.params?.shareCode ?? '')
+  const initialCode = route.params?.shareCode ?? ''
+  const [code, setCode] = useState(initialCode)
   const [list, setList] = useState<GiftList | null>(null)
   const [gifts, setGifts] = useState<Gift[]>([])
   const [loading, setLoading] = useState(false)
@@ -36,6 +37,12 @@ export function PublicListScreen({ navigation, route }: Props) {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (initialCode) void load(initialCode)
+    // The code is a route capability when coming from search/profile; load it once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCode])
 
   async function reserve() {
     if (!list || !selected || !name.trim()) return
@@ -72,10 +79,12 @@ export function PublicListScreen({ navigation, route }: Props) {
       )}
     >
 
-      <Card>
-        <Field label="Code de partage" value={code} onChangeText={setCode} autoCapitalize="characters" placeholder="Ex. A1B2C3D4" />
-        <Button title={loading ? 'Ouverture…' : 'Ouvrir la liste'} onPress={() => load()} loading={loading} disabled={!code.trim()} fullWidth />
-      </Card>
+      {!initialCode ? (
+        <Card>
+          <Field label="Code de partage" value={code} onChangeText={setCode} autoCapitalize="characters" placeholder="Ex. A1B2C3D4" />
+          <Button title={loading ? 'Ouverture…' : 'Ouvrir la liste'} onPress={() => load()} loading={loading} disabled={!code.trim()} fullWidth />
+        </Card>
+      ) : null}
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -84,7 +93,7 @@ export function PublicListScreen({ navigation, route }: Props) {
           <View>
             <Text style={styles.title}>{list.title}</Text>
             {list.description ? <Text style={styles.muted}>{list.description}</Text> : null}
-            <Text style={styles.meta}>Par {list.user?.name || 'un proche'} · {gifts.length} cadeau{gifts.length > 1 ? 'x' : ''}</Text>
+            <Text style={styles.meta}>Par {list.user?.username ? `@${list.user.username}` : 'un proche'} · {gifts.length} cadeau{gifts.length > 1 ? 'x' : ''}</Text>
           </View>
 
           {gifts.map((gift) => {

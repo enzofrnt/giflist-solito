@@ -17,7 +17,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         user: {
           select: {
             id: true,
-            name: true
+            username: true
           }
         }
       }

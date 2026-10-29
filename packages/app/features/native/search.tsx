@@ -1,12 +1,12 @@
 import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack'
-import { Search as SearchIcon, ArrowRight, ListChecks } from 'lucide-react-native'
+import { Search as SearchIcon, ArrowRight } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { SearchPayload } from 'app/lib/api'
 import { api } from 'app/lib/api'
 import type { PublicListSummary } from 'app/lib/api'
 import type { RootStackParamList } from 'app/navigation/native'
-import { AppHeader, Button, Card, Screen, colors, spacing, typography } from 'app/ui'
+import { AppHeader, Button, Card, ListCard, Screen, colors, spacing, typography } from 'app/ui'
 
 type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'main'> }
 
@@ -74,7 +74,7 @@ export function SearchScreen({ navigation }: Props) {
           <Text style={styles.kicker}>LISTE TROUVÉE</Text>
           <Text style={styles.cardTitle}>{result.list.title}</Text>
           {result.list.description ? <Text style={styles.muted}>{result.list.description}</Text> : null}
-          <Text style={styles.meta}>Par {result.list.owner.name}{result.list.owner.username ? ` · @${result.list.owner.username}` : ''}</Text>
+          <Text style={styles.meta}>Par {result.list.owner.username ? `@${result.list.owner.username}` : 'un membre'}</Text>
           <Button title="Ouvrir la liste" icon={ArrowRight} onPress={() => navigation.navigate('public', { shareCode: result.list!.shareCode })} fullWidth />
         </Card>
       ) : null}
@@ -91,10 +91,9 @@ export function SearchScreen({ navigation }: Props) {
             >
               <Card>
                 <View style={styles.userRow}>
-                  <View style={styles.avatar}><Text style={styles.avatarText}>{user.name.slice(0, 1).toUpperCase()}</Text></View>
+                  <View style={styles.avatar}><Text style={styles.avatarText}>{user.username.slice(0, 1).toUpperCase()}</Text></View>
                   <View style={styles.flex}>
-                    <Text style={styles.cardTitle}>{user.name}</Text>
-                    <Text style={styles.meta}>@{user.username}</Text>
+                    <Text style={styles.cardTitle}>@{user.username}</Text>
                   </View>
                   <Text style={styles.count}>{user.publicListsCount} liste{user.publicListsCount > 1 ? 's' : ''}</Text>
                 </View>
@@ -112,7 +111,7 @@ export function SearchScreen({ navigation }: Props) {
 }
 
 export function PublicUserScreen({ navigation, route }: NativeStackScreenProps<RootStackParamList, 'userProfile'>) {
-  const [user, setUser] = useState<{ username: string; name: string } | null>(null)
+  const [user, setUser] = useState<{ username: string } | null>(null)
   const [lists, setLists] = useState<PublicListSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -131,21 +130,20 @@ export function PublicUserScreen({ navigation, route }: NativeStackScreenProps<R
       {user ? (
         <>
           <View style={styles.profileHead}>
-            <View style={styles.avatar}><Text style={styles.avatarText}>{user.name.slice(0, 1).toUpperCase()}</Text></View>
+            <View style={styles.avatar}><Text style={styles.avatarText}>{user.username.slice(0, 1).toUpperCase()}</Text></View>
             <View>
-              <Text style={styles.title}>{user.name}</Text>
-              <Text style={styles.meta}>@{user.username}</Text>
+              <Text style={styles.title}>@{user.username}</Text>
             </View>
           </View>
           <Text style={styles.sectionTitle}>Listes publiques</Text>
           {lists.length === 0 ? <Card><Text style={styles.muted}>Aucune liste publique.</Text></Card> : null}
           {lists.map((list) => (
-            <Card key={list.shareCode}>
-              <Text style={styles.cardTitle}>{list.title}</Text>
-              {list.description ? <Text style={styles.muted}>{list.description}</Text> : null}
-              <Text style={styles.meta}>{list.giftsCount} cadeau{list.giftsCount > 1 ? 'x' : ''}</Text>
-              <Button title="Voir la liste" icon={ListChecks} onPress={() => navigation.navigate('public', { shareCode: list.shareCode })} fullWidth />
-            </Card>
+            <ListCard
+              key={list.shareCode}
+              list={list}
+              context="public"
+              onOpen={() => navigation.navigate('public', { shareCode: list.shareCode })}
+            />
           ))}
         </>
       ) : null}

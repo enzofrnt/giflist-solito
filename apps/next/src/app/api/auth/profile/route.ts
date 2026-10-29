@@ -14,27 +14,32 @@ export async function PUT(request: NextRequest) {
     const currentUser = await getCurrentUser(token);
     if (!currentUser) return NextResponse.json({ error: 'Token invalide' }, { status: 401 });
     
-    const { name, username, isPublic } = await request.json();
+    const body = await request.json();
+    const { name, username, isPublic } = body;
+    const data: { name?: string; username?: string; isPublic?: boolean } = {};
 
-    if (!name || name.trim().length === 0) {
-      return NextResponse.json({ error: 'Le nom est requis' }, { status: 400 });
-    }
-
-    if (name.trim().length > 100) {
-      return NextResponse.json({ error: 'Le nom ne peut pas dépasser 100 caractères' }, { status: 400 });
-    }
-
-    const data: { name: string; username?: string; isPublic?: boolean } = { name: name.trim() }
-    if (username !== undefined) {
-      const normalized = normalizeUsername(String(username))
-      if (!isValidUsername(normalized)) {
-        return NextResponse.json({ error: 'Le pseudo doit contenir 3 à 30 caractères (a-z, chiffres, _).' }, { status: 400 })
+    if (name !== undefined) {
+      if (typeof name !== 'string' || !name.trim()) {
+        return NextResponse.json({ error: 'Le nom est requis' }, { status: 400 });
       }
-      const taken = await prisma.user.findFirst({ where: { username: normalized, id: { not: currentUser.id } }, select: { id: true } })
-      if (taken) return NextResponse.json({ error: 'Ce pseudo est déjà utilisé.' }, { status: 409 })
-      data.username = normalized
+      if (name.trim().length > 100) {
+        return NextResponse.json({ error: 'Le nom ne peut pas dépasser 100 caractères' }, { status: 400 });
+      }
+      data.name = name.trim();
     }
-    if (typeof isPublic === 'boolean') data.isPublic = isPublic
+
+    if (username !== undefined) {
+      const normalized = normalizeUsername(String(username));
+      if (!isValidUsername(normalized)) {
+        return NextResponse.json({ error: 'Le pseudo doit contenir 3 à 30 caractères (a-z, chiffres, _).' }, { status: 400 });
+      }
+      const taken = await prisma.user.findFirst({ where: { username: normalized, id: { not: currentUser.id } }, select: { id: true } });
+      if (taken) return NextResponse.json({ error: 'Ce pseudo est déjà utilisé.' }, { status: 409 });
+      data.username = normalized;
+      if (data.name === undefined) data.name = normalized;
+    }
+    if (typeof isPublic === 'boolean') data.isPublic = isPublic;
+    if (Object.keys(data).length === 0) return NextResponse.json({ error: 'Aucune modification.' }, { status: 400 });
 
     const updatedUser = await prisma.user.update({
       where: { id: currentUser.id },

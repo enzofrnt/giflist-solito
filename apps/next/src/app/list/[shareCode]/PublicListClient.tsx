@@ -244,7 +244,7 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
             ) : null}
 
             <div className="ds-home__meta">
-              <span>Par {giftList?.user.name?.trim() || 'un proche'}</span>
+              <span>Par {giftList?.user.username ? `@${giftList.user.username}` : 'un proche'}</span>
               <span aria-hidden="true">·</span>
               <span>{gifts.length} {gifts.length > 1 ? 'cadeaux' : 'cadeau'}</span>
               <span aria-hidden="true">·</span>

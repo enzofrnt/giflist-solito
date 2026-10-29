@@ -69,7 +69,7 @@ export default function SearchPage() {
               <span className="ds-overline">Liste trouvée</span>
               <h2 className="ds-card__title">{result.list.title}</h2>
               {result.list.description ? <p className="ds-body-sm ds-text-muted">{result.list.description}</p> : null}
-              <p className="ds-hint">Par {result.list.owner.name}{result.list.owner.username ? ` · @${result.list.owner.username}` : ''}</p>
+              <p className="ds-hint">Par {result.list.owner.username ? `@${result.list.owner.username}` : 'un membre'}</p>
               <Link href={`/list/${result.list.shareCode}`} className="ds-btn ds-btn--primary ds-btn--md">
                 <ArrowRight size={16} className="ds-btn__icon" aria-hidden="true" />
                 Ouvrir la liste
@@ -85,8 +85,8 @@ export default function SearchPage() {
               <Link key={user.username} href={`/u/${user.username}`} className="ds-card" style={{ textDecoration: 'none', color: 'inherit' }}>
                 <div className="ds-card__body ds-cluster" style={{ justifyContent: 'space-between' }}>
                   <div className="ds-stack ds-stack--gap-1">
-                    <strong>{user.name}</strong>
-                    <span className="ds-hint">@{user.username}</span>
+                    <strong>@{user.username}</strong>
+                    <span className="ds-hint">{user.publicListsCount} liste{user.publicListsCount > 1 ? 's' : ''} publique{user.publicListsCount > 1 ? 's' : ''}</span>
                   </div>
                   <span className="ds-hint">{user.publicListsCount} liste{user.publicListsCount > 1 ? 's' : ''} publique{user.publicListsCount > 1 ? 's' : ''}</span>
                 </div>

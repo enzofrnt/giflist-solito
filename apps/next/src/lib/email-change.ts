@@ -25,7 +25,7 @@ export async function requestEmailChange(userId: number, currentPassword: string
   const { origin } = getEmailConfig()
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, email: true, name: true, password: true, authVersion: true },
+    select: { id: true, email: true, username: true, password: true, authVersion: true },
   })
   if (!user) throw new EmailChangeError('Compte introuvable.', 404)
   if (!await bcrypt.compare(currentPassword, user.password)) {
@@ -56,10 +56,10 @@ export async function requestEmailChange(userId: number, currentPassword: string
     origin,
     preheader: `Confirmez votre nouvelle adresse e-mail Giftlist (${newEmail}).`,
     title: 'Confirmez votre nouvelle adresse e-mail',
-    bodyHtml: `<p style="margin:0 0 14px">Bonjour ${escapeHtml(user.name || '')},</p>
+    bodyHtml: `<p style="margin:0 0 14px">Bonjour @${escapeHtml(user.username || '')},</p>
       <p style="margin:0 0 14px">Vous avez demandé à associer l’adresse <strong>${escapeHtml(newEmail)}</strong> à votre compte Giftlist (actuellement ${escapeHtml(user.email)}).</p>
       <p style="margin:0 0 14px">Ce lien est valable <strong>30 minutes</strong> et utilisable une seule fois. Votre adresse actuelle reste active jusqu’à confirmation.</p>`,
-    bodyText: `Bonjour ${user.name || ''},\n\nVous avez demandé à associer ${newEmail} à votre compte Giftlist (actuellement ${user.email}).\n\nCe lien est valable 30 minutes et utilisable une seule fois. Votre adresse actuelle reste active jusqu’à confirmation.`,
+    bodyText: `Bonjour @${user.username || ''},\n\nVous avez demandé à associer ${newEmail} à votre compte Giftlist (actuellement ${user.email}).\n\nCe lien est valable 30 minutes et utilisable une seule fois. Votre adresse actuelle reste active jusqu’à confirmation.`,
     cta: { label: 'Confirmer ma nouvelle adresse', href: link },
     footnoteHtml: 'Si vous n’êtes pas à l’origine de cette demande, ignorez cet e-mail : votre adresse actuelle reste inchangée.',
     footnoteText: 'Si vous n’êtes pas à l’origine de cette demande, ignorez cet e-mail : votre adresse actuelle reste inchangée.',

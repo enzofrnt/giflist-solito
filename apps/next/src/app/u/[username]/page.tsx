@@ -1,7 +1,7 @@
-import { ListChecks } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { ListCard } from '@/components/ListCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,11 +11,10 @@ export default async function PublicUserPage({ params }: { params: Promise<{ use
     where: { username: username.toLowerCase(), isPublic: true },
     select: {
       username: true,
-      name: true,
       giftLists: {
         where: { isPublic: true },
         orderBy: { createdAt: 'desc' },
-        select: { shareCode: true, title: true, description: true, _count: { select: { gifts: true } } },
+        select: { shareCode: true, title: true, description: true, image: true, createdAt: true, _count: { select: { gifts: true } } },
       },
     },
   })
@@ -27,7 +26,7 @@ export default async function PublicUserPage({ params }: { params: Promise<{ use
         <header className="ds-page-header">
           <div className="ds-page-header__copy">
             <span className="ds-page-kicker">Profil public</span>
-            <h1 className="ds-page-title">{user.name}</h1>
+            <h1 className="ds-page-title">@{user.username}</h1>
             <p className="ds-page-subtitle">@{user.username}</p>
           </div>
         </header>
@@ -35,17 +34,13 @@ export default async function PublicUserPage({ params }: { params: Promise<{ use
           <h2 className="ds-h3">Listes publiques</h2>
           {user.giftLists.length === 0 ? <div className="ds-card"><div className="ds-card__body ds-body-sm ds-text-muted">Aucune liste publique.</div></div> : null}
           {user.giftLists.map((list) => (
-            <article className="ds-card" key={list.shareCode}>
-              <div className="ds-card__body ds-stack ds-stack--gap-2">
-                <h3 className="ds-card__title">{list.title}</h3>
-                {list.description ? <p className="ds-body-sm ds-text-muted">{list.description}</p> : null}
-                <p className="ds-hint">{list._count.gifts} cadeau{list._count.gifts > 1 ? 'x' : ''}</p>
-                <Link href={`/list/${list.shareCode}`} className="ds-btn ds-btn--primary ds-btn--sm" style={{ alignSelf: 'flex-start' }}>
-                  <ListChecks size={16} className="ds-btn__icon" aria-hidden="true" />
-                  Voir la liste
-                </Link>
-              </div>
-            </article>
+            <ListCard
+              key={list.shareCode}
+              list={{ title: list.title, description: list.description, image: list.image, giftsCount: list._count.gifts, createdAt: list.createdAt.toISOString() }}
+              context="public"
+              href={`/list/${list.shareCode}`}
+              footer={<Link href={`/list/${list.shareCode}`} className="ds-btn ds-btn--primary ds-btn--sm">Voir la liste</Link>}
+            />
           ))}
         </section>
       </main>

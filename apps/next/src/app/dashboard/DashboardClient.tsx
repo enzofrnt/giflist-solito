@@ -3,6 +3,7 @@
 import AlertModal from '@/components/AlertModal'
 import { DropdownMenu } from '@/components/DropdownMenu'
 import EditListModal from '@/components/EditListModal'
+import { ListCard } from '@/components/ListCard'
 import { InfoHint } from '@/components/InfoHint'
 import { useAlert } from '@/hooks/useAlert'
 import { useAuthContext } from '@/contexts/AuthContext'
@@ -266,7 +267,7 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
       <main className="ds-page__main">
         <header className="ds-page-header">
           <div className="ds-page-header__copy">
-            <p className="ds-page-kicker">Bonjour {user?.name || user?.email} !</p>
+            <p className="ds-page-kicker">Bonjour {user?.username ? `@${user.username}` : user?.email} !</p>
             <h1 className="ds-page-title">Mes listes</h1>
             <p className="ds-page-subtitle">
               Créez, partagez et gérez vos listes de cadeaux en un seul endroit.
@@ -477,40 +478,21 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
             )
           ) : (
             <div className="ds-grid">
-              {giftLists.map((list, index) => (
-                <article key={list.id} className="ds-card">
-                  {list.image && (
-                    <Image
-                      src={list.image}
-                      alt={list.title}
-                      width={640}
-                      height={128}
-                      className="h-32 w-full object-cover"
-                      unoptimized
-                      priority={index < 3}
-                      fetchPriority={index < 3 ? 'high' : 'auto'}
-                      loading={index < 3 ? undefined : 'lazy'}
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none'
-                      }}
-                    />
-                  )}
-                  <div className="ds-card__body">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <h3 className="ds-card__title">{list.title}</h3>
-                      <span className={`ds-badge ds-badge--dot ${list.secret ? 'ds-badge--warning' : 'ds-badge--success'}`}>
-                        {list.secret ? 'Mode secret' : 'Visible'}
-                      </span>
-                    </div>
-                    {list.description && (
-                      <p className="ds-card__subtitle line-clamp-2">{list.description}</p>
-                    )}
-                    <div className="ds-hint flex flex-wrap items-center justify-between gap-2">
-                      <span>{list.giftsCount} cadeau{list.giftsCount > 1 ? 'x' : ''}</span>
-                      <span>Créée le {new Date(list.createdAt).toLocaleDateString('fr-FR')}</span>
-                    </div>
-                  </div>
-                  <div className="ds-card__footer ds-card__footer--split">
+              {giftLists.map((list) => (
+                <ListCard
+                  key={list.id}
+                  list={{
+                    title: list.title,
+                    description: list.description,
+                    image: list.image,
+                    giftsCount: list.giftsCount,
+                    isPublic: list.isPublic,
+                    secret: list.secret,
+                    createdAt: list.createdAt,
+                  }}
+                  context="owner"
+                  footer={
+                    <div className="ds-card__footer--split">
                     <Link href={`/manage/${list.id}`} className="ds-btn ds-btn--primary">
                       <span className="ds-btn__icon" aria-hidden="true">
                         {GEAR_ICON}
@@ -537,8 +519,9 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
                         },
                       ]}
                     />
-                  </div>
-                </article>
+                    </div>
+                  }
+                />
               ))}
             </div>
           )}
@@ -554,7 +537,8 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
             title: editingList.title,
             description: editingList.description,
             image: editingList.image,
-            secret: editingList.secret
+            secret: editingList.secret,
+            isPublic: editingList.isPublic
           }}
           onSubmit={handleUpdateGiftList}
           isSubmitting={updating}

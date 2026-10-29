@@ -155,6 +155,12 @@ See [Phase 8 screenshots](screenshots/phase-8/).
 
 See [Phase 9 screenshots](screenshots/phase-9/).
 
+## Phase 17 — Unified identity & shared list cards
+
+- One identity: @username + email; no separate display name in UI.
+- Shared ListCard for own lists and public profiles; public cards have no management controls.
+- Search/profile list links open directly without a code form.
+
 ## Phase 16 — Public search & discoverability
 
 - Third mobile tab **Recherche**; web header link and `/search`.

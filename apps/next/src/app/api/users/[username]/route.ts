@@ -12,7 +12,6 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       where: { username: normalized, isPublic: true },
       select: {
         username: true,
-        name: true,
         giftLists: {
           where: { isPublic: true },
           orderBy: { createdAt: 'desc' },
@@ -30,7 +29,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     if (!user) return NextResponse.json({ ok: false, error: 'Profil introuvable.' }, { status: 404 })
     return NextResponse.json({
       ok: true,
-      user: { username: user.username, name: user.name },
+      user: { username: user.username },
       giftLists: user.giftLists.map((list) => ({
         shareCode: list.shareCode,
         title: list.title,

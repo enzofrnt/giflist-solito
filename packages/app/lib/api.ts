@@ -17,9 +17,9 @@ export type SearchPayload = {
     title: string
     description?: string | null
     isPublic: boolean
-    owner: { name: string; username: string | null }
+    owner: { username: string | null }
   } | null
-  users: Array<{ username: string; name: string; publicListsCount: number }>
+  users: Array<{ username: string; publicListsCount: number }>
 }
 
 export const API_URL = (
@@ -93,7 +93,7 @@ export const api = {
     request<SearchPayload>(`/api/search?q=${encodeURIComponent(q)}`, { method: 'GET' }),
 
   publicUser: (username: string) =>
-    request<{ ok: boolean; user: { username: string; name: string }; giftLists: PublicListSummary[] }>(`/api/users/${encodeURIComponent(username)}`, { method: 'GET' }),
+    request<{ ok: boolean; user: { username: string }; giftLists: PublicListSummary[] }>(`/api/users/${encodeURIComponent(username)}`, { method: 'GET' }),
 
   updateProfile: (data: { name: string; username?: string; isPublic?: boolean }) =>
     request<{ success: boolean; user: User }>('/api/auth/profile', {
