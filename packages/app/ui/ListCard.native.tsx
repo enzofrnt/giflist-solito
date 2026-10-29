@@ -72,7 +72,7 @@ export function ListCard({
 }
 
 const styles = StyleSheet.create({
-  cover: { width: '100%', height: 128, borderRadius: 10, marginBottom: spacing.sm, backgroundColor: colors.surfaceMuted },
+  cover: { width: '100%', aspectRatio: 16 / 10, borderRadius: 10, marginBottom: spacing.sm, backgroundColor: colors.surfaceMuted },
   coverEmpty: { alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
   body: { gap: spacing.xs },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },

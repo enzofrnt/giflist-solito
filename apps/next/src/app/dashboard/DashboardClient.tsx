@@ -479,7 +479,7 @@ export default function DashboardClient({ initialGiftLists = [] }: DashboardClie
               </div>
             )
           ) : (
-            <div className="ds-grid">
+            <div className="ds-card-grid">
               {giftLists.map((list) => (
                 <ListCard
                   key={list.id}

@@ -27,6 +27,18 @@ export default function SearchPage() {
   }, [user])
 
   useEffect(() => {
+    const initial = new URLSearchParams(window.location.search).get('q')
+    if (initial) setQuery(initial)
+  }, [])
+
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    if (query.trim()) url.searchParams.set('q', query.trim())
+    else url.searchParams.delete('q')
+    window.history.replaceState(null, '', `${url.pathname}${url.search}`)
+  }, [query])
+
+  useEffect(() => {
     const q = query.trim()
     if (q.length < 2) { setResult(null); setError(''); return }
     let cancelled = false
@@ -88,6 +100,8 @@ export default function SearchPage() {
           </section>
         ) : null}
 
+        {favorites.length > 0 ? <hr className="ds-search-separator" /> : null}
+
         <div className="ds-card">
           <div className="ds-card__body">
             <label htmlFor="search-q" className="ds-label">Pseudo ou code de liste</label>
@@ -117,7 +131,7 @@ export default function SearchPage() {
               <h2 className="ds-card__title">{result.list.title}</h2>
               {result.list.description ? <p className="ds-body-sm ds-text-muted">{result.list.description}</p> : null}
               <p className="ds-hint">Par {result.list.owner.username ? `@${result.list.owner.username}` : 'un membre'}</p>
-              <Link href={`/list/${result.list.shareCode}`} className="ds-btn ds-btn--primary ds-btn--md">
+              <Link href={`/list/${result.list.shareCode}?from=${encodeURIComponent(`/search?q=${query.trim()}`)}`} className="ds-btn ds-btn--primary ds-btn--md">
                 <ArrowRight size={16} className="ds-btn__icon" aria-hidden="true" />
                 Ouvrir la liste
               </Link>
@@ -129,7 +143,7 @@ export default function SearchPage() {
           <section className="ds-stack ds-stack--gap-3">
             <h2 className="ds-h3">Comptes publics</h2>
             {result.users.map((user) => (
-              <Link key={user.username} href={`/u/${user.username}`} className="ds-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Link key={user.username} href={`/u/${user.username}?from=${encodeURIComponent(`/search?q=${query.trim()}`)}`} className="ds-card" style={{ textDecoration: 'none', color: 'inherit' }}>
                 <div className="ds-card__body ds-cluster" style={{ justifyContent: 'space-between' }}>
                   <div className="ds-stack ds-stack--gap-1">
                     <strong>@{user.username}</strong>

@@ -13,8 +13,10 @@ import { useSession } from 'app/provider/session.native'
 
 type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'main'> }
 
+let lastSearchQuery = ''
+
 export function SearchScreen({ navigation }: Props) {
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(lastSearchQuery)
   const [result, setResult] = useState<SearchPayload | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -100,6 +102,8 @@ export function SearchScreen({ navigation }: Props) {
           </ScrollView>
         </View>
       ) : null}
+
+      {favorites.length > 0 ? <View style={styles.separator} /> : null}
 
       <Card>
         <View style={styles.searchWrap}>
@@ -232,6 +236,7 @@ const styles = StyleSheet.create({
   favoritesRow: { gap: spacing.sm, paddingVertical: 2 },
   favoriteItem: { width: 230 },
   favoriteRemove: { position: 'absolute', right: spacing.sm, top: spacing.sm },
+  separator: { height: 1, backgroundColor: colors.border, marginVertical: spacing.xs },
   results: { gap: spacing.sm },
   userRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   avatar: { width: 42, height: 42, borderRadius: 999, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },

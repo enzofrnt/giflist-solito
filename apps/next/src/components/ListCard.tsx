@@ -26,22 +26,25 @@ export function ListCard({
 }) {
   const title = href ? <Link href={href} className="ds-card__title">{list.title}</Link> : <h3 className="ds-card__title">{list.title}</h3>
   return (
-    <article className="ds-card">
-      {list.image ? (
-        <Image
-          src={list.image}
-          alt={list.title}
-          width={640}
-          height={160}
-          className="h-32 w-full object-cover"
-          unoptimized
-        />
-      ) : (
-        <div className="flex h-32 w-full items-center justify-center bg-[var(--ds-color-surface-muted)] text-[var(--ds-color-text-subtle)]" aria-hidden="true">
-          <Gift size={30} strokeWidth={1.8} />
-        </div>
-      )}
-      <div className="ds-card__body">
+    <article className="ds-card ds-list-card">
+      <div className="ds-list-card__media">
+        {list.image ? (
+          <Image
+            src={list.image}
+            alt={list.title}
+            fill
+            sizes="(max-width: 640px) 100vw, 320px"
+            className="object-cover"
+            unoptimized
+          />
+        ) : (
+          <div className="ds-list-card__placeholder" aria-hidden="true">
+            <Gift size={26} strokeWidth={1.8} />
+            <span>Aucune image</span>
+          </div>
+        )}
+      </div>
+      <div className="ds-card__body ds-list-card__body">
         <div className="flex flex-wrap items-start justify-between gap-2">
           {title}
           {context === 'owner' ? (
@@ -56,7 +59,7 @@ export function ListCard({
           {list.createdAt ? <span>Créée le {new Date(list.createdAt).toLocaleDateString('fr-FR')}</span> : null}
         </div>
       </div>
-      {footer ? <div className="ds-card__footer">{footer}</div> : null}
+      {footer ? <div className="ds-card__footer ds-list-card__footer">{footer}</div> : null}
     </article>
   )
 }
