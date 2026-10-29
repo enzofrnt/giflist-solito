@@ -159,6 +159,7 @@ See [Phase 9 screenshots](screenshots/phase-9/).
 
 - Brand header fixed outside scroll; back/share appear without moving the centered logo.
 - Detail screens switch instantly (`animation: none`): no slide, no fade.
+- Managed-list sharing includes the list URL exactly once.
 
 ## Shared-list OpenGraph
 
