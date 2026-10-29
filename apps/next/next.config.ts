@@ -8,6 +8,15 @@ const nextConfig: NextConfig = {
     includePaths: [path.join(process.cwd(), "src/styles")],
   },
   turbopack: {
+    // Prisma's generated client uses dynamic filesystem helpers for engine
+    // resolution. These are expected; suppress only the two known tracing
+    // warnings from generated code instead of hiding unrelated builder issues.
+    ignoreIssue: [
+      {
+        path: '**/src/generated/prisma/**',
+        title: 'Dynamic filesystem access causes tracing of the whole project',
+      },
+    ],
     // Alias React Native to react-native-web for both client and server.
     resolveAlias: {
       'react-native': 'react-native-web',
