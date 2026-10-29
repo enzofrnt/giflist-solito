@@ -59,7 +59,8 @@ export function SearchScreen({ navigation }: Props) {
   return (
     <Screen header={<AppHeader />}>
       <View>
-        <Text style={styles.title}>Recherche</Text>
+        <Text style={styles.pageKicker}>DÉCOUVRIR</Text>
+        <Text style={styles.pageTitle}>Recherche</Text>
         <Text style={styles.lead}>Un pseudo ou un code de liste. Les comptes publics apparaissent ici.</Text>
       </View>
 
@@ -197,9 +198,11 @@ export function PublicUserScreen({ navigation, route }: NativeStackScreenProps<R
       {user ? (
         <>
           <View style={styles.profileHead}>
-            <View style={styles.avatar}><Text style={styles.avatarText}>{user.username.slice(0, 1).toUpperCase()}</Text></View>
-            <View>
-              <Text style={styles.title}>@{user.username}</Text>
+            <View style={styles.profileAvatar}><Text style={styles.profileAvatarText}>{user.username.slice(0, 1).toUpperCase()}</Text></View>
+            <View style={styles.flex}>
+              <Text style={styles.pageKicker}>PROFIL PUBLIC</Text>
+              <Text style={styles.profileTitle}>@{user.username}</Text>
+              <Text style={styles.meta}>{lists.length} liste{lists.length > 1 ? 's' : ''} publique{lists.length > 1 ? 's' : ''}</Text>
             </View>
           </View>
           <Text style={styles.sectionTitle}>Listes publiques</Text>
@@ -221,6 +224,11 @@ export function PublicUserScreen({ navigation, route }: NativeStackScreenProps<R
 }
 
 const styles = StyleSheet.create({
+  pageKicker: { color: colors.accent, fontSize: typography.caption, fontWeight: '700', letterSpacing: 1.2 },
+  pageTitle: { color: colors.text, fontSize: 32, lineHeight: 36, fontWeight: '800', letterSpacing: -0.7 },
+  profileAvatar: { width: 58, height: 58, borderRadius: 999, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
+  profileAvatarText: { color: colors.primary, fontSize: 24, fontWeight: '800' },
+  profileTitle: { color: colors.text, fontSize: typography.title, fontWeight: '800', letterSpacing: -0.4 },
   title: { color: colors.text, fontSize: typography.title, fontWeight: '800' },
   lead: { color: colors.textMuted, fontSize: typography.small, marginTop: spacing.xs, lineHeight: 19 },
   searchWrap: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 44, paddingHorizontal: spacing.md, borderWidth: 1, borderColor: colors.borderStrong, borderRadius: 10, backgroundColor: colors.surface, marginBottom: spacing.sm },

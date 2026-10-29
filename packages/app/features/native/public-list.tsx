@@ -1,10 +1,10 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useEffect, useState } from 'react'
-import { Modal, Pressable, Share, StyleSheet, Text, View } from 'react-native'
+import { Alert, Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 import type { Gift, GiftList } from 'app/types'
 import type { RootStackParamList } from 'app/navigation/native'
-import { API_URL, api } from 'app/lib/api'
-import { AppHeader, Button, Card, FavoriteButton, Field, GiftCard, Screen, ShareAction, colors, spacing, typography } from 'app/ui'
+import { WEB_URL, api } from 'app/lib/api'
+import { AppHeader, Button, Card, FavoriteButton, Field, GiftCard, Screen, ShareAction, ShareSheet, colors, spacing, typography } from 'app/ui'
 import { useSession } from 'app/provider/session.native'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'public'>
@@ -22,6 +22,7 @@ export function PublicListScreen({ navigation, route }: Props) {
   const [reserving, setReserving] = useState(false)
   const [isFavorite, setIsFavorite] = useState(false)
   const [favoriteBusy, setFavoriteBusy] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
   const { user } = useSession()
 
   async function load(shareCode = code) {
@@ -90,9 +91,18 @@ export function PublicListScreen({ navigation, route }: Props) {
     }
   }
 
-  async function shareList() {
-    if (!list) return
-    await Share.share({ title: list.title, message: `${list.title} — ${API_URL}/list/${list.shareCode}` }).catch(() => undefined)
+  function cancelReservation(gift: Gift) {
+    Alert.alert('Annuler la réservation', 'Libérer ce cadeau pour les autres ?', [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Libérer', style: 'destructive', onPress: async () => {
+        try {
+          await api.cancelPublicReservation(list!.shareCode, gift.id)
+          setGifts((current) => current.map((item) => item.id === gift.id ? { ...item, status: 'available', reservedByName: undefined } : item))
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Annulation impossible')
+        }
+      } },
+    ])
   }
 
   return (
@@ -100,7 +110,7 @@ export function PublicListScreen({ navigation, route }: Props) {
       header={(
         <AppHeader
           onBack={() => navigation.goBack()}
-          right={list ? <ShareAction onPress={shareList} /> : null}
+          right={list ? <ShareAction onPress={() => setShareOpen(true)} /> : null}
         />
       )}
     >
@@ -116,14 +126,18 @@ export function PublicListScreen({ navigation, route }: Props) {
 
       {list ? (
         <>
-          <View>
-            <Text style={styles.title}>{list.title}</Text>
-            {list.description ? <Text style={styles.muted}>{list.description}</Text> : null}
-            <View style={styles.titleRow}>
-              <Text style={styles.meta}>Par {list.user?.username ? `@${list.user.username}` : 'un proche'} · {gifts.length} cadeau{gifts.length > 1 ? 'x' : ''}</Text>
-              {user ? (
-                <FavoriteButton active={isFavorite} onPress={toggleFavorite} busy={favoriteBusy} withLabel />
-              ) : null}
+          <View style={styles.listHero}>
+            {list.image ? <Image source={{ uri: list.image }} style={styles.listCover} resizeMode="cover" accessibilityLabel={list.title} /> : null}
+            <View style={styles.heroCopy}>
+              <Text style={styles.kicker}>LISTE DE CADEAUX</Text>
+              <Text style={styles.title}>{list.title}</Text>
+              {list.description ? <Text style={styles.muted}>{list.description}</Text> : null}
+              <View style={styles.titleRow}>
+                <Text style={styles.meta}>Par {list.user?.username ? `@${list.user.username}` : 'un proche'} · {gifts.length} cadeau{gifts.length > 1 ? 'x' : ''}</Text>
+                {user ? (
+                  <FavoriteButton active={isFavorite} onPress={toggleFavorite} busy={favoriteBusy} withLabel />
+                ) : null}
+              </View>
             </View>
           </View>
 
@@ -133,6 +147,7 @@ export function PublicListScreen({ navigation, route }: Props) {
               gift={gift}
               context="public"
               onReserve={() => setSelected(gift)}
+              onCancelReservation={gift.status === 'reserved' ? () => cancelReservation(gift) : undefined}
             />
           ))}
         </>
@@ -149,11 +164,24 @@ export function PublicListScreen({ navigation, route }: Props) {
           </View>
         </View>
       </Modal>
+
+      {list ? (
+        <ShareSheet
+          visible={shareOpen}
+          title={list.title}
+          url={`${WEB_URL}/list/${list.shareCode}`}
+          onClose={() => setShareOpen(false)}
+        />
+      ) : null}
     </Screen>
   )
 }
 
 const styles = StyleSheet.create({
+  listHero: { gap: spacing.md },
+  listCover: { width: '100%', aspectRatio: 16 / 9, borderRadius: 14, backgroundColor: colors.surfaceMuted },
+  heroCopy: { gap: 5 },
+  kicker: { color: colors.accent, fontSize: typography.caption, fontWeight: '700', letterSpacing: 1.2 },
   title: { color: colors.text, fontSize: typography.title, fontWeight: '800' },
   muted: { color: colors.textMuted, fontSize: typography.small, lineHeight: 19 },
   meta: { color: colors.textSubtle, fontSize: typography.caption },

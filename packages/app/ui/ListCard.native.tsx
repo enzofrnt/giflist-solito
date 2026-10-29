@@ -36,24 +36,29 @@ export function ListCard({
   const { colors: palette } = useTheme()
   return (
     <Card>
-      {list.image ? (
-        <Image source={{ uri: list.image }} style={styles.cover} resizeMode="cover" accessibilityLabel={list.title} />
-      ) : (
-        <View style={[styles.cover, styles.coverEmpty]}>
-          <GiftIcon size={28} color={colors.textSubtle} strokeWidth={1.8} />
-        </View>
-      )}
+      <View style={styles.media}>
+        {list.image ? (
+          <Image source={{ uri: list.image }} style={styles.cover} resizeMode="cover" accessibilityLabel={list.title} />
+        ) : (
+          <View style={[styles.cover, styles.coverEmpty]}>
+            <GiftIcon size={28} color={colors.textSubtle} strokeWidth={1.8} />
+          </View>
+        )}
+        {context === 'owner' ? (
+          <View style={[styles.visibility, { backgroundColor: list.isPublic === false ? palette.warningSoft : palette.successSoft }]}>
+            <Text style={[styles.visibilityText, { color: list.isPublic === false ? palette.warning : palette.success }]}>
+              {list.isPublic === false ? 'Privée' : 'Publique'}
+            </Text>
+          </View>
+        ) : null}
+        {context === 'public' && onToggleFavorite ? (
+          <View style={styles.favoriteOverlay}>
+            <FavoriteButton active={Boolean(isFavorite)} onPress={onToggleFavorite} busy={favoriteBusy} />
+          </View>
+        ) : null}
+      </View>
       <View style={styles.body}>
-        <View style={styles.titleRow}>
-          <Text style={styles.title}>{list.title}</Text>
-          {context === 'owner' ? (
-            <View style={[styles.visibility, { backgroundColor: list.isPublic === false ? palette.warningSoft : palette.successSoft }]}>
-              <Text style={[styles.visibilityText, { color: list.isPublic === false ? palette.warning : palette.success }]}>
-                {list.isPublic === false ? 'Privée' : 'Publique'}
-              </Text>
-            </View>
-          ) : null}
-        </View>
+        <Text style={styles.title}>{list.title}</Text>
         {list.description ? <Text style={styles.description} numberOfLines={3}>{list.description}</Text> : null}
         <Text style={styles.meta}>{list.giftsCount} cadeau{list.giftsCount > 1 ? 'x' : ''}{context === 'owner' && list.secret ? ' · Mode secret' : ''}</Text>
         {context === 'owner' ? (
@@ -62,8 +67,7 @@ export function ListCard({
           </View>
         ) : (
           <View style={styles.publicActions}>
-            <Button title="Voir la liste" icon={ListChecks} onPress={onOpen} style={styles.flex} />
-            {onToggleFavorite ? <FavoriteButton active={Boolean(isFavorite)} onPress={onToggleFavorite} busy={favoriteBusy} /> : null}
+            <Button title="Voir la liste" icon={ListChecks} onPress={onOpen} fullWidth />
           </View>
         )}
       </View>
@@ -72,12 +76,14 @@ export function ListCard({
 }
 
 const styles = StyleSheet.create({
-  cover: { width: '100%', aspectRatio: 16 / 10, borderRadius: 10, marginBottom: spacing.sm, backgroundColor: colors.surfaceMuted },
+  media: { position: 'relative', marginBottom: spacing.sm },
+  cover: { width: '100%', aspectRatio: 16 / 10, borderRadius: 10, backgroundColor: colors.surfaceMuted },
   coverEmpty: { alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
   body: { gap: spacing.xs },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   title: { color: colors.text, fontSize: typography.body, fontWeight: '800', flex: 1 },
-  visibility: { borderRadius: 999, paddingHorizontal: spacing.sm, paddingVertical: 3 },
+  visibility: { position: 'absolute', top: spacing.sm, right: spacing.sm, borderRadius: 999, paddingHorizontal: spacing.sm, paddingVertical: 3 },
+  favoriteOverlay: { position: 'absolute', top: spacing.sm, right: spacing.sm },
   visibilityText: { fontSize: typography.caption, fontWeight: '700' },
   description: { color: colors.textMuted, fontSize: typography.small, lineHeight: 19 },
   meta: { color: colors.textSubtle, fontSize: typography.caption },

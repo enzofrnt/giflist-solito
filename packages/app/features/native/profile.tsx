@@ -103,8 +103,14 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
   return (
     <Screen header={<AppHeader />}>
       <Card>
-        <Text style={styles.name}>{user?.username ? `@${user.username}` : 'Mon compte'}</Text>
-        {user?.email ? <Text style={styles.muted}>{user.email}</Text> : null}
+        <View style={styles.identity}>
+          <View style={styles.avatar}><Text style={styles.avatarText}>{(user?.username || 'GL').slice(0, 2).toUpperCase()}</Text></View>
+          <View style={styles.flex}>
+            <Text style={styles.kicker}>MON COMPTE</Text>
+            <Text style={styles.name}>{user?.username ? `@${user.username}` : 'Mon compte'}</Text>
+            {user?.email ? <Text style={styles.muted}>{user.email}</Text> : null}
+          </View>
+        </View>
         <View style={styles.divider} />
         <Text style={styles.sectionTitle}>Informations personnelles</Text>
         <Text style={styles.muted}>Pseudo unique, email et visibilité de votre compte.</Text>
@@ -224,6 +230,10 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
 }
 
 const styles = StyleSheet.create({
+  identity: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  avatar: { width: 52, height: 52, borderRadius: 999, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: colors.primary, fontSize: typography.heading, fontWeight: '800' },
+  kicker: { color: colors.accent, fontSize: typography.caption, fontWeight: '700', letterSpacing: 1.2 },
   name: { color: colors.text, fontSize: typography.heading, fontWeight: '800' },
   username: { color: colors.primary, fontSize: typography.small, fontWeight: '600', marginTop: 2 },
   sectionTitle: { color: colors.text, fontSize: typography.body, fontWeight: '700' },

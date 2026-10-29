@@ -4,30 +4,52 @@ import { UserPlus } from 'lucide-react-native'
 import { Pressable, StyleSheet, Text } from 'react-native'
 import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
-import { useSession } from 'app/provider/session.native'
-import { AppHeader, Button, Card, Field, PasswordField, PasswordStrength, Screen, colors, spacing, typography } from 'app/ui'
+import { ApiError } from 'app/lib/api'
+import { AppHeader, AuthBrand, Button, Card, Field, PasswordField, PasswordStrength, Screen, colors, spacing, typography } from 'app/ui'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'register'>
 
 export function RegisterScreen({ navigation }: Props) {
-  const { signIn } = useSession()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
   async function submit() {
-    if (!/^[a-z0-9_]{3,30}$/.test(username) || !email.trim() || password.length < 8 || password !== passwordConfirm) return
+    const cleanEmail = email.trim()
+    if (!EMAIL_PATTERN.test(cleanEmail)) {
+      setError('Adresse e-mail invalide. Utilisez le format nom@domaine.com.')
+      return
+    }
+    if (!/^[a-z0-9_]{3,30}$/.test(username)) {
+      setError('Le pseudo doit contenir 3 à 30 caractères (lettres, chiffres, _).')
+      return
+    }
+    if (password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères.')
+      return
+    }
+    if (password !== passwordConfirm) {
+      setError('Les mots de passe ne correspondent pas.')
+      return
+    }
     setLoading(true)
     setError('')
     try {
-      const result = await api.register(username, email.trim(), password, username)
-      await signIn(result.token, result.user)
-      navigation.reset({ index: 0, routes: [{ name: 'main' }] })
+      const result = await api.register(username, cleanEmail, password, username)
+      if (result.requiresEmailVerification) {
+        navigation.navigate('verifyEmail', { email: result.email || cleanEmail })
+      } else if (result.token && result.user) {
+        // Backward-compatible with older API deployments.
+        navigation.reset({ index: 0, routes: [{ name: 'login' }] })
+      } else {
+        setError('Compte créé, mais la confirmation est indisponible. Réessayez.')
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Création impossible')
+      setError(err instanceof ApiError ? err.message : 'Création impossible')
     } finally {
       setLoading(false)
     }
@@ -36,6 +58,7 @@ export function RegisterScreen({ navigation }: Props) {
   return (
     <Screen header={<AppHeader onBack={() => navigation.goBack()} />}>
       <Card>
+        <AuthBrand />
         <Text style={styles.title}>Créer un compte</Text>
         <Text style={styles.lead}>Votre première liste prend quelques secondes.</Text>
         <Field label="Pseudo" value={username} onChangeText={(value) => setUsername(value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30))} autoCapitalize="none" autoComplete="username" textContentType="username" hint="3–30 caractères : a-z, chiffres et _." />
