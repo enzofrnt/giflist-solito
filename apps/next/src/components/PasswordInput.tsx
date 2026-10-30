@@ -49,6 +49,9 @@ export default function PasswordInput({
           id={id}
           name={name}
           autoComplete={autoComplete}
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           type={showPassword ? 'text' : 'password'}
           value={value}
           onChange={onChange}

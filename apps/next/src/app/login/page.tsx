@@ -12,11 +12,18 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     event.stopPropagation()
     if (loading) return
 
+    // Password managers can fill the fields without firing React input events,
+    // so read the submitted values from the form itself.
+    const values = new FormData(event.currentTarget)
+    const email = String(values.get('email') ?? '').trim()
+    const password = String(values.get('password') ?? '')
+
+    setFormData({ email, password })
     setLoading(true)
     setError('')
 
@@ -24,7 +31,7 @@ export default function LoginPage() {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ email, password }),
       })
       const data = await response.json()
 
@@ -96,6 +103,9 @@ export default function LoginPage() {
             className="ds-input"
             placeholder="votre@email.com"
             autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
           />
         </div>
 
