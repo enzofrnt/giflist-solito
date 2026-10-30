@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { Search } from 'lucide-react'
 import { useAuthContext } from '@/contexts/AuthContext'
 
 const STEPS = [
@@ -56,6 +57,14 @@ export function HomePage() {
                 </Link>
               )}
             </div>
+            {user ? null : (
+              <Link href="/search" className="ds-btn ds-btn--ghost ds-btn--sm ds-home__search-link">
+                <span className="ds-btn__icon" aria-hidden="true">
+                  <Search size={17} strokeWidth={1.8} />
+                </span>
+                Rechercher une liste ou un compte
+              </Link>
+            )}
             <div className="ds-home__meta">
               <span>Gratuit</span>
               <span aria-hidden="true">·</span>

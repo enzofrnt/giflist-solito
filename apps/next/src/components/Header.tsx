@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Search } from 'lucide-react'
 import { DropdownMenu } from '@/components/DropdownMenu'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { useAuthContext } from '@/contexts/AuthContext'
@@ -58,6 +59,15 @@ export function Header() {
         </div>
 
         <div className="ds-header__actions">
+          {!loading && !user ? (
+            <Link
+              href="/search"
+              className="ds-icon-btn ds-header__mobile-search"
+              aria-label="Recherche"
+            >
+              <Search size={19} strokeWidth={1.8} aria-hidden="true" />
+            </Link>
+          ) : null}
           <ThemeToggle />
           {loading ? (
             <span className="ds-spinner" aria-label="Chargement du compte" role="status" />
@@ -74,8 +84,8 @@ export function Header() {
                   </>
                 }
                 items={[
-                  { label: 'Mes listes', href: '/dashboard', mobileOnly: true },
                   { label: 'Mon profil', href: '/profile' },
+                  { label: 'separator-logout', separator: true, mobileOnly: true },
                   { label: 'Se déconnecter', onSelect: () => logout(), danger: true },
                 ]}
               />

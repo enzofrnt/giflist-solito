@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
+import { MobileTabBar } from '@/components/MobileTabBar'
 
 /**
  * Renders the product Header everywhere except on the design-system review
@@ -18,6 +19,7 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
       {isStandalone ? null : <Header />}
       {children}
       {isStandalone ? null : <Footer />}
+      {isStandalone ? null : <MobileTabBar />}
     </>
   )
 }

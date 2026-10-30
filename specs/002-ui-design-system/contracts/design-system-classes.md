@@ -113,6 +113,9 @@ Levels: `0` Très faible (danger), `1` Faible (warning), `2` Moyen (caution), `3
 | `.ds-icon-btn`, `.ds-spinner` | Icon button and loading indicator |
 | `.ds-list`, `.ds-list-item`, `.ds-table`, `.ds-table__row` | Dense lists / admin table |
 | `.ds-home`, `.ds-home__hero`, `.ds-home__title`, `.ds-home__lead`, `.ds-home__actions`, `.ds-home__art`, `.ds-home__features`, `.ds-home__feature`, `.ds-home__strip` | Marketing/home and public-list hero |
+| `.ds-tabbar`, `.ds-tabbar__item`, `.ds-tabbar-spacer` | Fixed mobile bottom navigation (authenticated, <768 px), safe-area aware |
+| `.ds-header__mobile-search`, `.ds-home__search-link` | Mobile-only discovery entry points (logged out) |
+| `.ds-dropdown__separator` | Group separator inside dropdown menus (mobile-only variant) |
 
 ## Layout helpers
 

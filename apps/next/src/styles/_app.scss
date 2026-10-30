@@ -239,6 +239,14 @@
     }
   }
 
+  .ds-header__actions .ds-header__mobile-search {
+    display: inline-flex;
+
+    @include ds-media-up('md') {
+      display: none;
+    }
+  }
+
   .ds-header__user {
     display: none;
     align-items: center;
@@ -471,6 +479,19 @@
   }
 
   .ds-dropdown__item--mobile-only {
+    @include ds-media-up('md') {
+      display: none;
+    }
+  }
+
+  .ds-dropdown__separator {
+    height: var(--ds-border-hairline);
+    margin: 0 var(--ds-space-1);
+    background: var(--ds-color-border);
+    border-radius: var(--ds-radius-full);
+  }
+
+  .ds-dropdown__separator--mobile-only {
     @include ds-media-up('md') {
       display: none;
     }
@@ -898,6 +919,15 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--ds-space-3);
+  }
+
+  .ds-home__copy .ds-home__search-link {
+    justify-self: start;
+    width: fit-content;
+
+    @include ds-media-up('md') {
+      display: none;
+    }
   }
 
   // On phones the header no longer carries a register action (feature 026),
@@ -1562,5 +1592,78 @@
 
   @media (prefers-reduced-motion: reduce) {
     .ds-easter-egg, .ds-easter-egg__panel, .ds-easter-egg__title { animation: none; }
+  }
+}
+
+@layer components {
+  // --- Mobile tab bar -------------------------------------------------------
+  // Fixed bottom navigation for authenticated mobile users. Safari:
+  // viewport-fit=cover (layout.tsx) + env(safe-area-inset-bottom) keeps the bar
+  // above the home indicator and the bottom browser toolbar. The spacer keeps
+  // the footer/content scrollable above the bar.
+  .ds-tabbar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: var(--ds-z-sticky);
+    display: none;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ds-space-1);
+    padding: var(--ds-space-1) var(--ds-space-2) calc(var(--ds-space-1) + env(safe-area-inset-bottom));
+    border-top: var(--ds-border-hairline) solid var(--ds-color-border);
+    background: color-mix(in srgb, var(--ds-color-canvas) 92%, transparent);
+    backdrop-filter: blur(14px);
+  }
+
+  @include ds-media-down('md') {
+    .ds-tabbar {
+      display: grid;
+    }
+  }
+
+  .ds-tabbar-spacer {
+    display: none;
+    height: calc(3.75rem + env(safe-area-inset-bottom));
+  }
+
+  @include ds-media-down('md') {
+    .ds-tabbar-spacer {
+      display: block;
+    }
+  }
+
+  .ds-tabbar__item {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 2px;
+    min-height: 3.25rem;
+    padding: var(--ds-space-1) var(--ds-space-2);
+    border-radius: var(--ds-radius-sm);
+    color: var(--ds-color-text-muted);
+    font-size: var(--ds-text-xs);
+    font-weight: var(--ds-weight-semibold);
+    line-height: var(--ds-leading-none);
+    text-decoration: none;
+    @include ds-transition(background-color, color);
+
+    &:hover {
+      background: var(--ds-color-surface-muted);
+      color: var(--ds-color-text);
+    }
+
+    &:focus-visible {
+      @include ds-focus-ring;
+    }
+
+    &[aria-current='page'] {
+      background: var(--ds-color-primary-soft);
+      color: var(--ds-color-primary);
+    }
+
+    svg {
+      width: 1.375rem;
+      height: 1.375rem;
+    }
   }
 }
