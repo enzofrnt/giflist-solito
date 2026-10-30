@@ -65,8 +65,10 @@ export function HomePage() {
               alt="Giftlist — liste de cadeaux"
               width={1536}
               height={1024}
+              sizes="(max-width: 768px) 70vw, 352px"
               className="ds-home__logo"
               priority
+              fetchPriority="high"
             />
           </div>
         </section>

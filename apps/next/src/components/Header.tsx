@@ -31,6 +31,7 @@ export function Header() {
               alt="Giftlist"
               width={320}
               height={214}
+              sizes="80px"
               className="ds-header__logo"
               priority
             />

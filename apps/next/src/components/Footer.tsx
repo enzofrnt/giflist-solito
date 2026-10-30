@@ -79,6 +79,7 @@ export function Footer() {
               alt="Giftlist"
               width={320}
               height={214}
+              sizes="64px"
               className="ds-footer__logo"
             />
           </Link>

@@ -90,8 +90,6 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <head suppressHydrationWarning>
-        <link rel="preload" as="image" href="/logo.webp" />
-        <link rel="preload" as="image" href="/logo-white.webp" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
