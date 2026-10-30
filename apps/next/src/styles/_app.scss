@@ -900,6 +900,22 @@
     gap: var(--ds-space-3);
   }
 
+  // On phones the header no longer carries a register action (feature 026),
+  // so the hero states the account creation explicitly.
+  .ds-home__cta--compact {
+    display: none;
+  }
+
+  @include ds-media-down('sm') {
+    .ds-home__cta--wide {
+      display: none;
+    }
+
+    .ds-home__cta--compact {
+      display: inline;
+    }
+  }
+
   .ds-home__meta {
     display: flex;
     flex-wrap: wrap;

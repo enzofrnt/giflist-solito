@@ -25,7 +25,6 @@ const STEPS = [
 export function HomePage() {
   const { user } = useAuthContext()
   const primaryHref = user ? '/dashboard' : '/register'
-  const primaryLabel = user ? 'Voir mes listes' : 'Commencer maintenant'
 
   return (
     <div className="ds-home">
@@ -42,7 +41,14 @@ export function HomePage() {
             </p>
             <div className="ds-home__actions">
               <Link href={primaryHref} className="ds-btn ds-btn--primary ds-btn--lg">
-                {primaryLabel}
+                {user ? (
+                  'Voir mes listes'
+                ) : (
+                  <>
+                    <span className="ds-home__cta--wide">Commencer maintenant</span>
+                    <span className="ds-home__cta--compact">Créer un compte</span>
+                  </>
+                )}
               </Link>
               {user ? null : (
                 <Link href="/login" className="ds-btn ds-btn--secondary ds-btn--lg">
