@@ -921,9 +921,10 @@
     gap: var(--ds-space-3);
   }
 
-  .ds-home__copy .ds-home__search-link {
-    justify-self: start;
-    width: fit-content;
+  .ds-home__actions .ds-home__search-link {
+    flex: 1 1 100%;
+    width: 100%;
+    justify-content: center;
 
     @include ds-media-up('md') {
       display: none;

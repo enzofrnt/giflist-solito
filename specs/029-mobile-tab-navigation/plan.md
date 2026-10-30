@@ -7,7 +7,7 @@
 
 ## Constitution check
 
-- **One primary action per view**: tabs are navigation; the hero search button is ghost/tertiary.
+- **One primary action per view**: tabs are navigation; the hero search button is an outlined secondary action, not a primary.
 - **Account menu**: avatar menu keeps identity/logout only; desktop untouched.
 - **Mobile**: app-style bottom navigation, no burger, no overlay/dim.
 - **Accessibility**: 44 px targets, labels, `aria-current`, focus ring, separator not focusable, Escape closes menu.
@@ -24,7 +24,7 @@
    - logged-out mobile search icon before the theme toggle (hidden ≥md);
    - account menu items become `Mon profil`, a mobile-only separator, `Se déconnecter`; remove `Mes listes`.
 4. **`DropdownMenu`**: support `separator?: boolean` items rendered as `role="separator"` (mobile-only class).
-5. **`HomePage`**: logged-out mobile ghost button with Search icon “Rechercher une liste ou un compte” under the hero actions (hidden ≥md).
+5. **`HomePage`**: logged-out mobile outlined secondary button with Search icon “Rechercher une liste ou un compte”, full width of the action group, below the account CTAs (hidden ≥md).
 6. **SCSS**: `.ds-tabbar`, `.ds-tabbar__item`, `.ds-tabbar-spacer`, `.ds-header__mobile-search`, `.ds-home__search-link`, `.ds-dropdown__separator`; tab bar display only ≤md; safe-area padding; z-index sticky.
 7. **Desktop**: every new element is hidden ≥md; account menu keeps profile/logout; no desktop markup visible.
 

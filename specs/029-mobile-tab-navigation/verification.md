@@ -8,8 +8,8 @@
 | 320 × 700 logged in | Bar fits; labels readable; `scrollWidth === innerWidth`; header 73 px |
 | 768 × 1024 logged in | Bar hidden; desktop header nav (`Mes listes`, `Recherche`) visible |
 | 1440 × 900 logged in | Bar hidden; header/nav/account unchanged; desktop menu = Mon profil + Se déconnecter (no separator, no lists) |
-| 390 × 844 logged out | No bar; header search icon + theme + Connexion; hero ghost button “Rechercher une liste ou un compte” below the account CTAs; both open `/search` |
-| 320 × 700 logged out | Same, no overflow; hero search width 248 px |
+| 390 × 844 logged out | No bar; header search icon + theme + Connexion; hero **outlined secondary** button “Rechercher une liste ou un compte” spanning the action-group width (358 px, 1 px border); both open `/search` |
+| 320 × 700 logged out | Same, no overflow; hero search width 288 px = action-group width |
 | `/profile` | Bar active on **Profil**, including after clicking the top-right menu item |
 | `/search` | Bar active on **Recherche** |
 | `/list/TESTA1`, `/u/camille_demo` | Bar visible, no active tab (detail/browsing pages) |

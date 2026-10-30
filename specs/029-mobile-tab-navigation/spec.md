@@ -11,7 +11,7 @@ On the web below 768 px the header hides the primary navigation, so “Mes liste
 - **User jobs**: move between my lists, discover public lists/accounts, and manage my account — on a phone.
 - **Primary navigation**: three destinations — Mes listes (`/dashboard`), Recherche (`/search`), Profil (`/profile`).
 - **Account**: the top-right avatar opens a menu with **Mon profil**, a separator, and **Se déconnecter**; it never contains lists.
-- **Logged out**: discovery is available without an account via a header search icon and a tertiary search button under the hero’s “Créer un compte / Se connecter” pair.
+- **Logged out**: discovery is available without an account via a header search icon and an outlined search button aligned to the hero action group.
 - **Success**: each destination is one tap away; the active tab is visible; no desktop change.
 - **Non-goals**: desktop layout, native app, auth logic, server/API.
 
@@ -31,7 +31,7 @@ On the web below 768 px the header hides the primary navigation, so “Mes liste
 - **FR-003**: The top-right avatar menu remains on mobile: **Mon profil**, separator, **Se déconnecter**; “Mes listes” is removed. Desktop keeps its existing profile/logout menu, without separator or lists.
 - **FR-004**: Clicking “Mon profil” or the Profil tab opens `/profile` and marks Profil active; the same follows for Mes listes and Recherche.
 - **FR-005**: iOS Safari: the bar sits above the browser bottom toolbar/home indicator using `viewport-fit=cover` (already set) + `env(safe-area-inset-bottom)`; a page spacer prevents content/footer occlusion. No fixed overlay on the Safari search bar.
-- **FR-006**: Logged out on mobile, the header shows a search icon (`/search`), plus theme and Connexion; the home hero adds a tertiary ghost button “Rechercher une liste ou un compte” below the account CTAs. Both are hidden at ≥768 px; desktop is unchanged.
+- **FR-006**: Logged out on mobile, the header shows a search icon (`/search`), plus theme and Connexion; the home hero adds an **outlined secondary** search button “Rechercher une liste ou un compte”, **full width of the action group**, below the account CTAs. Both are hidden at ≥768 px; desktop is unchanged.
 - **FR-007**: No API, data, auth or native change; desktop must be visually identical.
 
 ## Success Criteria
@@ -39,7 +39,7 @@ On the web below 768 px the header hides the primary navigation, so “Mes liste
 - At 390 px logged in: bottom bar with 3 tabs, correct active state; menu shows Profil / separator / Déconnexion; both profile paths land on `/profile` with Profil active.
 - At 320 px: no horizontal overflow; header and bar remain usable.
 - At 768 px and 1440 px: no bottom bar, no mobile search icon/button, desktop header/menu unchanged.
-- Logged out at 390 px: search icon and hero search button both open `/search`.
+- Logged out at 390 px: search icon and hero search button both open `/search`; the hero button is outlined and spans the action group width.
 - Keyboard: bar links reachable, focus ring visible; menu separator is not focusable; Escape closes the menu.
 - `bun run web:typecheck`, `bun run web:lint`, `bun run web:build` pass.
 
