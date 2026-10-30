@@ -221,6 +221,22 @@
       padding-inline: var(--ds-space-2);
       font-size: var(--ds-text-xs);
     }
+
+    // Mobile keeps a single cobalt auth action. Registration stays one tap
+    // away on the login page, so the second header button is dropped.
+    .ds-header__auth-register {
+      display: none;
+    }
+
+    .ds-header__actions .ds-header__auth-login {
+      --ds-btn-bg: var(--ds-color-primary);
+      --ds-btn-bg-hover: var(--ds-color-primary-hover);
+      --ds-btn-bg-active: var(--ds-color-primary-strong);
+      --ds-btn-border: var(--ds-color-primary);
+      --ds-btn-border-hover: var(--ds-color-primary-hover);
+      --ds-btn-color: var(--ds-color-text-inverse);
+      --ds-btn-shadow: var(--ds-shadow-xs);
+    }
   }
 
   .ds-header__user {

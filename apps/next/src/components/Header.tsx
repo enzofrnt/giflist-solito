@@ -82,8 +82,18 @@ export function Header() {
             </div>
           ) : (
             <>
-              <Link href="/login" className="ds-btn ds-btn--ghost ds-btn--sm ds-header__auth-action">Connexion</Link>
-              <Link href="/register" className="ds-btn ds-btn--primary ds-btn--sm ds-header__auth-action">Créer un compte</Link>
+              <Link
+                href="/login"
+                className="ds-btn ds-btn--ghost ds-btn--sm ds-header__auth-action ds-header__auth-login"
+              >
+                Connexion
+              </Link>
+              <Link
+                href="/register"
+                className="ds-btn ds-btn--primary ds-btn--sm ds-header__auth-action ds-header__auth-register"
+              >
+                Créer un compte
+              </Link>
             </>
           )}
         </div>
