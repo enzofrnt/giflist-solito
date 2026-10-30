@@ -15,6 +15,7 @@ export interface DropdownItem {
   selected?: boolean
   description?: string
   icon?: ReactNode
+  separator?: boolean
 }
 
 type Position = { top: number; left?: number; right?: number }
@@ -131,6 +132,16 @@ export function DropdownMenu({
           onKeyDown={handleMenuKeyDown}
         >
           {items.map((item, index) => {
+            if (item.separator) {
+              return (
+                <div
+                  key={item.label}
+                  role="separator"
+                  className={`ds-dropdown__separator${item.mobileOnly ? ' ds-dropdown__separator--mobile-only' : ''}`}
+                />
+              )
+            }
+
             const itemClass = `ds-dropdown__item${item.danger ? ' ds-dropdown__item--danger' : ''}${item.mobileOnly ? ' ds-dropdown__item--mobile-only' : ''}${item.selected ? ' ds-dropdown__item--selected' : ''}`
             const content = (
               <>

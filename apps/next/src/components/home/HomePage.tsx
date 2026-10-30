@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { Search } from 'lucide-react'
 import { useAuthContext } from '@/contexts/AuthContext'
 
 const STEPS = [
@@ -25,7 +26,6 @@ const STEPS = [
 export function HomePage() {
   const { user } = useAuthContext()
   const primaryHref = user ? '/dashboard' : '/register'
-  const primaryLabel = user ? 'Voir mes listes' : 'Commencer maintenant'
 
   return (
     <div className="ds-home">
@@ -42,11 +42,26 @@ export function HomePage() {
             </p>
             <div className="ds-home__actions">
               <Link href={primaryHref} className="ds-btn ds-btn--primary ds-btn--lg">
-                {primaryLabel}
+                {user ? (
+                  'Voir mes listes'
+                ) : (
+                  <>
+                    <span className="ds-home__cta--wide">Commencer maintenant</span>
+                    <span className="ds-home__cta--compact">Créer un compte</span>
+                  </>
+                )}
               </Link>
               {user ? null : (
                 <Link href="/login" className="ds-btn ds-btn--secondary ds-btn--lg">
                   Se connecter
+                </Link>
+              )}
+              {user ? null : (
+                <Link href="/search" className="ds-btn ds-btn--secondary ds-btn--sm ds-home__search-link">
+                  <span className="ds-btn__icon" aria-hidden="true">
+                    <Search size={17} strokeWidth={1.8} />
+                  </span>
+                  Rechercher une liste ou un compte
                 </Link>
               )}
             </div>

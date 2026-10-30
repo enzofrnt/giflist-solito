@@ -4,6 +4,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   allowedDevOrigins: ['127.0.0.1', 'localhost'],
   transpilePackages: ['app', 'expo-image'],
+  // The dev badge sits on top of the mobile tab bar; development-only chrome.
+  devIndicators: false,
   sassOptions: {
     includePaths: [path.join(process.cwd(), "src/styles")],
   },
