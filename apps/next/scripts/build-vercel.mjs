@@ -26,4 +26,5 @@ if (databaseUrl) {
   console.log('No database configured; skipping deployment migrations.')
 }
 
+await run('../../scripts/patch-next-polyfills.mjs')
 await run('build')

@@ -19,7 +19,7 @@
     "android": "bun run --cwd apps/expo android",
     "ios": "bun run --cwd apps/expo ios",
     "prepare": "husky",
-    "postinstall": "bun run --cwd apps/next db:generate",
+    "postinstall": "bun run --cwd apps/next db:generate && bun scripts/patch-next-polyfills.mjs",
     "native:export": "bun run --cwd apps/expo export",
     "web:lint": "bun run --cwd apps/next lint .",
     "native:typecheck": "bun run --cwd apps/expo typecheck",
