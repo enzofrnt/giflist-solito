@@ -23,6 +23,7 @@ export function AuthCard({
               alt=""
               width={320}
               height={214}
+              sizes="88px"
               className="ds-auth__logo ds-auth__logo--light"
               priority
             />
@@ -31,6 +32,7 @@ export function AuthCard({
               alt=""
               width={320}
               height={214}
+              sizes="88px"
               className="ds-auth__logo ds-auth__logo--dark"
               priority
             />

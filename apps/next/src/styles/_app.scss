@@ -200,8 +200,16 @@
 
   .ds-header__actions {
     display: flex;
+    min-width: 17rem;
+    justify-content: flex-end;
     align-items: center;
     gap: var(--ds-space-2);
+  }
+
+  @include ds-media-down('sm') {
+    .ds-header__actions {
+      min-width: 17rem;
+    }
   }
 
   .ds-header__auth-action {
