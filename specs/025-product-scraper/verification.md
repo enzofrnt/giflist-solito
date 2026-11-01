@@ -32,3 +32,16 @@
 - **200 challenge pages**: `scrapeDirect` now runs block detection on every response and refuses to return a parsed “product” from a block page unless it actually yielded useful fields.
 - **Tests**: 36 pass / 7 skipped live / 0 fail (12 new outbound-URL-safety cases + 3 bot-protection cases).
 - **Out of scope (documented baseline gap)**: `scrape-product` still has no auth/quota; this change adds no new exposure but does not remediate that gap (it needs its own spec, per the constitution).
+
+## Hard bot protection (Cloudflare + DataDome) — 2026-11-01
+
+- **Symptom**: `https://www.cultura.com/p-l-ecole-des-pouvoirs-secrets-edition-collector-9782203315617.html` → generic 422.
+- **Investigation**: every request path is challenged. `curl`/Node with browser headers → `403` Cloudflare `"Just a moment..."` (also for `robots.txt`, `sitemap.xml`, `/graphql`, `/api/`, `/rest/V1/...`); `cultura.com` → 301 to `www`; a real headless Chrome (puppeteer, 20 s of real waits) stays on Cultura's DataDome interstitial `"Un instant…"`; `r.jina.ai` renders the Cloudflare challenge; Microlink's own API refuses with `EPROXYNEEDED` ("uses antibot protection"). The `/%2E` Akamai trick does not apply — the block is not path-scoped.
+- **Conclusion**: fetching Cultura needs a paid anti-bot bypass (residential proxy + humanised browser, e.g. ScrapingBee `render_js` + `premium_proxy`, which is the already-wired `SCRAPINGBEE_API_KEY` path). No free server-side strategy reads the page, so this is not a fixable code defect.
+- **Delivered for FR-010**: the route now distinguishes a block from “no product data” and returns a specific 422 (`blocked: true`) telling the user the site blocks automatic reading and to copy the fields manually; the existing inline `role="alert"` error area shows it. Unblocked failures keep the previous wording.
+
+### FR-010 evidence (local + production)
+
+- Cultura URL → `422` `{"error":"Ce site bloque la lecture automatique de ses pages (protection anti-bot). Ouvre le lien pour copier le titre, le prix et l’image, ou remplis les champs manuellement.","blocked":true}` in 1.1 s (before: generic “impossible de lire”).
+- Non-blocked failures keep the generic wording: `https://example.com/does-not-exist` (404) → “Impossible de lire les informations de ce produit…”.
+- No regression on the bypass: Casio URL → `200` (price `59.9`).
