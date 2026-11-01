@@ -20,7 +20,8 @@
   - Regression E2E on the same endpoint: Etam 200 (`32.99`), Petit Bateau 200 (`8.5`), King Jouet 200, Apple 200. The bypass only runs after a detected block.
   - `bun test apps/next/tests/product-scraper.test.ts` → 24 pass / 7 skipped (live) / 0 fail; the 3 new cases are deterministic.
   - `bun run web:typecheck` clean; `bun run web:lint` → 0 errors (32 pre-existing warnings, none in the changed files).
-- **Not verified**: Vercel egress (Akamai behaviour from the deployment region) — the definitive check is the production endpoint after deploy: `curl -sS -X POST https://www.giftlist.fr/api/scrape-product -H 'Content-Type: application/json' -d '{"url":"https://www.casio.com/fr/watches/casio/product.UTP-1302PD-1AV/"}'`. Datacenter probes (`r.jina.ai`) show non-protected Casio paths are served normally from datacenter IPs, so the block is path-scoped rather than IP-scoped.
+- **Vercel egress (verified)**: `POST https://giflist-solito-h9g03z5xw-enzofrnts-projects.vercel.app/api/scrape-product` (PR #43 preview deployment `dpl_H1dPVtb6U5Npvadzchvvm9XhYsYg`, reached through a temporary share link) returned **HTTP 200** with the same title/price/image/description in 4.0 s. The Akamai block is path-scoped, not IP-scoped, so the bypass works from the deployment region.
+- **Production**: confirmed after merge with `curl -sS -X POST https://www.giftlist.fr/api/scrape-product -H 'Content-Type: application/json' -d '{"url":"https://www.casio.com/fr/watches/casio/product.UTP-1302PD-1AV/"}'`.
 - **Caveat**: the bypass depends on the edge's path normalisation staying as observed; if Casio changes its Akamai rules the route degrades to the previous curl/ScrapingBee/422 chain.
 
 ### Independent review follow-ups (2026-11-01)
