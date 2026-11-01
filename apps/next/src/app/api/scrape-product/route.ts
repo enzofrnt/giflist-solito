@@ -63,6 +63,9 @@ export async function POST(request: NextRequest) {
   try {
     const direct = await scrapeDirect(parsedUrl.toString())
     let product = direct.product
+    // A block is a different failure than "this page has no product data": it
+    // needs an explicit message so the user knows to copy the fields by hand.
+    const blocked = direct.blocked
 
     // Edge bot managers (Akamai, as used by www.casio.com) reject the canonical
     // URL server-side but still serve the page on a raw dot-segment path; try
@@ -90,9 +93,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (!hasUsefulProduct(product)) {
-      return NextResponse.json({
-        error: 'Impossible de lire les informations de ce produit. Vérifie le lien ou remplis les champs manuellement.',
-      }, { status: 422 })
+      return NextResponse.json(blocked
+        ? {
+            error: 'Ce site bloque la lecture automatique de ses pages (protection anti-bot). Ouvre le lien pour copier le titre, le prix et l’image, ou remplis les champs manuellement.',
+            blocked: true,
+          }
+        : {
+            error: 'Impossible de lire les informations de ce produit. Vérifie le lien ou remplis les champs manuellement.',
+          }, { status: 422 })
     }
 
     return NextResponse.json({ success: true, product })
