@@ -326,3 +326,57 @@ export function decodeEntities(value: string): string {
 function isRecord(value: unknown): value is JsonRecord {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
+
+/**
+ * Storefront edges (Akamai, Cloudflare, Datadome…) answer server-side fetches
+ * with a block page instead of the product page. Detecting that lets the route
+ * retry with a path the edge does not protect instead of treating the page as
+ * empty.
+ */
+const BOT_BLOCK_STATUS = new Set([401, 403, 405, 406, 429, 503])
+const BOT_BLOCK_PATTERN = /access denied|request unsuccessful|attention required|just a moment|verify (?:that )?you are (?:a )?human|unusual traffic|enable javascript and cookies|edgesuite\.net|incapsula|perimeterx/i
+
+export function isBotBlockedResponse(status: number, body: string): boolean {
+  if (BOT_BLOCK_STATUS.has(status)) return true
+  if (!body) return false
+  // Large pages are products, not block pages; only short or error bodies are
+  // inspected for block-page wording.
+  if (status >= 400 || body.length < 50000) return BOT_BLOCK_PATTERN.test(body.slice(0, 4000))
+  return false
+}
+
+/**
+ * Some edges (Akamai, as used by www.casio.com) protect an exact page path and
+ * still serve the page when it carries an extra percent-encoded dot segment,
+ * because the origin normalises `/%2E` back to the page. WHATWG URL parsing
+ * collapses that segment, so this path must be sent on the raw wire.
+ */
+export function botBypassPathVariants(pathname: string, search = ''): string[] {
+  const base = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname
+  if (!base || base === '/') return []
+  const query = !search ? '' : search.startsWith('?') ? search : `?${search}`
+  return [`${base}/%2E${query}`]
+}
+
+function isPrivateHostname(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^\[|\]$/g, '').replace(/\.$/, '')
+  if (!host) return true
+  if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local')) return true
+  // Unspecified, loopback and IPv4-mapped IPv6 (any `::`-prefixed address is reserved).
+  if (host === '0.0.0.0' || host === '0' || host.startsWith('::')) return true
+  if (/^(?:fc|fd)[0-9a-f]{2}:/.test(host) || /^fe[89ab][0-9a-f]:/.test(host)) return true
+  if (/^127\./.test(host) || /^10\./.test(host) || /^192\.168\./.test(host) || /^169\.254\./.test(host)) return true
+  return /^172\.(?:1[6-9]|2\d|3[01])\./.test(host)
+}
+
+/** Accepts http(s) URLs whose host is publicly routable; blocks local/private targets. */
+export function isSafePublicUrl(value: string): URL | null {
+  try {
+    const url = new URL(value)
+    if (!['http:', 'https:'].includes(url.protocol)) return null
+    if (isPrivateHostname(url.hostname)) return null
+    return url
+  } catch {
+    return null
+  }
+}
