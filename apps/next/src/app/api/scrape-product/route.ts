@@ -7,6 +7,7 @@ import { createBrotliDecompress, createGunzip, createInflate } from 'node:zlib'
 import { NextRequest, NextResponse } from 'next/server'
 import {
   botBypassPathVariants,
+  extractIsbn,
   isBotBlockedResponse,
   isSafePublicUrl,
   parseProductHtml,
@@ -28,6 +29,11 @@ const BROWSER_HEADERS = {
 const RAW_HEADERS = { ...BROWSER_HEADERS, 'Accept-Encoding': 'gzip, deflate, br' } as const
 
 const MAX_RAW_BYTES = 6 * 1024 * 1024
+// Free book aggregator used when a store cannot be read and the URL carries an
+// ISBN: in France the retail price of a book is fixed by law, so the price is
+// the same as the requested store's.
+const ISBN_SOURCE_NAME = 'Place des Libraires'
+const ISBN_SOURCE_ORIGIN = 'https://www.placedeslibraires.fr'
 // Keep a safety margin under maxDuration (30 s) so slow sites get the friendly
 // error instead of a platform timeout.
 const MAX_DURATION_MS = 26000
@@ -50,6 +56,11 @@ interface DirectResult {
   blocked: boolean
 }
 
+interface ProductSource {
+  vendor: string
+  url: string
+}
+
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null)
   const url = typeof body?.url === 'string' ? body.url.trim() : ''
@@ -66,6 +77,7 @@ export async function POST(request: NextRequest) {
     // A block is a different failure than "this page has no product data": it
     // needs an explicit message so the user knows to copy the fields by hand.
     const blocked = direct.blocked
+    let source: ProductSource | undefined
 
     // Edge bot managers (Akamai, as used by www.casio.com) reject the canonical
     // URL server-side but still serve the page on a raw dot-segment path; try
@@ -82,6 +94,19 @@ export async function POST(request: NextRequest) {
       if (budget >= 4000) {
         const curlProduct = await scrapeWithCurl(parsedUrl.toString(), budget)
         if (hasUsefulProduct(curlProduct)) product = curlProduct
+      }
+    }
+    if (!hasUsefulProduct(product)) {
+      const isbn = extractIsbn(url)
+      if (isbn) {
+        const budget = budgetFor(12000)
+        if (budget >= 5000) {
+          const lookup = await scrapeIsbnLookup(isbn, budget)
+          if (hasUsefulProduct(lookup.product)) {
+            product = lookup.product
+            source = lookup.source
+          }
+        }
       }
     }
     if (!hasUsefulProduct(product)) {
@@ -103,7 +128,7 @@ export async function POST(request: NextRequest) {
           }, { status: 422 })
     }
 
-    return NextResponse.json({ success: true, product })
+    return NextResponse.json(source ? { success: true, product, source } : { success: true, product })
   } catch (error) {
     console.error('Scraping error:', error)
     return NextResponse.json({
@@ -265,6 +290,39 @@ function rawGet(target: RawTarget, timeoutMs: number): Promise<RawResponse> {
     })
     request.end()
   })
+}
+
+async function fetchText(url: string, timeoutMs: number): Promise<string> {
+  const response = await fetch(url, {
+    headers: BROWSER_HEADERS,
+    redirect: 'follow',
+    signal: AbortSignal.timeout(timeoutMs),
+    cache: 'no-store',
+  })
+  return response.ok ? response.text() : ''
+}
+
+/**
+ * Free fallback for blocked stores: look the ISBN up on a small book aggregator
+ * that serves plain HTML, then parse the product page with the same parser.
+ */
+async function scrapeIsbnLookup(isbn: string, timeoutMs: number): Promise<{ product: ScrapedProduct; source?: ProductSource }> {
+  const perRequest = Math.max(2500, Math.floor(timeoutMs / 2))
+  try {
+    const searchHtml = await fetchText(`${ISBN_SOURCE_ORIGIN}/listeliv.php?mots_recherche=${isbn}&base=allbooks`, perRequest)
+    if (!searchHtml) return { product: {} }
+    const link = searchHtml.match(new RegExp(`href="((?:https?:\\/\\/[^"]+)?\\/livre\\/${isbn}-[^"]+)"`, 'i'))
+    if (!link) return { product: {} }
+    const productUrl = new URL(link[1], ISBN_SOURCE_ORIGIN).toString()
+    const productHtml = await fetchText(productUrl, perRequest)
+    if (!productHtml) return { product: {} }
+    const product = parseProductHtml(productHtml, productUrl)
+    if (!hasUsefulProduct(product)) return { product: {} }
+    return { product, source: { vendor: ISBN_SOURCE_NAME, url: productUrl } }
+  } catch (error) {
+    console.warn('ISBN lookup failed:', error)
+    return { product: {} }
+  }
 }
 
 async function scrapeWithCurl(url: string, timeoutMs: number): Promise<ScrapedProduct> {

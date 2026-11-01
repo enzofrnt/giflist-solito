@@ -123,8 +123,11 @@ export default function ManageListPage({ params }: { params: Promise<{ id: strin
 
       if (response.ok && data.success) {
         const product = data.product;
+        const vendor = typeof data?.source?.vendor === 'string' ? data.source.vendor : undefined;
         setScrapingUrl('');
-        showSuccess('Succès', 'Informations du produit récupérées !');
+        showSuccess('Succès', vendor
+          ? `Informations récupérées depuis ${vendor} (prix unique du livre).`
+          : 'Informations du produit récupérées !');
         return {
           title: product.title ? String(product.title) : undefined,
           url: scrapingUrl,

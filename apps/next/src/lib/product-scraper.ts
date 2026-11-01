@@ -380,3 +380,28 @@ export function isSafePublicUrl(value: string): URL | null {
     return null
   }
 }
+
+/**
+ * Extracts a valid ISBN-13 from a product URL. Cultura, Fnac, Decitre or Amazon
+ * URLs embed it, which lets the route fall back to a free book source when the
+ * requested store cannot be read. Only 978/979 prefixes with a valid check digit
+ * are accepted, so random 13-digit ids are ignored.
+ */
+export function extractIsbn(value: string): string | undefined {
+  let text = value
+  try {
+    text = decodeURIComponent(value)
+  } catch {
+    // keep the raw value when it is not valid percent-encoding
+  }
+  const candidates = text.match(/(?:97[89])[\d\s-]{10,17}/g) ?? []
+  for (const candidate of candidates) {
+    const digits = candidate.replace(/\D/g, '')
+    if (digits.length !== 13) continue
+    const checksum = [...digits.slice(0, 12)]
+      .reduce((sum, digit, index) => sum + Number(digit) * (index % 2 === 0 ? 1 : 3), 0)
+    const expected = (10 - (checksum % 10)) % 10
+    if (expected === Number(digits[12])) return digits
+  }
+  return undefined
+}
