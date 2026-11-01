@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { normalizePrice, parseProductHtml } from '../src/lib/product-scraper'
+import { botBypassPathVariants, isBotBlockedResponse, isSafePublicUrl, normalizePrice, parseProductHtml } from '../src/lib/product-scraper'
 
 const base = 'https://shop.example.com/produit/123'
 
@@ -182,3 +182,50 @@ for (const [merchant, url, expected] of liveFrenchMerchants) {
     expect(product.image).toMatch(/^https:\/\//)
   }, 25000)
 }
+
+describe('product scraper — edge bot protection (Casio/Akamai)', () => {
+  test('detects block pages instead of treating them as "no data"', () => {
+    expect(isBotBlockedResponse(403, '<HTML><HEAD><TITLE>Access Denied</TITLE></HEAD><BODY>You don\'t have permission to access this server. Reference #18.1db4dc17</BODY></HTML>')).toBe(true)
+    expect(isBotBlockedResponse(429, '')).toBe(true)
+    expect(isBotBlockedResponse(200, '<html><head><title>Just a moment...</title></head></html>')).toBe(true)
+    expect(isBotBlockedResponse(200, `<html><body>${'x'.repeat(6000)}</body></html>`)).toBe(false)
+    expect(isBotBlockedResponse(404, 'Page not found')).toBe(false)
+  })
+
+  test('builds a raw dot-segment path and keeps the query string', () => {
+    expect(botBypassPathVariants('/fr/watches/casio/product.UTP-1302PD-1AV/')).toEqual(['/fr/watches/casio/product.UTP-1302PD-1AV/%2E'])
+    expect(botBypassPathVariants('/produit/1', '?color=black')).toEqual(['/produit/1/%2E?color=black'])
+    expect(botBypassPathVariants('/', '')).toEqual([])
+    expect(botBypassPathVariants('', '')).toEqual([])
+  })
+
+  test('regression guard: WHATWG parsing collapses the bypass segment', () => {
+    // This is why the bypass is sent on the raw wire: `new URL()` (and `fetch`)
+    // normalise `/%2E` away and request the blocked canonical path again.
+    expect(new URL('https://www.casio.com/fr/watches/casio/product.UTP-1302PD-1AV/%2E').pathname)
+      .toBe('/fr/watches/casio/product.UTP-1302PD-1AV/')
+  })
+})
+
+describe('product scraper — outbound URL safety', () => {
+  test.each([
+    'http://localhost/',
+    'http://localhost:3000/x',
+    'http://127.0.0.1/x',
+    'http://10.0.0.5/x',
+    'http://192.168.1.1/x',
+    'http://169.254.169.254/latest/meta-data',
+    'http://[::1]/x',
+    'http://[::ffff:127.0.0.1]/x',
+    'http://2130706433/',
+    'ftp://example.com/x',
+    'not a url',
+  ])('rejects %s', (input) => {
+    expect(isSafePublicUrl(input)).toBeNull()
+  })
+
+  test('accepts public http(s) targets', () => {
+    expect(isSafePublicUrl('https://www.casio.com/fr/watches/casio/product.UTP-1302PD-1AV/')?.hostname).toBe('www.casio.com')
+    expect(isSafePublicUrl('http://example.com')?.protocol).toBe('http:')
+  })
+})
