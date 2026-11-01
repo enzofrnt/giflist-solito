@@ -45,3 +45,14 @@
 - Cultura URL → `422` `{"error":"Ce site bloque la lecture automatique de ses pages (protection anti-bot). Ouvre le lien pour copier le titre, le prix et l’image, ou remplis les champs manuellement.","blocked":true}` in 1.1 s (before: generic “impossible de lire”).
 - Non-blocked failures keep the generic wording: `https://example.com/does-not-exist` (404) → “Impossible de lire les informations de ce produit…”.
 - No regression on the bypass: Casio URL → `200` (price `59.9`).
+
+## Free ISBN fallback (FR-011/FR-012) — 2026-11-01
+
+- **Why**: Cultura is unreachable server-side (Cloudflare challenge for HTTP clients, DataDome for headless browsers), and no free proxy/TLS trick works (`curl_cffi` impersonating Chrome/Safari/Firefox → still `403 Just a moment…`). A paid bypass is the only way to read Cultura itself.
+- **Free alternative**: the Cultura URL embeds the ISBN (`9782203315617`). `placedeslibraires.fr` serves plain HTML without anti-bot protection and includes the book's fixed retail price: `13.95 €`, identical to the publisher's price (Casterman lists `13,95 €`). French law fixes book prices, so the price matches Cultura.
+- **Verification (local + production egress)**:
+  - `POST /api/scrape-product` with the Cultura URL → **HTTP 200** in 2.5 s: `{"title":"L'École des pouvoirs secrets Tome 1","price":"13.95","image":"https://images.epagine.fr/617/9782203315617_1_75.jpg", …,"source":{"vendor":"Place des Libraires","url":"…"}}`.
+  - Production egress can read the same source (`POST https://www.giftlist.fr/api/scrape-product` with the PDL URL → 200, `13.95` in 2.0 s).
+  - Regressions: Casio 200 (`59.9`, no ISBN → no fallback), Petit Bateau 200 (`8.5`), PDL product page 200, blocked non-book URL (Fnac `/a1`) still returns the FR-010 `blocked: true` message.
+  - Unit: `extractIsbn` accepts store URLs with valid ISBN-13 (plain/hyphenated), rejects bad check digits, `1234567890123` and ISBN-10-only strings — 38 pass / 7 skipped / 0 fail.
+  - Web form toast now names the source when `source` is returned; native receives the same fields, without the provenance line (declared web-only in the spec).

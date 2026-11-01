@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { botBypassPathVariants, isBotBlockedResponse, isSafePublicUrl, normalizePrice, parseProductHtml } from '../src/lib/product-scraper'
+import { botBypassPathVariants, extractIsbn, isBotBlockedResponse, isSafePublicUrl, normalizePrice, parseProductHtml } from '../src/lib/product-scraper'
 
 const base = 'https://shop.example.com/produit/123'
 
@@ -227,5 +227,20 @@ describe('product scraper — outbound URL safety', () => {
   test('accepts public http(s) targets', () => {
     expect(isSafePublicUrl('https://www.casio.com/fr/watches/casio/product.UTP-1302PD-1AV/')?.hostname).toBe('www.casio.com')
     expect(isSafePublicUrl('http://example.com')?.protocol).toBe('http:')
+  })
+})
+
+describe('product scraper — ISBN extraction (free book fallback)', () => {
+  test('extracts the ISBN-13 embedded in store URLs', () => {
+    expect(extractIsbn('https://www.cultura.com/p-l-ecole-des-pouvoirs-secrets-edition-collector-9782203315617.html')).toBe('9782203315617')
+    expect(extractIsbn('https://www.fnac.com/a1234567/Livre-978-2-203-31561-7')).toBe('9782203315617')
+    expect(extractIsbn('https://www.decitre.fr/livre/9782203315617-x.html')).toBe('9782203315617')
+  })
+
+  test('ignores invalid check digits and non-ISBN numbers', () => {
+    expect(extractIsbn('https://shop.example.com/p-9782203315618.html')).toBeUndefined()
+    expect(extractIsbn('https://shop.example.com/p-1234567890123.html')).toBeUndefined()
+    expect(extractIsbn('https://shop.example.com/produit/123')).toBeUndefined()
+    expect(extractIsbn('https://shop.example.com/?sku=2-203-31561-7')).toBeUndefined()
   })
 })
