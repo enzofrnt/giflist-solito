@@ -144,9 +144,13 @@ redirects or rewrites.
 - **Preview origins**: `getAppOrigin()` (`src/lib/email.ts`) uses
   `VERCEL_BRANCH_URL || VERCEL_URL` when `VERCEL_ENV === 'preview'` (must match
   `*.vercel.app`); otherwise requires an explicit HTTPS `APP_URL`; throws otherwise.
-- **DB hardening**: migrations enable RLS and revoke `PUBLIC`/`anon`/`authenticated`
-  privileges on `User`, `PasswordResetToken`, `AuthRateLimit`, `Passkey`,
-  `PasskeyChallenge`.
+- **DB hardening**: `20261104120000_harden_public_tables` enables RLS on **every**
+  table in `public` and revokes `PUBLIC`/`anon`/`authenticated` on tables, sequences
+  and functions, then revokes Supabase's `ALTER DEFAULT PRIVILEGES` so future tables
+  are not re-exposed. `FORCE ROW LEVEL SECURITY` is never used (it would break
+  `prisma migrate deploy`). Earlier migrations hardened `User`, `PasswordResetToken`,
+  `AuthRateLimit`, `Passkey`, `PasskeyChallenge` and `EmailVerificationToken`
+  individually; that per-table approach is superseded and must not be reintroduced.
 
 ### 1.6 Data model
 
@@ -167,8 +171,10 @@ generator `prisma-client-js` → `../src/generated/prisma`. **No enums**, no `De
 
 Migrations (directory order): `20250101000000_init`,
 `20251031143802_make_name_required`, `20251031211354_add_secret_to_gift_lists`,
-`20261028180000_add_password_recovery`, `20261028190000_add_passkeys` (last two add RLS
-and revoke grants). `apps/next/prisma/dev.db` (69 KB SQLite file) is still **tracked**
+`20261028180000_add_password_recovery`, `20261028190000_add_passkeys` (these, plus
+`20261029220000_add_email_verification`, added per-table RLS; all are now superseded
+by `20261104120000_harden_public_tables`, see 1.5).
+`apps/next/prisma/dev.db` (69 KB SQLite file) is still **tracked**
 even though no script or datasource uses SQLite.
 
 ### 1.7 Environment variables referenced by code

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import AlertModal from '@/components/AlertModal';
@@ -7,11 +7,6 @@ import PasswordInput from '@/components/PasswordInput';
 import ScrapingTest from '@/components/ScrapingTest';
 import AmazonDebug from '@/components/AmazonDebug';
 import { useAlert } from '@/hooks/useAlert';
-
-const ADMIN_CREDENTIALS = {
-  username: 'enzo',
-  password: 'enzo'
-};
 
 type Gift = {
   id: number;
@@ -89,11 +84,24 @@ export default function AdminPage() {
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
   const [isUnreserving, setIsUnreserving] = useState<number | null>(null);
   const [loginError, setLoginError] = useState('');
+  const [loginErrorTitle, setLoginErrorTitle] = useState('Identifiants incorrects');
   const { alert, showSuccess, showError, showConfirm, hideAlert } = useAlert();
 
-  const fetchGifts = async () => {
+  const resetToUnauthenticated = useCallback(() => {
+    setIsAuthenticated(false);
+    setGifts([]);
+  }, []);
+
+  const fetchGifts = useCallback(async () => {
     try {
-      const response = await fetch('/api/gift');
+      const response = await fetch('/api/admin/gift', {
+        credentials: 'same-origin',
+        cache: 'no-store',
+      });
+      if (response.status === 401) {
+        resetToUnauthenticated();
+        return;
+      }
       const result = await response.json();
       if (result.ok) {
         setGifts(result.data);
@@ -101,37 +109,100 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Erreur lors du chargement des cadeaux:', error);
     }
-  };
+  }, [resetToUnauthenticated]);
 
   useEffect(() => {
-    const authStatus = localStorage.getItem('admin_authenticated');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
-      fetchGifts();
-    }
-    setIsLoading(false);
-  }, []);
+    let cancelled = false;
+    const checkAdminSession = async () => {
+      try {
+        const response = await fetch('/api/admin/session', {
+          credentials: 'same-origin',
+          cache: 'no-store',
+        });
+        const result = await response.json();
+        if (cancelled || !response.ok) {
+          return;
+        }
+        if (result.authenticated === true) {
+          setIsAuthenticated(true);
+          await fetchGifts();
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification de la session administrateur:', error);
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+    checkAdminSession();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchGifts]);
 
   const [adminPassword, setAdminPassword] = useState('');
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const username = formData.get('username') as string;
     const password = adminPassword;
 
-    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-      localStorage.setItem('admin_authenticated', 'true');
-      setLoginError('');
-      setIsAuthenticated(true);
-      fetchGifts();
-    } else {
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
+        cache: 'no-store',
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (response.ok) {
+        setLoginError('');
+        setLoginErrorTitle('Identifiants incorrects');
+        setAdminPassword('');
+        setIsAuthenticated(true);
+        await fetchGifts();
+        return;
+      }
+
+      if (response.status === 503) {
+        setLoginErrorTitle('Espace administrateur indisponible');
+        setLoginError('L’espace administrateur est actuellement désactivé.');
+        return;
+      }
+
+      if (response.status === 429) {
+        setLoginErrorTitle('Trop de tentatives');
+        setLoginError('Trop de tentatives de connexion. Réessayez dans quelques minutes.');
+        return;
+      }
+
+      setLoginErrorTitle('Identifiants incorrects');
       setLoginError('Identifiants incorrects. Vérifiez votre nom d’utilisateur et votre mot de passe.');
+    } catch (error) {
+      console.error('Erreur lors de la connexion administrateur:', error);
+      setLoginErrorTitle('Connexion impossible');
+      setLoginError('Impossible de contacter le serveur. Réessayez plus tard.');
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin_authenticated');
-    setIsAuthenticated(false);
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', {
+        method: 'POST',
+        credentials: 'same-origin',
+        cache: 'no-store',
+      });
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion administrateur:', error);
+    } finally {
+      setAdminPassword('');
+      setLoginError('');
+      resetToUnauthenticated();
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -173,9 +244,15 @@ export default function AdminPage() {
       async () => {
         setIsDeleting(giftId);
         try {
-          const response = await fetch(`/api/gift?id=${giftId}`, {
+          const response = await fetch(`/api/admin/gift?id=${giftId}`, {
             method: 'DELETE',
+            credentials: 'same-origin',
+            cache: 'no-store',
           });
+          if (response.status === 401) {
+            resetToUnauthenticated();
+            return;
+          }
           const result = await response.json();
 
           if (result.ok) {
@@ -201,11 +278,13 @@ export default function AdminPage() {
       async () => {
         setIsUnreserving(giftId);
         try {
-          const response = await fetch('/api/gift', {
+          const response = await fetch('/api/admin/gift', {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
             },
+            credentials: 'same-origin',
+            cache: 'no-store',
             body: JSON.stringify({
               id: giftId,
               status: 'available',
@@ -215,6 +294,10 @@ export default function AdminPage() {
               reservedAt: null
             }),
           });
+          if (response.status === 401) {
+            resetToUnauthenticated();
+            return;
+          }
           const result = await response.json();
 
           if (result.ok) {
@@ -243,7 +326,7 @@ export default function AdminPage() {
     setIsSubmitting(true);
 
     try {
-      const url = editingGift ? '/api/gift' : '/api/gift';
+      const url = '/api/admin/gift';
       const method = editingGift ? 'PUT' : 'POST';
       const body = editingGift 
         ? { id: editingGift.id, ...formData, price: formData.price ? parseFloat(formData.price) : undefined }
@@ -254,8 +337,15 @@ export default function AdminPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'same-origin',
+        cache: 'no-store',
         body: JSON.stringify(body),
       });
+
+      if (response.status === 401) {
+        resetToUnauthenticated();
+        return;
+      }
 
       const result = await response.json();
 
@@ -342,7 +432,7 @@ export default function AdminPage() {
                   </svg>
                 </span>
                 <div className="ds-alert__content">
-                  <p className="ds-alert__title">Identifiants incorrects</p>
+                  <p className="ds-alert__title">{loginErrorTitle}</p>
                   <p className="ds-alert__message">{loginError}</p>
                 </div>
               </div>
