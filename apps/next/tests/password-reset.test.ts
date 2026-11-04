@@ -24,7 +24,21 @@ let rejectEmail = false
 before(async () => {
   db = await PGlite.create()
   // Reproduce Supabase's default Data API grants before applying migrations.
-  await db.exec('CREATE ROLE anon; CREATE ROLE authenticated; ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated;')
+  await db.exec('CREATE ROLE anon; CREATE ROLE authenticated; ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated; ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO anon, authenticated;')
+  // Prisma creates its bookkeeping table before applying migrations, so do the
+  // same here: the public-schema hardening migration must see it.
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS public."_prisma_migrations" (
+      id varchar(36) PRIMARY KEY,
+      checksum varchar(64) NOT NULL,
+      finished_at timestamptz,
+      migration_name varchar(255) NOT NULL,
+      logs text,
+      rolled_back_at timestamptz,
+      started_at timestamptz NOT NULL DEFAULT now(),
+      applied_steps_count integer NOT NULL DEFAULT 0
+    );
+  `)
   const migrations = path.resolve('prisma/migrations')
   for (const name of (await readdir(migrations)).sort()) {
     if (name === 'migration_lock.toml') continue
@@ -459,4 +473,92 @@ test('favorites are unique per account/list and cascade with the list', async ()
   assert.equal(await prisma.favoriteList.count({ where: { userId: account.id } }), 1)
   await prisma.giftList.delete({ where: { id: list.id } })
   assert.equal(await prisma.favoriteList.count({ where: { userId: account.id } }), 0)
+})
+
+// --- Supabase Data API exposure (migration 20261104120000_harden_public_tables) ---
+
+test('every table in the public schema has RLS enabled', async () => {
+  const rows = await prisma.$queryRaw<{ relname: string; relrowsecurity: boolean }[]>`
+    SELECT c.relname, c.relrowsecurity
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public' AND c.relkind = 'r'
+    ORDER BY c.relname
+  `
+  // Guard against a vacuous pass if the schema stops being loaded into the fixture.
+  assert.ok(rows.length >= 9, `expected the public schema tables, got ${rows.length}`)
+  const unprotected = rows.filter(row => !row.relrowsecurity).map(row => row.relname)
+  assert.deepEqual(unprotected, [], `tables without RLS: ${unprotected.join(', ')}`)
+})
+
+test('the tables reported by the Supabase advisors are hardened', async () => {
+  for (const table of ['Gift', 'GiftList', 'FavoriteList', '_prisma_migrations']) {
+    const [row] = await prisma.$queryRaw<{ relrowsecurity: boolean }[]>`
+      SELECT relrowsecurity FROM pg_class
+      WHERE relname = ${table} AND relnamespace = 'public'::regnamespace
+    `
+    assert.ok(row, `${table} must exist`)
+    assert.equal(row.relrowsecurity, true, `${table} must have RLS enabled`)
+  }
+})
+
+test('anon and authenticated hold no table privileges in public', async () => {
+  const rows = await prisma.$queryRaw<{ tablename: string; role: string; privs: string[] }[]>`
+    SELECT c.relname AS tablename, r AS role,
+           ARRAY(
+             SELECT p FROM unnest(ARRAY['SELECT', 'INSERT', 'UPDATE', 'DELETE']) p
+             WHERE has_table_privilege(r, c.oid, p)
+           ) AS privs
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    CROSS JOIN unnest(ARRAY['anon', 'authenticated']) r
+    WHERE n.nspname = 'public' AND c.relkind = 'r'
+  `
+  const leaking = rows.filter(row => row.privs.length > 0)
+  assert.deepEqual(leaking.map(row => `${row.role}:${row.tablename}:${row.privs.join('+')}`), [])
+})
+
+test('anon and authenticated cannot use the public sequences', async () => {
+  const rows = await db.query<{ relname: string; role: string; allowed: boolean }>(`
+    SELECT c.relname, r AS role, has_sequence_privilege(r, c.oid, 'USAGE') AS allowed
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    CROSS JOIN unnest(ARRAY['anon', 'authenticated']) r
+    WHERE n.nspname = 'public' AND c.relkind = 'S'
+  `)
+  assert.deepEqual(rows.rows.filter(row => row.allowed).map(row => `${row.role}:${row.relname}`), [])
+})
+
+test('tables created after the migration are not granted to the Data API roles', async () => {
+  // Proves the ALTER DEFAULT PRIVILEGES part; without it every future Prisma
+  // table would be re-exposed exactly like FavoriteList was.
+  await prisma.$executeRawUnsafe('CREATE TABLE public."HardeningProbe" (id serial primary key)')
+  try {
+    const [row] = await prisma.$queryRaw<{ anon: boolean; authenticated: boolean }[]>`
+      SELECT has_table_privilege('anon', 'public."HardeningProbe"', 'SELECT') AS anon,
+             has_table_privilege('authenticated', 'public."HardeningProbe"', 'SELECT') AS authenticated
+    `
+    assert.equal(row.anon, false)
+    assert.equal(row.authenticated, false)
+  } finally {
+    await prisma.$executeRawUnsafe('DROP TABLE public."HardeningProbe"')
+  }
+})
+
+test('the application keeps full access as the table owner', async () => {
+  const account = await prisma.user.create({
+    data: { email: 'rls-owner@example.com', username: 'rls_owner', password: 'not-a-real-hash', name: 'RLS Owner' },
+  })
+  const list = await prisma.giftList.create({
+    data: { title: 'Liste RLS', shareCode: 'RLS0WNER', userId: account.id },
+  })
+  const gift = await prisma.gift.create({
+    data: { title: 'Cadeau RLS', giftListId: list.id, reservedByEmail: 'reserved@example.com' },
+  })
+  assert.equal(gift.reservedByEmail, 'reserved@example.com')
+  assert.equal((await prisma.giftList.findUnique({ where: { id: list.id } }))?.title, 'Liste RLS')
+
+  await prisma.gift.delete({ where: { id: gift.id } })
+  await prisma.giftList.delete({ where: { id: list.id } })
+  await prisma.user.delete({ where: { id: account.id } })
 })
