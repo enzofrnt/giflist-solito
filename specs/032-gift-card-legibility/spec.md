@@ -4,9 +4,11 @@
 
 **Created**: 2026-11-09
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "Le prix est gris sur les listes de cadeaux publiques et en mode édition, vraiment pas très visible. Pareil pour le bouton « Voir le produit », trop petit et pas assez visible."
+
+**Follow-up (post-merge)**: verification on the live production list exposed a pre-existing clipping defect in the 4-column gift grid: at 1440 px the public gift grid rendered 302 px cards, the text column was ~154 px, and the product link (154 px min-content) plus long scraped titles overflowed the card and were cut by `overflow: hidden`. The card body now uses one shrinkable column, the thumbnail is the documented 96 px compact size, and the public gift grid uses wider columns so price, title and product link are never clipped.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -72,19 +74,21 @@ The design-system showcase documents the new price and link patterns, and the na
 - **FR-005**: Native `GiftCard` gives the price the same hierarchy (ink colour, bold, one step above body).
 - **FR-006**: The design-system showcase “Fiche cadeau” documents `.ds-price` and the secondary link.
 - **FR-007**: No behaviour, API, data or copy change; no new dependency.
+- **FR-008**: `.ds-card__body` uses a single shrinkable grid column (`minmax(0, 1fr)`) so long unbreakable titles/URLs wrap instead of widening the card and being clipped by its `overflow: hidden`.
+- **FR-009**: The public gift grid uses a wider column floor (`--ds-grid-min: 21.25rem` via `.ds-grid--gift`) so the horizontal card always keeps room for price, badge and the product button; the thumbnail is the documented compact 96 px size.
 
 ### UX brief
 
 - **Job**: read the price → decide → open the product page.
 - **Primary action per view**: unchanged (reserve publicly, edit/manage in the editor); “Voir le produit” is a neutral navigate action, so neutral bordered is correct.
 - **Hierarchy**: media → title → **price (ink, bold)** → status badge → description → product link → primary action.
-- **Scope**: web public list + editor; native price parity. **Non-goals**: layout redesign, currency formatting, native product link.
+- **Scope**: web public list + editor; native price parity. **Non-goals**: full card redesign, currency formatting, native product link.
 
 ### Screen / action audit
 
 | Screen | Actions today | Issue | Change |
 |---|---|---|---|
-| Public list card | Réserver (primary), Voir le produit (ghost 12 px) | Link nearly invisible; price looks like a grey tag | Price → `.ds-price`; link → secondary md |
+| Public list card | Réserver (primary), Voir le produit (ghost 12 px) | Link nearly invisible; price looks like a grey tag; at 1440 the 302 px card clipped the link and long titles | Price → `.ds-price`; link → secondary md; wider gift grid; shrinkable card body |
 | Editor card | Modifier, Annuler, Supprimer | Same grey price; weak link | Shared `GiftCard` fix |
 | Showcase “Fiche cadeau” | Illustration only | Documents outdated pattern | `.ds-price` + secondary link |
 
@@ -93,6 +97,7 @@ The design-system showcase documents the new price and link patterns, and the na
 - **SC-001**: At 1440 / 390 px, light and dark, the price is the second most prominent element after the title and is clearly not grey.
 - **SC-002**: “Voir le produit” has a visible border, ≥ 44 px height and stays visually below the primary action.
 - **SC-003**: `bun run web:typecheck`, `web:lint`, `web:build` pass; screenshots attached to the PR.
+- **SC-004**: No gift card clips its title or product link at 1440 / 768 / 390 (measured: `scrollWidth === clientWidth` for titles, link right edge inside the card).
 
 ## Assumptions
 

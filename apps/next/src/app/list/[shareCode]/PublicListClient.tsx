@@ -336,7 +336,7 @@ export default function PublicListClient({ shareCode }: PublicListClientProps) {
               </div>
             </div>
 
-            <ul className="ds-grid">
+            <ul className="ds-grid ds-grid--gift">
               {gifts.map(g => {
                 const showReserve = g.status === 'available' || (giftList?.secret && !hasRevealed);
                 const showCancel = isOwner && !showReserve;

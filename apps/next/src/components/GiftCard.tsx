@@ -16,12 +16,12 @@ export function GiftCard({
     <article className="ds-card">
       <div className="ds-card__body">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-          <div className="ds-card ds-card--flat mx-auto flex h-24 w-32 shrink-0 items-center justify-center overflow-hidden sm:mx-0">
+          <div className="ds-card ds-card--flat mx-auto flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden sm:mx-0">
             {gift.image ? (
               <Image
                 src={gift.image}
                 alt={gift.title}
-                width={128}
+                width={96}
                 height={96}
                 className="h-full w-full object-contain"
                 unoptimized
