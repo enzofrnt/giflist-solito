@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { AuthCard } from '@/components/AuthCard'
 import PasswordInput from '@/components/PasswordInput'
 import { validatePassword } from 'app/lib/passwordValidation'
+import { USERNAME_ERROR, USERNAME_HINT, isValidUsername, sanitizeUsernameInput } from 'app/lib/usernameValidation'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
@@ -34,8 +35,8 @@ export default function RegisterPage() {
       return
     }
 
-    if (!/^[a-z0-9_]{3,30}$/.test(username)) {
-      setError('Le pseudo doit contenir 3 à 30 caractères (lettres, chiffres, _).')
+    if (!isValidUsername(username)) {
+      setError(USERNAME_ERROR)
       setLoading(false)
       return
     }
@@ -124,14 +125,14 @@ export default function RegisterPage() {
             minLength={3}
             maxLength={30}
             value={formData.username}
-            onChange={handleInputChange}
+            onChange={(event) => setFormData((previous) => ({ ...previous, username: sanitizeUsernameInput(event.target.value) }))}
             className="ds-input"
             placeholder="ex : camille_demo"
             autoComplete="username"
             autoCapitalize="none"
             spellCheck={false}
           />
-          <p className="ds-hint">3 à 30 caractères : lettres, chiffres et _.</p>
+          <p className="ds-hint">{USERNAME_HINT}</p>
         </div>
 
         <div className="ds-field">

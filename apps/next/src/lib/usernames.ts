@@ -1,15 +1,19 @@
 import { prisma } from './prisma'
+import { USERNAME_MAX, USERNAME_MIN, USERNAME_RE, isValidUsername as isValidSharedUsername } from 'app/lib/usernameValidation'
 
-export const USERNAME_MIN = 3
-export const USERNAME_MAX = 30
-export const USERNAME_RE = /^[a-z0-9_]{3,30}$/
+export { USERNAME_MAX, USERNAME_MIN, USERNAME_RE }
 
+/**
+ * Trim only: a pseudo keeps the casing chosen by its owner. Comparisons and
+ * uniqueness checks must be case-insensitive (see USERNAME_RE and the
+ * `lower(username)` unique index).
+ */
 export function normalizeUsername(value: string): string {
-  return value.trim().toLowerCase()
+  return value.trim()
 }
 
 export function isValidUsername(value: string): boolean {
-  return USERNAME_RE.test(normalizeUsername(value))
+  return isValidSharedUsername(value)
 }
 
 export function usernameFromName(name: string): string {
@@ -23,13 +27,16 @@ export function usernameFromName(name: string): string {
   return slug.length >= USERNAME_MIN ? slug : 'user'
 }
 
-/** Pick a free handle. The final insert still relies on the DB unique index. */
+/** Pick a free handle. The final insert still relies on the DB unique indexes. */
 export async function uniqueUsername(base: string, excludeUserId?: number): Promise<string> {
   const normalized = normalizeUsername(base)
   for (let suffix = 0; suffix < 1000; suffix++) {
     const candidate = suffix === 0 ? normalized : `${normalized.slice(0, USERNAME_MAX - String(suffix).length - 1)}_${suffix}`
     const existing = await prisma.user.findFirst({
-      where: { username: candidate, ...(excludeUserId ? { id: { not: excludeUserId } } : {}) },
+      where: {
+        username: { equals: candidate, mode: 'insensitive' },
+        ...(excludeUserId ? { id: { not: excludeUserId } } : {}),
+      },
       select: { id: true },
     })
     if (!existing) return candidate

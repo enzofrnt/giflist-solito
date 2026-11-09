@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 import { isValidUsername, normalizeUsername } from '@/lib/usernames';
+import { USERNAME_ERROR } from 'app/lib/usernameValidation';
 
 export async function PUT(request: NextRequest) {
   try {
@@ -31,9 +32,12 @@ export async function PUT(request: NextRequest) {
     if (username !== undefined) {
       const normalized = normalizeUsername(String(username));
       if (!isValidUsername(normalized)) {
-        return NextResponse.json({ error: 'Le pseudo doit contenir 3 à 30 caractères (a-z, chiffres, _).' }, { status: 400 });
+        return NextResponse.json({ error: USERNAME_ERROR }, { status: 400 });
       }
-      const taken = await prisma.user.findFirst({ where: { username: normalized, id: { not: currentUser.id } }, select: { id: true } });
+      const taken = await prisma.user.findFirst({
+        where: { username: { equals: normalized, mode: 'insensitive' }, id: { not: currentUser.id } },
+        select: { id: true },
+      });
       if (taken) return NextResponse.json({ error: 'Ce pseudo est déjà utilisé.' }, { status: 409 });
       data.username = normalized;
       if (data.name === undefined) data.name = normalized;

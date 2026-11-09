@@ -21,7 +21,8 @@ function normalizeSiteUrl(siteUrl: string): string {
  *
  * - no `lastModified` for the homepage: its content is not modified per request;
  * - profiles use their real `updatedAt` (never `new Date()`);
- * - usernames are lowercased, encoded and de-duplicated;
+ * - usernames keep their stored casing, encoded and de-duplicated
+ *   case-insensitively (the canonical URL is `/u/<stored username>`);
  * - the result never exceeds the 50 000-URL protocol limit.
  */
 export function buildSitemapEntries(
@@ -42,9 +43,10 @@ export function buildSitemapEntries(
   for (const profile of profiles) {
     if (entries.length >= MAX_SITEMAP_URLS) break
 
-    const username = profile.username.trim().toLowerCase()
-    if (!username || seen.has(username)) continue
-    seen.add(username)
+    const username = profile.username.trim()
+    const key = username.toLowerCase()
+    if (!username || seen.has(key)) continue
+    seen.add(key)
 
     entries.push({
       url: `${base}/u/${encodeURIComponent(username)}`,

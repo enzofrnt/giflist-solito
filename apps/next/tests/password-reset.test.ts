@@ -562,3 +562,37 @@ test('the application keeps full access as the table owner', async () => {
   await prisma.giftList.delete({ where: { id: list.id } })
   await prisma.user.delete({ where: { id: account.id } })
 })
+
+test('pseudos keep their casing and stay unique case-insensitively', async () => {
+  const first = await auth.registerUser('case-first@example.com', 'Str0ng!Passw0rd', 'First', 'Joris88')
+  assert.equal(first.success, true)
+  assert.equal(first.user?.username, 'Joris88')
+
+  for (const variant of ['joris88', 'JORIS88']) {
+    const duplicate = await auth.registerUser(`case-${variant}@example.com`, 'Str0ng!Passw0rd', 'Dup', variant)
+    assert.equal(duplicate.success, false, variant)
+    assert.match(duplicate.error || '', /déjà utilisé/, variant)
+  }
+
+  const { getPublicProfile } = await import('../src/lib/public-profile')
+  assert.equal((await getPublicProfile('JORIS88'))?.username, 'Joris88')
+
+  const { uniqueUsername } = await import('../src/lib/usernames')
+  assert.equal(await uniqueUsername('JORIS88'), 'JORIS88_1')
+})
+
+test('the database enforces case-insensitive username uniqueness', async () => {
+  // Hash generated rather than stored as a literal, so secret scanners do not
+  // mistake this throwaway fixture for a credential.
+  const password = await bcrypt.hash('not-a-real-hash', 4)
+  await prisma.user.create({
+    data: { email: 'db-case-first@example.com', username: 'Joris88', name: 'First', password },
+  })
+
+  await assert.rejects(
+    prisma.user.create({
+      data: { email: 'db-case-second@example.com', username: 'JORIS88', name: 'Second', password },
+    }),
+    (error: unknown) => (error as { code?: string }).code === 'P2002',
+  )
+})
