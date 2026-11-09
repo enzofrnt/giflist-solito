@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { KeyRound, List, LogOut, Mail } from 'lucide-react-native'
 import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
+import { USERNAME_ERROR, USERNAME_HINT, isValidUsername, sanitizeUsernameInput } from 'app/lib/usernameValidation'
 import { ThemeSettings } from 'app/features/native/theme-settings'
 import { useSession } from 'app/provider/session.native'
 import { AppHeader, Button, Card, Field, InfoHint, PasswordField, PasswordStrength, Screen, colors, spacing, typography } from 'app/ui'
@@ -39,8 +40,8 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
   }, [user, loading, navigation])
 
   async function savePublicProfile() {
-    if (!user || !/^[a-z0-9_]{3,30}$/.test(username)) {
-      setProfileError('Le pseudo doit contenir 3 à 30 caractères (a-z, chiffres, _).')
+    if (!user || !isValidUsername(username)) {
+      setProfileError(USERNAME_ERROR)
       return
     }
     setProfileSaving(true)
@@ -115,7 +116,7 @@ export function ProfileScreen({ navigation, onShowLists }: Props) {
         <Text style={styles.sectionTitle}>Informations personnelles</Text>
         <Text style={styles.muted}>Pseudo unique, email et visibilité de votre compte.</Text>
         <View style={styles.form}>
-          <Field label="Pseudo" value={username} onChangeText={(value) => setUsername(value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30))} autoCapitalize="none" autoComplete="username" textContentType="username" hint="3–30 caractères : a-z, chiffres et _." />
+          <Field label="Pseudo" value={username} onChangeText={(value) => setUsername(sanitizeUsernameInput(value))} autoCapitalize="none" autoComplete="username" textContentType="username" hint={USERNAME_HINT} />
           <View style={styles.rowBetween}>
             <View style={styles.inline}>
               <Text style={styles.switchLabel}>Compte public</Text>

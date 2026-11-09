@@ -9,6 +9,7 @@ import { useAlert } from '@/hooks/useAlert'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { getAuthToken, setAuthToken } from 'app/lib/authStorage'
 import { validatePassword } from 'app/lib/passwordValidation'
+import { USERNAME_HINT, sanitizeUsernameInput } from 'app/lib/usernameValidation'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -84,7 +85,7 @@ export default function ProfileClient() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          username: formData.username.trim().toLowerCase(),
+          username: formData.username.trim(),
           isPublic: accountPublic,
         })
       })
@@ -261,16 +262,16 @@ export default function ProfileClient() {
                     type="text"
                     required
                     value={formData.username}
-                    onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30) }))}
+                    onChange={(e) => setFormData(prev => ({ ...prev, username: sanitizeUsernameInput(e.target.value) }))}
                     className="ds-input"
                     placeholder="votre_pseudo"
                     minLength={3}
                     maxLength={30}
-                    pattern="[a-z0-9_]{3,30}"
+                    pattern="[A-Za-z0-9_]{3,30}"
                     autoComplete="username"
                     aria-describedby="profile-username-hint"
                   />
-                  <p className="ds-hint" id="profile-username-hint">Unique, 3–30 caractères : a-z, chiffres et _. Sert à la recherche publique.</p>
+                  <p className="ds-hint" id="profile-username-hint">Unique, {USERNAME_HINT} Sert à la recherche publique.</p>
                 </div>
 
                 <div className="ds-field">

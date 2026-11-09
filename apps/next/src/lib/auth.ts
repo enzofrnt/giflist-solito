@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from './prisma';
 import { isValidUsername, normalizeUsername, uniqueUsername, usernameFromName } from './usernames';
+import { USERNAME_ERROR } from 'app/lib/usernameValidation';
 
 export function getJwtSecret() {
   if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
@@ -107,9 +108,12 @@ export async function registerUser(email: string, password: string, name: string
       ? normalizeUsername(requestedUsername)
       : await uniqueUsername(usernameFromName(name))
     if (!isValidUsername(username)) {
-      return { success: false, error: 'Le pseudo doit contenir 3 à 30 caractères (a-z, chiffres, _).' }
+      return { success: false, error: USERNAME_ERROR }
     }
-    const usernameTaken = await prisma.user.findUnique({ where: { username }, select: { id: true } })
+    const usernameTaken = await prisma.user.findFirst({
+      where: { username: { equals: username, mode: 'insensitive' } },
+      select: { id: true },
+    })
     if (usernameTaken) return { success: false, error: 'Ce pseudo est déjà utilisé.' }
 
     // Hacher le mot de passe

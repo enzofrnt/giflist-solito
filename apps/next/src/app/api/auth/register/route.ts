@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { registerUser } from '@/lib/auth';
 import { sendVerificationEmail } from '@/lib/email-verification';
 import { validatePassword } from 'app/lib/passwordValidation'
+import { USERNAME_RE } from 'app/lib/usernameValidation'
 
 const RegisterSchema = z.object({
   email: z.string().trim().email('Adresse e-mail invalide. Utilisez le format nom@domaine.com.'),
@@ -16,7 +17,7 @@ const RegisterSchema = z.object({
     }
   }),
   name: z.string().min(1).max(100).optional(),
-  username: z.string().trim().min(3, 'Le pseudo doit contenir au moins 3 caractères').max(30, 'Le pseudo ne peut pas dépasser 30 caractères').regex(/^[a-zA-Z0-9_]+$/, 'Le pseudo ne peut contenir que des lettres, chiffres et _').optional(),
+  username: z.string().trim().min(3, 'Le pseudo doit contenir au moins 3 caractères').max(30, 'Le pseudo ne peut pas dépasser 30 caractères').regex(USERNAME_RE, 'Le pseudo ne peut contenir que des lettres, chiffres et _').optional(),
 });
 
 export async function POST(request: NextRequest) {

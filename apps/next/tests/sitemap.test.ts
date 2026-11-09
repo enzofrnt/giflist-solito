@@ -12,7 +12,7 @@ test('sitemap always starts with the homepage and does not invent a lastmod', ()
   assert.equal(entries[0].lastModified, undefined)
 })
 
-test('public profiles are listed once, lowercased, with their real updatedAt', () => {
+test('public profiles are listed once, with their stored casing, and their real updatedAt', () => {
   const updatedAt = new Date('2026-10-01T10:00:00.000Z')
   const entries = buildSitemapEntries(SITE, [
     { username: 'Enzo_Frnt', updatedAt },
@@ -21,7 +21,7 @@ test('public profiles are listed once, lowercased, with their real updatedAt', (
 
   const profileEntries = entries.filter((entry) => entry.url.includes('/u/'))
   assert.equal(profileEntries.length, 1)
-  assert.equal(profileEntries[0].url, 'https://giftlist.fr/u/enzo_frnt')
+  assert.equal(profileEntries[0].url, 'https://giftlist.fr/u/Enzo_Frnt')
   assert.equal(profileEntries[0].lastModified, updatedAt)
 })
 

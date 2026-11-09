@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text } from 'react-native'
 import type { RootStackParamList } from 'app/navigation/native'
 import { api } from 'app/lib/api'
 import { ApiError } from 'app/lib/api'
+import { USERNAME_ERROR, USERNAME_HINT, isValidUsername, sanitizeUsernameInput } from 'app/lib/usernameValidation'
 import { AppHeader, AuthBrand, Button, Card, Field, PasswordField, PasswordStrength, Screen, colors, spacing, typography } from 'app/ui'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'register'>
@@ -24,8 +25,8 @@ export function RegisterScreen({ navigation }: Props) {
       setError('Adresse e-mail invalide. Utilisez le format nom@domaine.com.')
       return
     }
-    if (!/^[a-z0-9_]{3,30}$/.test(username)) {
-      setError('Le pseudo doit contenir 3 à 30 caractères (lettres, chiffres, _).')
+    if (!isValidUsername(username)) {
+      setError(USERNAME_ERROR)
       return
     }
     if (password.length < 8) {
@@ -61,7 +62,7 @@ export function RegisterScreen({ navigation }: Props) {
         <AuthBrand />
         <Text style={styles.title}>Créer un compte</Text>
         <Text style={styles.lead}>Votre première liste prend quelques secondes.</Text>
-        <Field label="Pseudo" value={username} onChangeText={(value) => setUsername(value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30))} autoCapitalize="none" autoComplete="username" textContentType="username" hint="3–30 caractères : a-z, chiffres et _." />
+        <Field label="Pseudo" value={username} onChangeText={(value) => setUsername(sanitizeUsernameInput(value))} autoCapitalize="none" autoComplete="username" textContentType="username" hint={USERNAME_HINT} />
         <Field label="Adresse e-mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="username" textContentType="username" />
         <PasswordField
           label="Mot de passe"
@@ -82,7 +83,7 @@ export function RegisterScreen({ navigation }: Props) {
           error={passwordConfirm && password !== passwordConfirm ? 'Les mots de passe ne correspondent pas.' : undefined}
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        <Button title="Créer mon compte" icon={UserPlus} onPress={submit} loading={loading} disabled={!/^[a-z0-9_]{3,30}$/.test(username) || !email.trim() || password.length < 8 || password !== passwordConfirm} fullWidth />
+        <Button title="Créer mon compte" icon={UserPlus} onPress={submit} loading={loading} disabled={!isValidUsername(username) || !email.trim() || password.length < 8 || password !== passwordConfirm} fullWidth />
         <Pressable onPress={() => navigation.navigate('login')} style={styles.link}>
           <Text style={styles.linkText}>Déjà un compte ? Se connecter</Text>
         </Pressable>

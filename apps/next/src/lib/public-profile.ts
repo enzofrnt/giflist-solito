@@ -21,11 +21,11 @@ export interface PublicProfile {
  * exposed; no email or private field can leak through this shape.
  */
 export const getPublicProfile = cache(async (username: string): Promise<PublicProfile | null> => {
-  const normalized = username.trim().toLowerCase()
-  if (!normalized) return null
+  const key = username.trim()
+  if (!key) return null
 
   return prisma.user.findFirst({
-    where: { username: normalized, isPublic: true },
+    where: { username: { equals: key, mode: 'insensitive' }, isPublic: true },
     select: {
       username: true,
       giftLists: {

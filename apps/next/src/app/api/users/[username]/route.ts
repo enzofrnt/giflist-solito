@@ -9,7 +9,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   const normalized = normalizeUsername(username)
   try {
     const user = await prisma.user.findFirst({
-      where: { username: normalized, isPublic: true },
+      where: { username: { equals: normalized, mode: 'insensitive' }, isPublic: true },
       select: {
         username: true,
         giftLists: {
