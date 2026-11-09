@@ -37,7 +37,7 @@ export function GiftCard({
             <Text style={styles.title}>{gift.title}</Text>
             <Badge label={reserved ? 'Réservé' : 'Disponible'} tone={reserved ? 'warning' : 'success'} />
           </View>
-          {gift.price != null ? <Text style={styles.meta}>{gift.price} €</Text> : null}
+          {gift.price != null ? <Text style={styles.price}>{gift.price} €</Text> : null}
           {gift.description ? <Text style={styles.description} numberOfLines={2}>{gift.description}</Text> : null}
         </View>
       </View>
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   info: { flex: 1, gap: spacing.xs },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
   title: { color: colors.text, fontSize: typography.body, fontWeight: '700', flex: 1 },
-  meta: { color: colors.textSubtle, fontSize: typography.caption },
+  price: { color: colors.text, fontSize: typography.body, fontWeight: '700' },
   description: { color: colors.textMuted, fontSize: typography.small, lineHeight: 19 },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
   flex: { flex: 1 },

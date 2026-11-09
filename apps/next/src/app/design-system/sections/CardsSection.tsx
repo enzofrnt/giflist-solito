@@ -1,5 +1,6 @@
 import { Section } from './Section'
 import { ArrowRightIcon, GiftIcon } from './icons'
+import { GiftCard } from '@/components/GiftCard'
 
 export function CardsSection() {
   return (
@@ -76,19 +77,26 @@ export function CardsSection() {
 
       <div className="ds-spec ds-showcase__spaced">
         <span className="ds-spec__label">Fiche cadeau (composition)</span>
-        <div className="ds-card" style={{ maxWidth: '28rem' }}>
-          <div className="ds-card__body">
-            <span className="ds-badge ds-badge--success ds-badge--dot">Disponible</span>
-            <div className="ds-stack" style={{ gap: 'var(--ds-space-1)' }}>
-              <p className="ds-card__title">Casque audio sans fil</p>
-              <p className="ds-card__subtitle">Sony WH-1000XM5 · 349 €</p>
-            </div>
-            <p className="ds-body-sm">Réduction de bruit, 30 h d’autonomie, coloris noir.</p>
-            <div className="ds-showcase__cluster">
-              <button type="button" className="ds-btn ds-btn--primary ds-btn--sm"><GiftIcon className="ds-btn__icon" /><span className="ds-btn__label">Réserver</span></button>
-              <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm">Voir le site</button>
-            </div>
-          </div>
+        <div style={{ maxWidth: '28rem' }}>
+          <GiftCard
+            gift={{
+              id: 0,
+              title: 'Casque audio sans fil',
+              description: 'Réduction de bruit, 30 h d’autonomie, coloris noir.',
+              price: 349,
+              url: 'https://example.com',
+              status: 'available',
+              createdAt: '',
+              updatedAt: '',
+            }}
+            badge={<span className="ds-badge ds-badge--success ds-badge--dot">Disponible</span>}
+            footer={
+              <button type="button" className="ds-btn ds-btn--primary ds-btn--block">
+                <GiftIcon className="ds-btn__icon" />
+                <span className="ds-btn__label">Réserver</span>
+              </button>
+            }
+          />
         </div>
       </div>
     </Section>
