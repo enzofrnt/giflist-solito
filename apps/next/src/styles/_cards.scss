@@ -169,6 +169,19 @@
     }
   }
 
+  // Price of a gift: a key decision input, never a muted tag.
+  .ds-price {
+    display: inline-flex;
+    align-items: baseline;
+    color: var(--ds-color-text);
+    font-size: var(--ds-text-lg);
+    font-weight: var(--ds-weight-bold);
+    font-variant-numeric: tabular-nums;
+    line-height: var(--ds-leading-snug);
+    letter-spacing: var(--ds-tracking-snug);
+    white-space: nowrap;
+  }
+
   .ds-avatar {
     display: inline-flex;
     flex: 0 0 auto;

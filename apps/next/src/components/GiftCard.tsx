@@ -38,12 +38,12 @@ export function GiftCard({
           <div className="ds-stack ds-stack--gap-2 min-w-0 flex-1">
             <h3 className="ds-card__title break-words">{gift.title}</h3>
             <div className="ds-cluster">
-              {gift.price != null ? <span className="ds-chip">{gift.price} €</span> : null}
+              {gift.price != null ? <span className="ds-price">{gift.price} €</span> : null}
               {badge}
             </div>
             {gift.description ? <p className="ds-card__subtitle break-words">{gift.description}</p> : null}
             {gift.url ? (
-              <a href={gift.url} target="_blank" rel="noopener noreferrer" className="ds-btn ds-btn--ghost ds-btn--sm min-h-11 self-start">
+              <a href={gift.url} target="_blank" rel="noopener noreferrer" className="ds-btn ds-btn--secondary min-h-11 self-start">
                 <svg className="ds-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
