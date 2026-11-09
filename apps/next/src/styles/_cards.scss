@@ -49,6 +49,9 @@
 
   .ds-card__body {
     display: grid;
+    /* One shrinkable column: long unbreakable titles/URLs must wrap instead of
+       widening the card and being clipped by the card's overflow. */
+    grid-template-columns: minmax(0, 1fr);
     align-content: start;
     gap: var(--ds-space-3);
     padding: var(--ds-space-5);
@@ -252,6 +255,12 @@
     grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--ds-grid-min, 16rem)), 1fr));
     gap: var(--ds-grid-gap, var(--ds-space-4));
     min-width: 0;
+  }
+
+  /* Gift cards are horizontal (media + text + actions): they need room so the
+     price row and the product button are never clipped. */
+  .ds-grid--gift {
+    --ds-grid-min: 21.25rem;
   }
 }
 
